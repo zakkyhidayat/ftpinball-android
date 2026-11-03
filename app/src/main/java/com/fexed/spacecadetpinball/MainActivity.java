@@ -323,7 +323,7 @@ public class MainActivity extends SDLActivity {
 
         @Override
         public void onHighScorePresented(int score) {
-            if (HighScoreHandler.postHighScore(getContext(), score)) {
+            if (HighScoreHandler.postHighScore(score)) {
                 runOnUiThread(() -> Toast.makeText(getContext(), getString(R.string.newhighscore, score), Toast.LENGTH_LONG).show());
                 Bundle bndl = new Bundle();
                 bndl.putInt(FirebaseAnalytics.Param.SCORE, score);

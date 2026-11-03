@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.VIBRATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -13,9 +12,6 @@
         android:supportsRtl="false"
         android:theme="@style/Theme.SpaceCadetPinball"
         tools:replace="android:supportsRtl">
-        <activity
-            android:name=".LeaderboardActivity"
-            android:exported="false" />
         <activity
             android:name=".Settings"
             android:exported="false" />
