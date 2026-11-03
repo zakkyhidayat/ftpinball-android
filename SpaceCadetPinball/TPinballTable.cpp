@@ -394,7 +394,8 @@ int TPinballTable::Message(int code, float value)
 		}
 		else
 		{
-			CheatsUsed = 0;
+			// Toggle cheats stay active across games
+			CheatsUsed = pb::cheat_mode || control::table_unlimited_balls;
 			Message(1024, 0.0);
 			auto ball = BallList[0];
 			ball->Position.Y = 0.0;
