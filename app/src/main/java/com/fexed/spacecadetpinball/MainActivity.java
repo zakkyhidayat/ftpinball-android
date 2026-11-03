@@ -12,6 +12,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -90,6 +92,7 @@ public class MainActivity extends SDLActivity {
             v1.performClick();
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_Z);
+                hapticTick();
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_Z);
@@ -102,6 +105,7 @@ public class MainActivity extends SDLActivity {
             v1.performClick();
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_SLASH);
+                hapticTick();
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SLASH);
@@ -114,6 +118,7 @@ public class MainActivity extends SDLActivity {
             v1.performClick();
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_SPACE);
+                hapticTick();
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SPACE);
@@ -126,6 +131,7 @@ public class MainActivity extends SDLActivity {
             v1.performClick();
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_SPACE);
+                hapticTick();
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SPACE);
@@ -165,6 +171,7 @@ public class MainActivity extends SDLActivity {
             v1.performClick();
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_X);
+                hapticTick();
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_X);
@@ -176,6 +183,7 @@ public class MainActivity extends SDLActivity {
             v1.performClick();
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_PERIOD);
+                hapticTick();
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_PERIOD);
@@ -187,6 +195,7 @@ public class MainActivity extends SDLActivity {
             v1.performClick();
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_DPAD_UP);
+                hapticTick();
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_DPAD_UP);
@@ -201,6 +210,17 @@ public class MainActivity extends SDLActivity {
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
+    }
+
+    private void hapticTick() {
+        if (!PrefsHelper.getHapticFeedback()) return;
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator == null || !vibrator.hasVibrator()) return;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
+        } else {
+            vibrator.vibrate(15);
+        }
     }
 
     private void copyAssets(File filesDir) {

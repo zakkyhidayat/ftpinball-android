@@ -99,6 +99,11 @@ public class Settings extends AppCompatActivity {
             PrefsHelper.setMusic(b);
         });
 
+        mBinding.hapticfeedback.setChecked(PrefsHelper.getHapticFeedback());
+        mBinding.hapticfeedback.setOnCheckedChangeListener((compoundButton, b) -> {
+            PrefsHelper.setHapticFeedback(b);
+        });
+
         mBinding.inpttxtusername.setText(PrefsHelper.getUsername("Player 1"));
         mBinding.inpttxtusername.addTextChangedListener(new TextWatcher() {
             @Override
