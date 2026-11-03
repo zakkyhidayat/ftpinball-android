@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.10.2)
 set(CMAKE_CXX_STANDARD 11)
 project(SpaceCadetPinball)
 
+# Align native libraries for 16 KB page size devices (Android 15+)
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-z,max-page-size=16384")
+
 set(SOURCE_FILES
         ../../../../SpaceCadetPinball/control.cpp
         ../../../../SpaceCadetPinball/control.h
