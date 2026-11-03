@@ -31,7 +31,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/bg_card"
-            app:layout_constraintBottom_toBottomOf="@+id/volumebar"
+            app:layout_constraintBottom_toBottomOf="@+id/soundfx"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/headingsound" />
@@ -167,7 +167,7 @@
             app:layout_constraintBottom_toTopOf="@+id/textView6"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/volumebar" />
+            app:layout_constraintTop_toBottomOf="@+id/soundfx" />
 
         <TextView
             android:id="@+id/textView21"
@@ -370,7 +370,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
-            android:text="@string/volume"
+            android:text="@string/soundfx"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -411,7 +411,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/volumebar" />
+            app:layout_constraintTop_toBottomOf="@+id/soundfx" />
 
         <TextView
             android:id="@+id/textView7"
@@ -539,7 +539,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="@+id/volumebar"
+            app:layout_constraintEnd_toEndOf="@+id/soundfx"
             app:layout_constraintStart_toEndOf="@+id/textView16"
             app:layout_constraintTop_toBottomOf="@+id/remainingballs" />
 
@@ -562,7 +562,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="@+id/volumebar"
+            app:layout_constraintEnd_toEndOf="@+id/soundfx"
             app:layout_constraintStart_toEndOf="@+id/textView16"
             app:layout_constraintTop_toBottomOf="@+id/headingsound" />
 
@@ -571,7 +571,7 @@
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="@+id/volumebar"
+            app:layout_constraintEnd_toEndOf="@+id/soundfx"
             app:layout_constraintStart_toEndOf="@+id/textView16"
             app:layout_constraintTop_toBottomOf="@+id/music" />
 
@@ -647,8 +647,8 @@
             app:layout_constraintStart_toStartOf="@+id/textView2"
             app:layout_constraintTop_toBottomOf="@+id/headingsound" />
 
-        <SeekBar
-            android:id="@+id/volumebar"
+        <Switch
+            android:id="@+id/soundfx"
             android:layout_width="0dp"
             android:layout_height="56dp"
             android:layout_marginTop="8dp"

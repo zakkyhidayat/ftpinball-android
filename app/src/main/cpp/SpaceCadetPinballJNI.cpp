@@ -124,8 +124,8 @@ winmain::BasePath = (char *) env->GetStringUTFChars(data_path, nullptr);
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_fexed_spacecadetpinball_MainActivity_setVolume(JNIEnv *env, jobject thiz, jint vol) {
-    Sound::SetVolume(vol);
+Java_com_fexed_spacecadetpinball_MainActivity_setSoundEnabled(JNIEnv *env, jobject thiz, jboolean enabled) {
+    Sound::Enable(enabled);
 }
 
 extern "C"

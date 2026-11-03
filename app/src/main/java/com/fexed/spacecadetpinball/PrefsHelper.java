@@ -10,7 +10,7 @@ public class PrefsHelper {
     private static final String KEY_HIGHSCORE = "highscore";
     private static final String KEY_CHEATHIGHSCORE = "cheathighscore";
     private static final String KEY_CHEATSUSED = "cheatsused";
-    private static final String KEY_VOLUME = "volume";
+    private static final String KEY_SOUNDFX = "soundfx";
     private static final String KEY_MUSIC = "music";
     private static final String KEY_FULLSCREENPLUNGER = "fullscreenplunger";
     private static final String KEY_PLUNGERPOPUP = "plungerPopup";
@@ -37,12 +37,12 @@ public class PrefsHelper {
         prefs.edit().putBoolean(KEY_CHEATSUSED, value).apply();
     }
 
-    public static int getVolume() {
-        return prefs.getInt(KEY_VOLUME, 100);
+    public static boolean getSoundFx() {
+        return prefs.getBoolean(KEY_SOUNDFX, true);
     }
 
-    public static void setVolume(int value) {
-        prefs.edit().putInt(KEY_VOLUME, value).apply();
+    public static void setSoundFx(boolean value) {
+        prefs.edit().putBoolean(KEY_SOUNDFX, value).apply();
     }
 
     public static String getUsername(String defaultvalue) {

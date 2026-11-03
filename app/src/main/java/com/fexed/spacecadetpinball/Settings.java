@@ -13,7 +13,6 @@ import android.text.TextWatcher;
 import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.fexed.spacecadetpinball.databinding.ActivityMainBinding;
@@ -146,20 +145,9 @@ public class Settings extends AppCompatActivity {
             startActivity(browserIntent);
         });
 
-        mBinding.volumebar.setProgress(PrefsHelper.getVolume());
-        mBinding.volumebar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int percentage, boolean b) {
-                PrefsHelper.setVolume(percentage);
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+        mBinding.soundfx.setChecked(PrefsHelper.getSoundFx());
+        mBinding.soundfx.setOnCheckedChangeListener((compoundButton, b) -> {
+            PrefsHelper.setSoundFx(b);
         });
 
         if (PrefsHelper.getCheatsUsed()) {

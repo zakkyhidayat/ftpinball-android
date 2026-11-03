@@ -14,7 +14,7 @@
     <string name="username">Username</string>
     <string name="credits">3D Pinball Table was created for Microsoft by Maxis.\nCopyright © 1995 Maxis.\n\nReverse engineering by: k4zmu2a\nOriginal Android port by: Iscle\nCurrent Android port by: fexed, th3vanger</string>
     <string name="restartprompt">Long tap to restart the game</string>
-    <string name="volume">Volume</string>
+    <string name="soundfx">Sound effects</string>
     <string name="customfonts">Custom fonts</string>
     <string name="plungerpopup">Plunger popup</string>
     <string name="plungerhint">Keep pressed on the screen to throw the ball</string>

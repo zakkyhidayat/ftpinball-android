@@ -58,6 +58,7 @@ public class MainActivity extends SDLActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         File filesDir = getFilesDir();
         copyAssets(filesDir);
         initNative(filesDir.getAbsolutePath() + "/");
@@ -70,7 +71,7 @@ public class MainActivity extends SDLActivity {
                 player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                 player.prepare();
                 player.setLooping(true);
-                player.setVolume(PrefsHelper.getVolume() / (float) 100, PrefsHelper.getVolume() / (float) 100);
+                player.setVolume(1f, 1f);
                 player.start();
             }
         } catch (IOException ignored) {
@@ -283,8 +284,8 @@ public class MainActivity extends SDLActivity {
     private final StateHelper.IStateListener mStateListener = new StateHelper.IStateListener() {
         @Override
         public void onStateChanged(int state) {
-            setVolume(PrefsHelper.getVolume());
-            if (player != null) player.setVolume(PrefsHelper.getVolume()/(float) 100, PrefsHelper.getVolume()/(float) 100);
+            setSoundEnabled(PrefsHelper.getSoundFx());
+            if (player != null) player.setVolume(1f, 1f);
             putTranslations();
             putString(26, PrefsHelper.getUsername("Player 1"));  //TODO abstract ids
 
@@ -399,7 +400,7 @@ public class MainActivity extends SDLActivity {
                     player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                     player.prepare();
                     player.setLooping(true);
-                    player.setVolume(PrefsHelper.getVolume()/(float) 100, PrefsHelper.getVolume()/(float) 100);
+                    player.setVolume(1f, 1f);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -410,8 +411,8 @@ public class MainActivity extends SDLActivity {
 
         if (!isPlaying) pauseNativeThread();
         if (isGameReady) {
-            setVolume(PrefsHelper.getVolume());
-            if (player != null) player.setVolume(PrefsHelper.getVolume()/(float) 100, PrefsHelper.getVolume()/(float) 100);
+            setSoundEnabled(PrefsHelper.getSoundFx());
+            if (player != null) player.setVolume(1f, 1f);
         }
         PrefsHelper.setCheatsUsed(checkCheatsUsed());
         setFullscreen();
@@ -555,7 +556,7 @@ public class MainActivity extends SDLActivity {
 
     private native void initNative(String dataPath);
 
-    private native void setVolume(int vol);
+    private native void setSoundEnabled(boolean enabled);
 
     private native void putString(int id, String str);
 
