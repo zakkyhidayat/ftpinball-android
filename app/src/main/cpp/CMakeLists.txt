@@ -132,6 +132,8 @@ include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/SDL_mixer/include)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SDL)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/SDL_mixer)
+# NDK 26 clang flags SDL's own -Werror=declaration-after-statement in C99+ code
+target_compile_options(SDL2 PRIVATE -Wno-declaration-after-statement)
 
 find_library(log-lib log)
 
