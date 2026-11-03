@@ -4113,7 +4113,7 @@ void control::TimeWarpController(int code, TPinballComponent* caller)
 
 void control::TimeWarpPartTwoController(int code, TPinballComponent* caller)
 {
-	char Buffer[64];
+	char Buffer[64]{};
 
 	if (code != 63)
 	{
@@ -4153,7 +4153,7 @@ void control::TimeWarpPartTwoController(int code, TPinballComponent* caller)
 			control_middle_circle_tag.Component->Message(41, 5.0);
 			snprintf(Buffer, sizeof Buffer, pinball::get_rc_string(173, 0), pinball::get_rc_string(RankRcArray[rank], 1));
 		}
-		if (!AddRankProgress(12))
+		if (!AddRankProgress(12) && Buffer[0])
 		{
 			control_mission_text_box_tag.Component->Display(Buffer, 8.0, 1);
 			control_soundwave10_tag.Component->Play();
