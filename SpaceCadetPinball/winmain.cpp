@@ -36,6 +36,8 @@ bool winmain::LaunchBallEnabled = true;
 bool winmain::HighScoresEnabled = true;
 bool winmain::DemoActive = false;
 char* winmain::BasePath;
+std::string winmain::DatOverride;
+bool winmain::FullTiltOverride = false;
 int winmain::MainMenuHeight = 0; 
 std::string winmain::FpsDetails;
 double winmain::UpdateToFrameRatio;
@@ -61,14 +63,22 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 	pinball::quickFlag = strstr(lpCmdLine, "-quick") != nullptr;
 	DatFileName = options::get_string("Pinball Data", pinball::get_rc_string(168, 0));
 
-	/*Check for full tilt .dat file and switch to it automatically*/
-	auto cadetFilePath = pinball::make_path_name("CADET.DAT");
-	auto cadetDat = fopen(cadetFilePath.c_str(), "r");
-	if (cadetDat)
+	if (!DatOverride.empty())
 	{
-		fclose(cadetDat);
-		DatFileName = "CADET.DAT";
-		pb::FullTiltMode = true;
+		DatFileName = DatOverride;
+		pb::FullTiltMode = FullTiltOverride;
+	}
+	else
+	{
+		/*Check for full tilt .dat file and switch to it automatically*/
+		auto cadetFilePath = pinball::make_path_name("CADET.DAT");
+		auto cadetDat = fopen(cadetFilePath.c_str(), "r");
+		if (cadetDat)
+		{
+			fclose(cadetDat);
+			DatFileName = "CADET.DAT";
+			pb::FullTiltMode = true;
+		}
 	}
 
 	// SDL window

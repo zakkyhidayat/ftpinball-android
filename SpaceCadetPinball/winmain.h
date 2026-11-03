@@ -48,6 +48,9 @@ public:
 	static bool HighScoresEnabled;
 	static bool DemoActive;
 	static char* BasePath;
+	// Table chosen by the Android app; empty means autodetect
+	static std::string DatOverride;
+	static bool FullTiltOverride;
 	static int MainMenuHeight;
 
 	static int WinMain(LPCSTR lpCmdLine);

@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Copyrighted Full Tilt! data staged by tools/stage_fulltilt.sh
+/app/fulltilt-assets/

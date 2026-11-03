@@ -36,6 +36,13 @@ android {
         }
     }
 
+    // Full Tilt! data is copyrighted and never committed: tools/stage_fulltilt.sh copies it here
+    sourceSets {
+        main {
+            if (file('fulltilt-assets').exists()) assets.srcDirs += 'fulltilt-assets'
+        }
+    }
+
     buildFeatures {
         buildConfig true
         viewBinding true

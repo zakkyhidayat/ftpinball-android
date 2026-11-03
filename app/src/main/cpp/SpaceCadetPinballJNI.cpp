@@ -118,8 +118,12 @@ void SpaceCadetPinballJNI::gameReady() {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_fexed_spacecadetpinball_MainActivity_initNative(JNIEnv *env, jobject thiz,
-        jstring data_path) {
-winmain::BasePath = (char *) env->GetStringUTFChars(data_path, nullptr);
+        jstring data_path, jstring dat_file, jboolean full_tilt) {
+    winmain::BasePath = (char *) env->GetStringUTFChars(data_path, nullptr);
+    const char *dat = env->GetStringUTFChars(dat_file, nullptr);
+    winmain::DatOverride = dat;
+    env->ReleaseStringUTFChars(dat_file, dat);
+    winmain::FullTiltOverride = full_tilt;
     env->GetJavaVM(&g_JavaVM);
 }
 extern "C"

@@ -39,6 +39,7 @@ import com.google.firebase.analytics.FirebaseAnalytics;
 
 public class MainActivity extends SDLActivity {
     private static final String TAG = "MainActivity";
+    public static final String EXTRA_TABLE = "table";
 
     private ActivityMainBinding mBinding;
     private Handler plungerTimer;
@@ -59,9 +60,9 @@ public class MainActivity extends SDLActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
-        File filesDir = getFilesDir();
-        copyAssets(filesDir);
-        initNative(filesDir.getAbsolutePath() + "/");
+        Table table = Table.byId(getIntent().getStringExtra(EXTRA_TABLE));
+        File tableDir = prepareTableFiles(table);
+        initNative(tableDir.getAbsolutePath() + "/", table.datFile, table.fullTilt);
         PrefsHelper.setPrefs(getSharedPreferences("com.fexed.spacecadetpinball", Context.MODE_PRIVATE));
 
         try {
@@ -247,27 +248,49 @@ public class MainActivity extends SDLActivity {
         }
     }
 
-    private void copyAssets(File filesDir) {
-        if (!new File(filesDir, "PINBALL.DAT").exists()) {
-            AssetManager assetManager = getAssets();
-            try {
-                for (String asset : assetManager.list("")) {
-                    Log.d(TAG, "Copying " + asset);
-                    try (InputStream is = assetManager.open(asset)){
-                        try (OutputStream os = new FileOutputStream(new File(filesDir, asset))) {
-                            byte[] buffer = new byte[1024];
-                            int len;
-                            while ((len = is.read(buffer)) != -1) {
-                                os.write(buffer, 0, len);
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+    /** Copies the files of the chosen table to its own folder, once per app version. */
+    private File prepareTableFiles(Table table) {
+        File dir = new File(getFilesDir(), table.id);
+        File marker = new File(dir, ".version");
+        String version = String.valueOf(BuildConfig.VERSION_CODE);
+        try {
+            if (marker.exists() && version.equals(new String(java.nio.file.Files.readAllBytes(marker.toPath())))
+                    && new File(dir, table.datFile).exists()) return dir;
+        } catch (IOException | RuntimeException ignored) {
+        }
+        dir.mkdirs();
+        AssetManager assetManager = getAssets();
+        try {
+            for (String asset : assetManager.list("")) {
+                String[] children = assetManager.list(asset);
+                if (children != null && children.length > 0) continue;
+                if (table.fullTilt && asset.startsWith("PINBALL.") && !asset.endsWith(".mp3")) continue;
+                copyAsset(assetManager, asset, new File(dir, asset));
             }
+            if (table.assetDir() != null) {
+                for (String asset : assetManager.list(table.assetDir())) {
+                    copyAsset(assetManager, table.assetDir() + "/" + asset, new File(dir, asset));
+                }
+            }
+            try (OutputStream os = new FileOutputStream(marker)) {
+                os.write(version.getBytes());
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to prepare " + table.id, e);
+        }
+        return dir;
+    }
+
+    private void copyAsset(AssetManager assetManager, String asset, File target) {
+        try (InputStream is = assetManager.open(asset);
+             OutputStream os = new FileOutputStream(target)) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                os.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to copy " + asset, e);
         }
     }
 
@@ -554,7 +577,7 @@ public class MainActivity extends SDLActivity {
         }
     }
 
-    private native void initNative(String dataPath);
+    private native void initNative(String dataPath, String datFile, boolean fullTilt);
 
     private native void setSoundEnabled(boolean enabled);
 
