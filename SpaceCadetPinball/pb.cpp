@@ -438,11 +438,17 @@ void pb::InputDown(GameInput input)
 					++index;
 					if (index >= MainTable->BallList.size())
 					{
-						ball = new TBall(MainTable);
+						// The renderer only has 20 ball bitmaps
+						if (MainTable->BallList.size() >= 20)
+							ball = nullptr;
+						else
+							ball = new TBall(MainTable);
 						break;
 					}
 				}
 			}
+			if (!ball)
+				break;
 			ball->ActiveFlag = 1;
             ball->Position.X = 1.0;
 			ball->Position.Z = ball->Offset;
