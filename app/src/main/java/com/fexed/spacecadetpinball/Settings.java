@@ -77,6 +77,11 @@ public class Settings extends AppCompatActivity {
             PrefsHelper.setPlungerPopup(b);
         });
 
+        mBinding.showmessages.setChecked(PrefsHelper.getShowMessages());
+        mBinding.showmessages.setOnCheckedChangeListener((compoundButton, b) -> {
+            PrefsHelper.setShowMessages(b);
+        });
+
         boolean remainingballs = PrefsHelper.getRemainingBalls();
         mBinding.remainingballs.setChecked(remainingballs);
         mBinding.remainingballs.setOnCheckedChangeListener((compoundButton, b) -> {

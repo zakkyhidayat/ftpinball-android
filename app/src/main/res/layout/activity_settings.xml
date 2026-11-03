@@ -69,10 +69,22 @@
             android:layout_marginEnd="32dp"
             android:layout_marginRight="32dp"
             android:background="?android:attr/listDivider"
-            app:layout_constraintBottom_toTopOf="@+id/remainingballs"
+            app:layout_constraintBottom_toTopOf="@+id/showmessages"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/plungerpopup" />
+
+        <View
+            android:id="@+id/divider11"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:background="?android:attr/listDivider"
+            app:layout_constraintBottom_toTopOf="@+id/remainingballs"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/showmessages" />
 
         <View
             android:id="@+id/divider7"
@@ -454,13 +466,34 @@
             app:layout_constraintTop_toBottomOf="@+id/cstmfnts" />
 
         <Switch
+            android:id="@+id/showmessages"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="@+id/remainingballs"
+            app:layout_constraintStart_toStartOf="@+id/remainingballs"
+            app:layout_constraintTop_toBottomOf="@+id/plungerpopup" />
+
+        <TextView
+            android:id="@+id/textView24"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="@string/showmessages"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/showmessages"
+            app:layout_constraintEnd_toEndOf="@+id/textView15"
+            app:layout_constraintStart_toStartOf="@+id/textView2"
+            app:layout_constraintTop_toBottomOf="@+id/plungerpopup" />
+
+        <Switch
             android:id="@+id/remainingballs"
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="@+id/fullscreenplunger"
             app:layout_constraintStart_toStartOf="@+id/fullscreenplunger"
-            app:layout_constraintTop_toBottomOf="@+id/plungerpopup" />
+            app:layout_constraintTop_toBottomOf="@+id/showmessages" />
 
         <Switch
             android:id="@+id/fullscreenplunger"
@@ -535,7 +568,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/remainingballs"
             app:layout_constraintEnd_toEndOf="@+id/textView15"
             app:layout_constraintStart_toStartOf="@+id/textView2"
-            app:layout_constraintTop_toBottomOf="@+id/plungerpopup" />
+            app:layout_constraintTop_toBottomOf="@+id/showmessages" />
 
         <TextView
             android:id="@+id/textView20"
