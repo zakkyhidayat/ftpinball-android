@@ -176,7 +176,7 @@ public class HighScoreHandler {
                                     // parseNetworkResponse runs on Volley's worker thread: show the toast from the main thread
                                     final String toastText = response.statusCode == 200
                                             ? context.getString(R.string.scoreupload_ok, nickname)
-                                            : context.getString(R.string.scoreupload_ok, "" + response.statusCode);
+                                            : context.getString(R.string.scoreupload_err, "" + response.statusCode);
                                     new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show());
                                 }
                             } catch (JSONException e) {
