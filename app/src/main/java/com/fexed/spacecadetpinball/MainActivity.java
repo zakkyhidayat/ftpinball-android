@@ -85,6 +85,20 @@ public class MainActivity extends SDLActivity {
 
         mBinding.getRoot().bringToFront();
 
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            // keep the system back gesture from stealing flipper presses at the screen edges
+            mBinding.getRoot().addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+                int w = r - l;
+                int h = b - t;
+                int edge = (int) (48 * getResources().getDisplayMetrics().density);
+                int height = Math.min(h, (int) (200 * getResources().getDisplayMetrics().density));
+                java.util.List<android.graphics.Rect> rects = new java.util.ArrayList<>();
+                rects.add(new android.graphics.Rect(0, h - height, edge, h));
+                rects.add(new android.graphics.Rect(w - edge, h - height, w, h));
+                v.setSystemGestureExclusionRects(rects);
+            });
+        }
+
         bottomSheetBehavior = BottomSheetBehavior.from(mBinding.bottomsheet);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
