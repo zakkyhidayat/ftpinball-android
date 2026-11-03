@@ -4,12 +4,14 @@ plugins {
 }
 
 android {
-    compileSdk 33
+    namespace 'com.fexed.spacecadetpinball'
+    compileSdk 34
+    ndkVersion '26.3.11579264'
 
     defaultConfig {
         applicationId "com.fexed.spacecadetpinball"
         minSdk 19
-        targetSdk 33
+        targetSdk 34
         versionCode 13
         versionName "2.5"
 
@@ -34,11 +36,12 @@ android {
         }
     }
 
-    buildFeatures{
+    buildFeatures {
+        buildConfig true
         viewBinding true
     }
 
-    lintOptions {
+    lint {
         abortOnError false
     }
 
@@ -50,7 +53,7 @@ android {
         }
     }
 
-    packagingOptions {
+    packaging {
         resources.excludes.add("META-INF/*")
     }
 }
