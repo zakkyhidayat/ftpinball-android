@@ -91,7 +91,7 @@ public class MainActivity extends SDLActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_Z);
             }
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_Z);
             }
             return false;
@@ -103,7 +103,7 @@ public class MainActivity extends SDLActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_SLASH);
             }
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SLASH);
             }
             return false;
@@ -115,7 +115,7 @@ public class MainActivity extends SDLActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_SPACE);
             }
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SPACE);
             }
             return false;
@@ -127,7 +127,7 @@ public class MainActivity extends SDLActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_SPACE);
             }
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SPACE);
             }
             return false;
@@ -166,7 +166,7 @@ public class MainActivity extends SDLActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_X);
             }
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_X);
             }
             return false;
@@ -177,7 +177,7 @@ public class MainActivity extends SDLActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_PERIOD);
             }
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_PERIOD);
             }
             return false;
@@ -188,7 +188,7 @@ public class MainActivity extends SDLActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_DPAD_UP);
             }
-            if (event.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_DPAD_UP);
             }
             return false;
