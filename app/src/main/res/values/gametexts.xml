@@ -217,9 +217,9 @@
 		<item>Ramp Bonus On</item>
 		<item>Light Reset Off</item>
 		<item>Skill Shot\n%ld</item>
-		<item>Game Paused\nF3 to Resume</item>
+		<item>Game Paused\nTap Play to Resume</item>
 		<item>Continue Play</item>
-		<item>F2 Starts New Game</item>
+		<item>Long Tap Restart for New Game</item>
 		<item>Careful...</item>
 		<item>Player 1</item>
 		<item>Player 2</item>
@@ -248,9 +248,9 @@
 		<item>Awaiting Deployment</item>
 		<item>Flags Upgraded</item>
 		<item>Bonus Hold</item>
-		<item>Level One Commation</item>
-		<item>Level Two Commation</item>
-		<item>Level Three Commation</item>
+		<item>Level One Commendation</item>
+		<item>Level Two Commendation</item>
+		<item>Level Three Commendation</item>
 		<item>Field Multiplier 2x</item>
 		<item>Field Multiplier 3x</item>
 		<item>Field Multiplier 5x</item>
