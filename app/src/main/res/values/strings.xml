@@ -57,4 +57,6 @@
     <string name="music">Music</string>
     <string name="hapticfeedback">Haptic feedback</string>
     <string name="showmessages">Show on-screen messages</string>
+    <string name="heading_options">Game options</string>
+    <string name="heading_sound">Sound and feedback</string>
 </resources>

@@ -107,7 +107,7 @@
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
             android:background="?android:attr/listDivider"
-            app:layout_constraintBottom_toTopOf="@+id/music"
+            app:layout_constraintBottom_toTopOf="@+id/headingsound"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/fullscreenplunger" />
@@ -353,6 +353,18 @@
             app:layout_constraintStart_toStartOf="@+id/textView2"
             app:layout_constraintTop_toBottomOf="@+id/divider10" />
 
+        <TextView
+            android:id="@+id/headingoptions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/heading_options"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/textView2"
+            app:layout_constraintTop_toBottomOf="@+id/textView16" />
+
         <Switch
             android:id="@+id/tiltbtns"
             android:layout_width="48dp"
@@ -360,7 +372,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="@+id/cstmfnts"
             app:layout_constraintStart_toStartOf="@+id/cstmfnts"
-            app:layout_constraintTop_toBottomOf="@+id/textView16" />
+            app:layout_constraintTop_toBottomOf="@+id/headingoptions" />
 
         <TextView
             android:id="@+id/textView6"
@@ -504,6 +516,18 @@
             app:layout_constraintStart_toEndOf="@+id/textView16"
             app:layout_constraintTop_toBottomOf="@+id/remainingballs" />
 
+        <TextView
+            android:id="@+id/headingsound"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/heading_sound"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="@+id/textView2"
+            app:layout_constraintTop_toBottomOf="@+id/divider8" />
+
         <Switch
             android:id="@+id/music"
             android:layout_width="48dp"
@@ -511,7 +535,7 @@
             android:layout_marginTop="8dp"
             app:layout_constraintEnd_toEndOf="@+id/volumebar"
             app:layout_constraintStart_toEndOf="@+id/textView16"
-            app:layout_constraintTop_toBottomOf="@+id/fullscreenplunger" />
+            app:layout_constraintTop_toBottomOf="@+id/headingsound" />
 
         <Switch
             android:id="@+id/hapticfeedback"
@@ -592,7 +616,7 @@
             app:layout_constraintBottom_toBottomOf="@+id/music"
             app:layout_constraintEnd_toEndOf="@+id/textView19"
             app:layout_constraintStart_toStartOf="@+id/textView2"
-            app:layout_constraintTop_toBottomOf="@+id/fullscreenplunger" />
+            app:layout_constraintTop_toBottomOf="@+id/headingsound" />
 
         <SeekBar
             android:id="@+id/volumebar"
