@@ -232,7 +232,21 @@ public class MainActivity extends SDLActivity {
     }
 
     @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        // SDL forwards BACK to the native engine, so catch it here
+        if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (event.getAction() == KeyEvent.ACTION_UP) confirmBackToMenu();
+            return true;
+        }
+        return super.dispatchKeyEvent(event);
+    }
+
+    @Override
     public void onBackPressed() {
+        confirmBackToMenu();
+    }
+
+    private void confirmBackToMenu() {
         final boolean wasPlaying = isPlaying;
         if (wasPlaying) pauseNativeThread();
         new android.app.AlertDialog.Builder(this)

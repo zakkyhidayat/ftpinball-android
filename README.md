@@ -8,16 +8,23 @@ Android port of `3D Pinball for Windows – Space Cadet`, a game bundled with Wi
 
 This is a fork of [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on-Android) with build updates and bug fixes. Thanks to [k4zmu2a](https://github.com/k4zmu2a) for the original source code, to [iscle](https://github.com/Iscle) for the original Android porting and to [fexed](https://github.com/fexed) for the Android app.
 
-## Changes in this fork
+## Features of this fork
 
-- Build upgraded to Gradle 8.5 / Android Gradle Plugin 8.2.2 (JDK 17+), targetSdk 34, NDK 26.3
-- Flippers no longer stick when a touch is cancelled, e.g. by an edge swipe ([fexed#82](https://github.com/fexed/Pinball-on-Android/issues/82))
-- No garbage text after reaching the top rank ([fexed#53](https://github.com/fexed/Pinball-on-Android/issues/53))
-- No graphics corruption when typing the `gmax` cheat ([fexed#93](https://github.com/fexed/Pinball-on-Android/issues/93))
-- Message typos and desktop key prompts fixed ([fexed#95](https://github.com/fexed/Pinball-on-Android/issues/95))
-- No crash when the ball cheat spawns more than 20 balls ([k4zmu2a#209](https://github.com/k4zmu2a/SpaceCadetPinball/issues/209))
-- Cheats that stay on now block high score entry in later games ([k4zmu2a#228](https://github.com/k4zmu2a/SpaceCadetPinball/issues/228))
-- Score upload: fixed a crash on repeated uploads and the wrong message on failure
+- Main menu with one card per table: the classic Windows 3D Pinball Space Cadet and the three Full Tilt! Pinball tables (Space Cadet, Dragon's Keep, Skulduggery). Dragon's Keep and Skulduggery are listed as "Coming soon": the engine has no rules for them yet.
+- No online leaderboard and no in-app volume sliders: use Android's media volume. Sound effects and music keep their on/off toggles.
+- New touch controls, haptic feedback, a restart confirmation and a back-to-menu confirmation
+- Build upgraded to Gradle 8.5 / Android Gradle Plugin 8.2.2 (JDK 17+), targetSdk 34, NDK 26.3, 16 KB page size support
+- Bug fixes: sticking flippers ([fexed#82](https://github.com/fexed/Pinball-on-Android/issues/82)), garbage text after the top rank ([fexed#53](https://github.com/fexed/Pinball-on-Android/issues/53)), graphics corruption when typing `gmax` ([fexed#93](https://github.com/fexed/Pinball-on-Android/issues/93)), message typos ([fexed#95](https://github.com/fexed/Pinball-on-Android/issues/95)), a crash with more than 20 balls ([k4zmu2a#209](https://github.com/k4zmu2a/SpaceCadetPinball/issues/209)) and high scores after cheats ([k4zmu2a#228](https://github.com/k4zmu2a/SpaceCadetPinball/issues/228))
+
+## Full Tilt! data (optional)
+
+Full Tilt! Pinball is copyrighted and its data is **not** in this repository. To build an APK with the Full Tilt tables for your own use, stage your own copy of the game (the folder holding CADET, DRAGON and PIRATE) before building:
+
+```bash
+tools/stage_fulltilt.sh /path/to/FULLTILT
+```
+
+This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds with the classic table only.
 
 ## Building
 
@@ -29,10 +36,6 @@ cd spacecadetpinball-android
 echo "sdk.dir=$HOME/Android/Sdk" > local.properties
 ./gradlew installDebug   # with a phone connected over adb
 ```
-
-## How to play
-
-Build it yourself as above, or download the upstream [APK](https://github.com/fexed/Pinball-on-Android/releases)
 
 ## Credits
 
