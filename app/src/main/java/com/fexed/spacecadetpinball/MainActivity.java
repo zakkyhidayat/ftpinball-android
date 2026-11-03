@@ -43,6 +43,7 @@ public class MainActivity extends SDLActivity {
 
     private ActivityMainBinding mBinding;
     private Handler plungerTimer;
+    private boolean leavingToMenu = false;
     private boolean isGameReady = false;
     private boolean isPlaying = true;
 
@@ -228,6 +229,34 @@ public class MainActivity extends SDLActivity {
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
+    }
+
+    @Override
+    public void onBackPressed() {
+        final boolean wasPlaying = isPlaying;
+        if (wasPlaying) pauseNativeThread();
+        new android.app.AlertDialog.Builder(this)
+                .setTitle(R.string.menutitle)
+                .setMessage(R.string.menumessage)
+                .setPositiveButton(R.string.yes, (dialog, which) -> {
+                    leavingToMenu = true;
+                    Intent menu = new Intent(this, MenuActivity.class);
+                    menu.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(menu);
+                    finish();
+                })
+                .setNegativeButton(R.string.no, null)
+                .setOnDismissListener(dialog -> {
+                    if (wasPlaying && !leavingToMenu) resumeNativeThread();
+                })
+                .show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // The native engine cannot be re-initialised, so the game process ends with the game
+        if (leavingToMenu) android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     private void restartGame() {

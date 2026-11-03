@@ -71,4 +71,13 @@
     <string name="desc_fullscreenplunger">Tap anywhere to pull the plunger</string>
     <string name="desc_music">Background music while playing</string>
     <string name="desc_hapticfeedback">Short vibration when pressing buttons</string>
+    <string name="menu_subtitle">Pinball on Android</string>
+    <string name="table_classic">Windows 3D Pinball</string>
+    <string name="table_fulltilt">Full Tilt! Pinball</string>
+    <string name="coming_soon">Coming soon</string>
+    <string name="last_played">Last played</string>
+    <string name="about">About</string>
+    <string name="menu_credits">Original source code: k4zmu2a/SpaceCadetPinball\nAndroid port: fexed/Pinball-on-Android\n\nThis fork adds fixes, a new interface and Full Tilt! support. Full Tilt! Pinball belongs to its owners and its data is not distributed with the source code.</string>
+    <string name="menutitle">Back to main menu?</string>
+    <string name="menumessage">The current game will be lost.</string>
 </resources>

@@ -46,6 +46,7 @@ public class Settings extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        PrefsHelper.setPrefs(getSharedPreferences("com.fexed.spacecadetpinball", android.content.Context.MODE_PRIVATE));
         mBinding = ActivitySettingsBinding.inflate(getLayoutInflater());
         View view = mBinding.getRoot();
         setContentView(view);

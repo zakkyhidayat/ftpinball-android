@@ -12,6 +12,7 @@ stage() { # folder-on-disc  dat-name  asset-folder
     [ -n "$d" ] || { echo "skip $3: no $1 folder" >&2; return 0; }
     mkdir -p "$dst/$3"
     find "$d" -maxdepth 1 -iname "$2" -exec cp {} "$dst/$3/$2" \;
+    find "$d" -maxdepth 1 -iname "*.BMP" -exec cp {} "$dst/$3/icon.bmp" \;
     s=$(find "$d" -maxdepth 1 -iname SOUND -type d | head -n1)
     [ -n "$s" ] && find "$s" -maxdepth 1 -type f -exec cp {} "$dst/$3/" \;
     echo "staged $3"

@@ -13,11 +13,7 @@
         android:theme="@style/Theme.SpaceCadetPinball"
         tools:replace="android:supportsRtl">
         <activity
-            android:name=".Settings"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:name=".MenuActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,6 +21,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- The game runs in its own process: the native engine can only be initialised once per process -->
+        <activity
+            android:name=".Settings"
+            android:exported="false"
+            android:process=":game" />
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:exported="false"
+            android:process=":game" />
     </application>
 
 </manifest>
