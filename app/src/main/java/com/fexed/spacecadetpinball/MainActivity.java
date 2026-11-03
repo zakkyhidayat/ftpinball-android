@@ -153,14 +153,6 @@ public class MainActivity extends SDLActivity {
             return false;
         });
 
-        mBinding.replay.setOnLongClickListener(view -> {
-            SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_F2);
-            SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_F2);
-            PrefsHelper.setCheatsUsed(false);
-            mBinding.cheatAlert.setVisibility(View.INVISIBLE);
-            return true;
-        });
-
         mBinding.playpause.setOnClickListener(view -> {
             if (isPlaying) {
                 isPlaying = false;
@@ -177,7 +169,17 @@ public class MainActivity extends SDLActivity {
         });
 
         mBinding.replay.setOnClickListener(view -> {
-            Toast.makeText(getContext(), R.string.restartprompt, Toast.LENGTH_SHORT).show();
+            final boolean wasPlaying = isPlaying;
+            if (wasPlaying) pauseNativeThread();
+            new android.app.AlertDialog.Builder(this)
+                    .setTitle(R.string.restarttitle)
+                    .setMessage(R.string.restartmessage)
+                    .setPositiveButton(R.string.yes, (dialog, which) -> restartGame())
+                    .setNegativeButton(R.string.no, null)
+                    .setOnDismissListener(dialog -> {
+                        if (wasPlaying) resumeNativeThread();
+                    })
+                    .show();
         });
 
 
@@ -224,6 +226,13 @@ public class MainActivity extends SDLActivity {
 
         firebaseAnalytics = FirebaseAnalytics.getInstance(this);
         firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
+    }
+
+    private void restartGame() {
+        SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_F2);
+        SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_F2);
+        PrefsHelper.setCheatsUsed(false);
+        mBinding.cheatAlert.setVisibility(View.INVISIBLE);
     }
 
     private void hapticTick() {

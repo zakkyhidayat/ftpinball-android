@@ -60,4 +60,8 @@
     <string name="showmessages">Mostra messaggi a schermo</string>
     <string name="heading_options">Opzioni di gioco</string>
     <string name="heading_sound">Audio e feedback</string>
+    <string name="restarttitle">Riavviare la partita?</string>
+    <string name="restartmessage">La partita in corso andrà persa.</string>
+    <string name="yes">Sì</string>
+    <string name="no">No</string>
 </resources>
