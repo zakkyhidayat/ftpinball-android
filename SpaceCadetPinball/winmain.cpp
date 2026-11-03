@@ -340,9 +340,8 @@ int winmain::event_handler(const SDL_Event* event)
 
 		switch (event->key.keysym.sym)
 		{
-		case SDLK_g:
-			DispGRhistory = 1;
-			break;
+		// 'g' used to enable the frame time graph, which overwrites the global palette.
+		// It also fires while typing the "gmax" cheat with hidden test enabled, corrupting all graphics.
 		case SDLK_y:
 			SDL_SetWindowTitle(MainWindow, "Pinball");
 			DispFrameRate = DispFrameRate == 0;
