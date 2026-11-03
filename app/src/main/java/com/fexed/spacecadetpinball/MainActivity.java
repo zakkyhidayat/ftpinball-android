@@ -146,12 +146,12 @@ public class MainActivity extends SDLActivity {
                 isPlaying = false;
                 pauseNativeThread();
                 if (PrefsHelper.getMusic()) player.pause();
-                mBinding.playpause.setImageDrawable(getContext().getResources().getDrawable(R.drawable.play));
+                mBinding.playpause.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.play, getTheme()));
             } else {
                 isPlaying = true;
                 resumeNativeThread();
                 if (PrefsHelper.getMusic()) player.start();
-                mBinding.playpause.setImageDrawable(getContext().getResources().getDrawable(R.drawable.pause));
+                mBinding.playpause.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.pause, getTheme()));
 
             }
         });

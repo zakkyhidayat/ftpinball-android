@@ -3,6 +3,7 @@ package com.fexed.spacecadetpinball;
 import static com.fexed.spacecadetpinball.PrefsHelper.*;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
@@ -70,11 +71,10 @@ public class HighScoreHandler {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             publicKey = (RSAPublicKey) keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
-            Log.e("KEY", e.getLocalizedMessage());
-            e.printStackTrace();
+            Log.e("KEY", "Unable to load public key", e);
         }
 
-        Log.d("KEY", publicKey.toString());
+        if (publicKey != null) Log.d("KEY", publicKey.toString());
         return publicKey;
     }
 
@@ -172,13 +172,12 @@ public class HighScoreHandler {
                                 if (PrefsHelper.getUserId().equals("0")) PrefsHelper.setUserId(uid);
                                 Log.d("RANKS", "response: " + received.toString());
 
-                                Looper.prepare();
                                 if (verbose) {
-                                    if (response.statusCode == 200) {
-                                        Toast.makeText(context, context.getString(R.string.scoreupload_ok, nickname), Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        Toast.makeText(context, context.getString(R.string.scoreupload_ok, "" + response.statusCode), Toast.LENGTH_SHORT).show();
-                                    }
+                                    // parseNetworkResponse runs on Volley's worker thread: show the toast from the main thread
+                                    final String toastText = response.statusCode == 200
+                                            ? context.getString(R.string.scoreupload_ok, nickname)
+                                            : context.getString(R.string.scoreupload_ok, "" + response.statusCode);
+                                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show());
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
