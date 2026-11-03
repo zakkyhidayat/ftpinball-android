@@ -63,4 +63,12 @@
     <string name="restartmessage">The current game will be lost.</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="settings_title">Settings</string>
+    <string name="desc_cstmfnts">Use the original pinball typeface for the HUD</string>
+    <string name="desc_plungerpopup">Hint shown when the ball waits in the plunger</string>
+    <string name="desc_showmessages">Mission and status text during the game</string>
+    <string name="desc_remainingballs">Count down balls left instead of balls used</string>
+    <string name="desc_fullscreenplunger">Tap anywhere to pull the plunger</string>
+    <string name="desc_music">Background music while playing</string>
+    <string name="desc_hapticfeedback">Short vibration when pressing buttons</string>
 </resources>

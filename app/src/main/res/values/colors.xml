@@ -20,4 +20,8 @@
     <color name="icon_fill_pressed">#99FFFFFF</color>
     <color name="icon_stroke">#55FFFFFF</color>
     <color name="ripple_light">#55FFFFFF</color>
+    <color name="card_fill">#14808080</color>
+    <color name="card_stroke">#33808080</color>
+    <color name="accent_title">#FF6200EE</color>
+    <color name="description_grey">#FF8A8A8A</color>
 </resources>

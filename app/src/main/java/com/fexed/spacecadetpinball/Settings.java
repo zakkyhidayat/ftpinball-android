@@ -42,12 +42,38 @@ public class Settings extends AppCompatActivity {
 
     private ActivitySettingsBinding mBinding;
 
+    private void addDescription(TextView label, int descRes) {
+        android.text.SpannableStringBuilder sb = new android.text.SpannableStringBuilder(label.getText());
+        int start = sb.length();
+        sb.append("\n").append(getString(descRes));
+        sb.setSpan(new android.text.style.RelativeSizeSpan(0.75f), start, sb.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        sb.setSpan(new android.text.style.ForegroundColorSpan(getResources().getColor(R.color.description_grey)), start, sb.length(), android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        label.setText(sb);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = ActivitySettingsBinding.inflate(getLayoutInflater());
         View view = mBinding.getRoot();
         setContentView(view);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(R.string.settings_title);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        addDescription(mBinding.textView5, R.string.desc_cstmfnts);
+        addDescription(mBinding.textView15, R.string.desc_plungerpopup);
+        addDescription(mBinding.textView24, R.string.desc_showmessages);
+        addDescription(mBinding.textView19, R.string.desc_remainingballs);
+        addDescription(mBinding.textView20, R.string.desc_fullscreenplunger);
+        addDescription(mBinding.textView22, R.string.desc_music);
+        addDescription(mBinding.textView23, R.string.desc_hapticfeedback);
         if (PrefsHelper.getUsername(null) != null) {
             HighScoreHandler.postScore(getApplicationContext(), false);
         }

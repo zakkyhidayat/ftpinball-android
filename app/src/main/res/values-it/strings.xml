@@ -64,4 +64,12 @@
     <string name="restartmessage">La partita in corso andrà persa.</string>
     <string name="yes">Sì</string>
     <string name="no">No</string>
+    <string name="settings_title">Impostazioni</string>
+    <string name="desc_cstmfnts">Usa il carattere originale del flipper per l\'interfaccia</string>
+    <string name="desc_plungerpopup">Suggerimento quando la palla attende nel lanciatore</string>
+    <string name="desc_showmessages">Testi di missione e stato durante la partita</string>
+    <string name="desc_remainingballs">Mostra le palline rimaste invece di quelle usate</string>
+    <string name="desc_fullscreenplunger">Tocca ovunque per tirare il lanciatore</string>
+    <string name="desc_music">Musica di sottofondo durante il gioco</string>
+    <string name="desc_hapticfeedback">Breve vibrazione alla pressione dei tasti</string>
 </resources>
