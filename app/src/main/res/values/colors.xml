@@ -7,4 +7,17 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="flipper_fill">#40BB86FC</color>
+    <color name="flipper_fill_pressed">#99BB86FC</color>
+    <color name="flipper_stroke">#99BB86FC</color>
+    <color name="nudge_fill">#3303DAC5</color>
+    <color name="nudge_fill_pressed">#8003DAC5</color>
+    <color name="nudge_stroke">#9903DAC5</color>
+    <color name="plunger_fill">#33FFB74D</color>
+    <color name="plunger_fill_pressed">#80FFB74D</color>
+    <color name="plunger_stroke">#CCFFB74D</color>
+    <color name="icon_fill">#66000000</color>
+    <color name="icon_fill_pressed">#99FFFFFF</color>
+    <color name="icon_stroke">#55FFFFFF</color>
+    <color name="ripple_light">#55FFFFFF</color>
 </resources>
