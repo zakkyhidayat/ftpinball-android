@@ -710,7 +710,9 @@ namespace
 	unsigned LaunchTicks;
 	int Hits[128];       // hits per score entry this ball
 	bool BankPaid[128];  // bank bonus already awarded this ball
-	int BumperHits, Weapons;
+	int BumperHits, Weapons, SwordHits, SlayHits, SlayNeed, SuperJackpot;
+	bool SlayActive;
+	unsigned SlayEnd;
 	char Line[96];
 
 	bool match(Roles roles, const char* name)
@@ -761,7 +763,9 @@ namespace
 	{
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
-		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = Weapons = 0;
+		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = Weapons = SwordHits = SlayHits = SlayNeed = 0;
+		SuperJackpot = 2500000;
+		SlayActive = false;
 		QuestActive = LastBallLost = false;
 		LaunchTicks = 0;
 		memset(Hits, 0, sizeof Hits);
@@ -806,6 +810,55 @@ namespace
 		return s.values[hits < s.count ? hits : s.count - 1];
 	}
 
+	// The super jackpot grows with every component hit; the sword target starts the slay dragon quest on its third
+	// hit, which needs the ball in the dragon's mouth (a_kout3) as often as eight minus the weapons won, in 30 seconds
+	void dragon_slay(const char* name)
+	{
+		if (!strncmp(name, "a_bump", 6)) SuperJackpot += 50000;
+		else if (!strncmp(name, "a_spot", 6)) SuperJackpot += 100000;
+		else if (!strncmp(name, "a_sink", 6)) SuperJackpot += 500000;
+		else if (!strncmp(name, "a_kout", 6)) SuperJackpot += 750000;
+
+		if (!SlayActive)
+		{
+			if ((!strcmp(name, "a_spot19") || !strcmp(name, "a_spot26")) && ++SwordHits >= 3)
+			{
+				SwordHits = 0;
+				SlayActive = true;
+				SlayHits = 0;
+				SlayNeed = 8 - Weapons < 3 ? 3 : 8 - Weapons;
+				SlayEnd = SDL_GetTicks() + 30000;
+				snprintf(Line, sizeof Line, "Slay Dragon: ball in the dragon's mouth (%d)", SlayNeed);
+				say(pinball::MissTextBox, Line, -1.0f, 1);
+			}
+			return;
+		}
+		if (SDL_GetTicks() > SlayEnd)
+		{
+			SlayActive = false;
+			say(pinball::InfoTextBox, "The dragon escapes", 3.0f, 2);
+			show_quest();
+			return;
+		}
+		if (strcmp(name, "a_kout3"))
+			return;
+		static const int fire[] = {100000, 1000000, JACKPOT, EXTRA_BALL, EXTRA_BALL};
+		int n = SlayHits++;
+		award(fire[n < 4 ? n : 4]);
+		if (SlayHits < SlayNeed)
+		{
+			snprintf(Line, sizeof Line, "Slay Dragon: %d hits left", SlayNeed - SlayHits);
+			say(pinball::MissTextBox, Line, -1.0f, 1);
+			return;
+		}
+		SlayActive = false;
+		++QuestsDone;
+		pb::MainTable->AddScore(SuperJackpot);
+		snprintf(Line, sizeof Line, "Super Jackpot %d", SuperJackpot);
+		say(pinball::InfoTextBox, Line, 5.0f, 2);
+		show_quest();
+	}
+
 	void hit(const char* name)
 	{
 		int index = -1;
@@ -830,6 +883,9 @@ namespace
 		}
 		else if (match(Rules->sinks, name))
 			Jackpot += Rules->jackpotSink;
+
+		if (Rules == &Dragon)
+			dragon_slay(name);
 
 		if (!QuestActive)
 		{
