@@ -42,6 +42,7 @@ public:
 
 	TFlipper* FlipperL;
 	TFlipper* FlipperR;
+	std::vector<TFlipper*> LeftFlippers, RightFlippers;
 	scoreStruct* CurScoreStruct;
 	scoreStruct* ScoreBallcount;
 	scoreStruct* ScorePlayerNumber1;

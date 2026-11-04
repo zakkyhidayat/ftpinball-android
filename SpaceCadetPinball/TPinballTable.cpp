@@ -112,9 +112,11 @@ TPinballTable::TPinballTable(): TPinballComponent(nullptr, -1, false)
 				break;
 			case 1003:
 				FlipperL = new TFlipper(this, groupIndex);
+				LeftFlippers.push_back(FlipperL);
 				break;
 			case 1004:
 				FlipperR = new TFlipper(this, groupIndex);
+				RightFlippers.push_back(FlipperR);
 				break;
 			case 1005:
 				new TBumper(this, groupIndex);
@@ -347,25 +349,25 @@ int TPinballTable::Message(int code, float value)
 	case 1000:
 		if (!TiltLockFlag)
 		{
-			if (FlipperL) FlipperL->Message(1, value);
+			for (auto flipper : LeftFlippers) flipper->Message(1, value); // tables like Skulduggery have more than one pair
 		}
 		break;
 	case 1001:
 		if (!TiltLockFlag)
 		{
-			if (FlipperL) FlipperL->Message(2, value);
+			for (auto flipper : LeftFlippers) flipper->Message(2, value);
 		}
 		break;
 	case 1002:
 		if (!TiltLockFlag)
 		{
-			if (FlipperR) FlipperR->Message(1, value);
+			for (auto flipper : RightFlippers) flipper->Message(1, value);
 		}
 		break;
 	case 1003:
 		if (!TiltLockFlag)
 		{
-			if (FlipperR) FlipperR->Message(2, value);
+			for (auto flipper : RightFlippers) flipper->Message(2, value);
 		}
 		break;
 	case 1004:
