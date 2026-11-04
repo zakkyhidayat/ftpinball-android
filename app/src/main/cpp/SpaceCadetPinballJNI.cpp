@@ -5,8 +5,6 @@
 #include "../../../../SpaceCadetPinball/control.h"
 #include "../../../../SpaceCadetPinball/render.h"
 #include "../../../../SpaceCadetPinball/pb.h"
-#include "../../../../SpaceCadetPinball/score.h"
-#include "../../../../SpaceCadetPinball/gdrv.h"
 #include "../../../../SpaceCadetPinball/TPinballTable.h"
 #include "../../../../SpaceCadetPinball/TPlunger.h"
 #include <vector>
@@ -137,54 +135,6 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_fexed_spacecadetpinball_MainActivity_setSoundEnabled(JNIEnv *env, jobject thiz, jboolean enabled) {
     Sound::Enable(enabled);
-}
-
-static void putGlyph(std::vector<jint>& out, gdrv_bitmap8* bmp)
-{
-    out.push_back(bmp->Width);
-    out.push_back(bmp->Height);
-    for (int y = 0; y < bmp->Height; ++y)
-        for (int x = 0; x < bmp->Width; ++x)
-        {
-            ColorRgba c = bmp->BmpBufPtr1[y * bmp->Stride + x];
-            out.push_back(c.Color == 0 ? 0 : static_cast<jint>(0xFF000000u | (c.rgba.Red << 16) | (c.rgba.Green << 8) | c.rgba.Blue));
-        }
-}
-
-// The picture fonts of the table: ten score digits, then the message font as {height, gap, count, {code, w, h, argb...}}
-extern "C"
-JNIEXPORT jintArray JNICALL
-Java_com_fexed_spacecadetpinball_MainActivity_captureGameFont(JNIEnv *env, jobject thiz) {
-    if (!pb::MainTable || !pb::MainTable->CurScoreStruct || !score::msg_fontp)
-        return nullptr;
-    std::vector<jint> out;
-    for (int i = 0; i < 10; ++i)
-    {
-        auto bmp = pb::MainTable->CurScoreStruct->CharBmp[i];
-        if (!bmp)
-            return nullptr;
-        putGlyph(out, bmp);
-    }
-    out.push_back(score::msg_fontp->Height);
-    out.push_back(score::msg_fontp->GapWidth);
-    size_t countAt = out.size();
-    out.push_back(0);
-    int count = 0;
-    for (int c = 32; c < 128; ++c)
-    {
-        auto bmp = score::msg_fontp->Chars[c];
-        if (!bmp)
-            continue;
-        out.push_back(c);
-        putGlyph(out, bmp);
-        ++count;
-    }
-    out[countAt] = count;
-    jintArray arr = env->NewIntArray(static_cast<jsize>(out.size()));
-    if (!arr)
-        return nullptr;
-    env->SetIntArrayRegion(arr, 0, static_cast<jsize>(out.size()), out.data());
-    return arr;
 }
 
 // The painting of the table's sidebar (above its score boxes) as {width, height, argb...}

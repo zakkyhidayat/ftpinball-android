@@ -459,10 +459,7 @@ public class MainActivity extends SDLActivity {
         public void onGameReady() {
             isGameReady = true;
             // the table's painting is only drawn once the table runs: keep a copy for the menu and the HUD
-            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                saveSidebarArt();
-                saveGameFont();
-            }, 3000);
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(MainActivity.this::saveSidebarArt, 3000);
         }
 
         @Override
@@ -507,7 +504,6 @@ public class MainActivity extends SDLActivity {
         setTiltButtons();
         tintHud();
         applySidebarArt();
-        applyGameFont();
         setCustomFonts();
         setBallsText();
     }
@@ -688,36 +684,6 @@ public class MainActivity extends SDLActivity {
     private native void setSoundVolume(int volume);
 
     private native int[] captureSidebarArt();
-
-    private native int[] captureGameFont();
-
-    private File gameFontFile() {
-        return new File(getFilesDir(), currentTable.id + "/" + ArtFiles.FONT);
-    }
-
-    /** Saves the table's picture fonts once, then draws the HUD text with them. */
-    private void saveGameFont() {
-        File file = gameFontFile();
-        if (!file.exists()) {
-            int[] data = captureGameFont();
-            if (data == null) return;
-            try {
-                GameFont.save(file, data);
-            } catch (IOException ignored) {
-                return;
-            }
-        }
-        runOnUiThread(this::applyGameFont);
-    }
-
-    private void applyGameFont() {
-        GameFont font = GameFont.load(gameFontFile());
-        if (font == null) return;
-        mBinding.txtscore.setGameFont(font, true);
-        mBinding.ballstxt.setGameFont(font, false);
-        mBinding.infotxt.setGameFont(font, false);
-        mBinding.missiontxt.setGameFont(font, false);
-    }
 
     private File sidebarArtFile() {
         return new File(getFilesDir(), currentTable.id + "/" + ArtFiles.SIDEBAR);
