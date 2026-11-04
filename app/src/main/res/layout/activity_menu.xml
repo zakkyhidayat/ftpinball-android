@@ -16,18 +16,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/app_name"
             android:src="@drawable/menu_header" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="24dp"
-            android:text="@string/menu_subtitle"
-            android:textColor="@color/description_grey"
-            android:textSize="14sp" />
 
         <LinearLayout
             android:id="@+id/tablelist"

@@ -72,7 +72,6 @@
     <string name="desc_fullscreenplunger">Tocca ovunque per tirare il lanciatore</string>
     <string name="desc_music">Musica di sottofondo durante il gioco</string>
     <string name="desc_hapticfeedback">Breve vibrazione alla pressione dei tasti</string>
-    <string name="menu_subtitle">Pinball su Android</string>
     <string name="table_fulltilt">Full Tilt! Pinball</string>
     <string name="table_norules">Sperimentale: nessuna regola di punteggio</string>
     <string name="no_tables">Nessun tavolo trovato. Compila l\'app con i tuoi dati di Full Tilt! Pinball (vedi il README).</string>
