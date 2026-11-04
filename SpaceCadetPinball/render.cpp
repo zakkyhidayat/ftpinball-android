@@ -508,8 +508,8 @@ void render::DrawPlungerWindow()
 	SDL_Rect src;
 	src.w = static_cast<int>(win.w / (scaleX * magnification));
 	src.h = static_cast<int>(win.h / (scaleY * magnification));
-	src.x = std::max(0, std::min(static_cast<int>(PlungerAnchorX - src.w * 0.7f), boardWidth - src.w));
-	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY - src.h * 0.15f), vscreen->Height - src.h));
+	src.x = std::max(0, std::min(static_cast<int>(PlungerAnchorX - src.w * 0.5f), boardWidth - src.w));
+	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY + src.h * 0.12f), vscreen->Height - src.h));
 
 	Uint8 oldR, oldG, oldB, oldA;
 	SDL_GetRenderDrawColor(winmain::Renderer, &oldR, &oldG, &oldB, &oldA);

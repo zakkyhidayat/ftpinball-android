@@ -30,35 +30,20 @@
                 android:id="@+id/left"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/pad_height"
+                android:layout_marginEnd="4dp"
                 android:layout_weight="1"
+                android:textSize="20sp"
                 android:background="@drawable/bg_pad"
                 android:text="@string/left"
                 android:textColor="@color/white" />
-
-            <FrameLayout
-                android:layout_width="@dimen/plunger_button_size"
-                android:layout_height="@dimen/pad_height"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp">
-
-                <Button
-                    android:id="@+id/plunger"
-                    android:layout_width="@dimen/plunger_button_size"
-                    android:layout_height="@dimen/plunger_button_size"
-                    android:layout_gravity="center"
-                    android:background="@drawable/bg_plunger_round"
-                    android:padding="8dp"
-                    android:text="@string/hold_to_shoot"
-                    android:textColor="@color/white"
-                    android:textSize="13sp"
-                    android:visibility="invisible" />
-            </FrameLayout>
 
             <Button
                 android:id="@+id/right"
                 android:layout_width="0dp"
                 android:layout_height="@dimen/pad_height"
+                android:layout_marginStart="4dp"
                 android:layout_weight="1"
+                android:textSize="20sp"
                 android:background="@drawable/bg_pad"
                 android:text="@string/right"
                 android:textColor="@color/white" />
@@ -106,6 +91,21 @@
                 android:textSize="12sp" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Hold to shoot: sits just below the floating shooter window, top margin set in code -->
+    <Button
+        android:id="@+id/plunger"
+        android:layout_width="@dimen/plunger_button_size"
+        android:layout_height="@dimen/plunger_button_size"
+        android:background="@drawable/bg_plunger_round"
+        android:padding="8dp"
+        android:text="@string/hold_to_shoot"
+        android:textColor="@color/white"
+        android:textSize="13sp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Paused: hides the table -->
     <FrameLayout

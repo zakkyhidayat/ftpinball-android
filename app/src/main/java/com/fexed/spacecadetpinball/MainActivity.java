@@ -360,7 +360,7 @@ public class MainActivity extends SDLActivity {
             setSoundEnabled(PrefsHelper.getSoundFx());
             if (player != null) player.setVolume(1f, 1f);
             putTranslations();
-            putString(26, PrefsHelper.getUsername("Player 1"));  //TODO abstract ids
+            putString(26, " ");  // no player name on screen //TODO abstract ids
 
             if (state == GameState.RUNNING) {
                 gamesInSession++;
@@ -523,6 +523,13 @@ public class MainActivity extends SDLActivity {
         ViewGroup.LayoutParams bottom = mBinding.bottompanel.getLayoutParams();
         bottom.height = margin;
         mBinding.bottompanel.setLayoutParams(bottom);
+
+        // The floating shooter window is a square centered on the table, 40% of its width: the button goes just below it
+        int windowBottom = height / 2 + (int) (width * 0.40f / 2);
+        androidx.constraintlayout.widget.ConstraintLayout.LayoutParams plunger =
+                (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) mBinding.plunger.getLayoutParams();
+        plunger.topMargin = windowBottom + (int) (10 * density);
+        mBinding.plunger.setLayoutParams(plunger);
     }
 
     private void setBallsText() {

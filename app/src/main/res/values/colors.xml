@@ -26,7 +26,7 @@
     <color name="description_grey">#FF8A8A8A</color>
     <color name="pad_fill">#22BB86FC</color>
     <color name="pad_fill_pressed">#77BB86FC</color>
-    <color name="plunger_btn_fill">#55FFB74D</color>
-    <color name="plunger_btn_fill_pressed">#BBFFB74D</color>
+    <color name="plunger_btn_fill">#EE6B4510</color>
+    <color name="plunger_btn_fill_pressed">#FFB27A1A</color>
     <color name="plunger_btn_stroke">#FFFFB74D</color>
 </resources>

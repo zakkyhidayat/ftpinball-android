@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="icon_button_size">64dp</dimen>
-    <dimen name="pad_height">150dp</dimen>
+    <dimen name="pad_height">170dp</dimen>
     <dimen name="plunger_button_size">120dp</dimen>
     <dimen name="tilt_height">56dp</dimen>
 </resources>
