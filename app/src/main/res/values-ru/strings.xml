@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Full Tilt! Pinball</string>
+    <string name="app_name">Pocket Tilt</string>
     <string name="left">Левый</string>
     <string name="right">Правый</string>
     <string name="plunger">Рычаг запуска</string>
@@ -12,7 +12,6 @@
     <string name="remainingballs">Оставшихся шаров: %d</string>
     <string name="remainingballssettings">Индикатор количества оставшихся шаров</string>
     <string name="tiltbuttons">Кнопки для толкания стола</string>
-    <string name="username">Игрок</string>
     <string name="credits">Оригинальная версия игры была разработана MAXIS по заказу Microsoft.\n© 1995 Maxis.\n\nРеверс-инжиниринг: k4zmu2a\nОригинальный порт на Android: Iscle\nДанный порт на Android: fexed, th3vanger\nПеревод на русский язык: HarGabt</string>
     <string name="restartprompt">Нажмите и удерживайте кнопку, чтобы запустить новую игру.</string>
     <string name="volume">Громкость</string>

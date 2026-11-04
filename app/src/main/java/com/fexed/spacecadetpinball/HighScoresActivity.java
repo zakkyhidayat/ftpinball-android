@@ -97,7 +97,6 @@ public class HighScoresActivity extends AppCompatActivity {
             ScoreBoard.Entry e = entries.get(i);
             View row = inflater.inflate(R.layout.item_score, list, false);
             ((TextView) row.findViewById(R.id.sc_rank)).setText(String.valueOf(i + 1));
-            ((TextView) row.findViewById(R.id.sc_name)).setText(e.name);
             ((TextView) row.findViewById(R.id.sc_date)).setText(dates.format(new Date(e.date)));
             TextView score = row.findViewById(R.id.sc_score);
             score.setText(String.valueOf(e.score));

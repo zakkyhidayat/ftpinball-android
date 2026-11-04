@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Full Tilt! Pinball</string>
+    <string name="app_name">Pocket Tilt</string>
     <string name="left">Sinistra</string>
     <string name="right">Destra</string>
     <string name="plunger">Lanciatore</string>
@@ -12,7 +12,6 @@
     <string name="remainingballs">Palline rimanenti %d</string>
     <string name="remainingballssettings">Indicatore palline rimanenti</string>
     <string name="tiltbuttons">Pulsanti tilt</string>
-    <string name="username">Nome utente</string>
     <string name="credits">3D Pinball Table was created for Microsoft by Maxis.\nCopyright © 1995 Maxis.\n\nReverse engineering: k4zmu2a\nPorting Android originale: Iscle\nPorting Android attuale: fexed, th3vanger</string>
     <string name="restartprompt">Tieni premuto per riavviare la partita</string>
     <string name="soundfx">Effetti sonori</string>
@@ -88,11 +87,9 @@
     <string name="play_again">Gioca ancora</string>
     <string name="back_to_menu">Menu principale</string>
     <string name="close">Chiudi</string>
-    <string name="sec_player">Giocatore</string>
     <string name="sec_controls">Controlli</string>
     <string name="sec_display">Schermo</string>
     <string name="sec_sound">Audio</string>
-    <string name="desc_username">Mostrato nei tuoi punteggi migliori</string>
     <string name="desc_tiltbuttons">Mostra i tre pulsanti di scossa sotto il tavolo</string>
     <string name="desc_soundfx">Paraurti, flipper e altri effetti. Il volume segue quello multimediale di Android</string>
     <string name="tilt_left">Scuoti sx</string>

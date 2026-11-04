@@ -404,7 +404,7 @@ public class MainActivity extends SDLActivity {
                 int rank = 0;
                 if (!cheated && score > 0) {
                     rank = ScoreBoard.add(MainActivity.this, currentTable.id,
-                            PrefsHelper.getUsername("Player 1"), score, System.currentTimeMillis());
+                            score, System.currentTimeMillis());
                 }
                 Intent intent = new Intent(MainActivity.this, HighScoresActivity.class);
                 intent.putExtra(HighScoresActivity.EXTRA_TABLE, currentTable.id);

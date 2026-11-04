@@ -1,10 +1,10 @@
 <!-- markdownlint-disable-file MD033 -->
 
-# Full Tilt! Pinball for Android
+# Pocket Tilt
 [![Android CI](https://github.com/zakkyhidayat/spacecadetpinball-android/actions/workflows/android.yml/badge.svg)](https://github.com/zakkyhidayat/spacecadetpinball-android/actions/workflows/android.yml)
 ## Summary
 
-Android app for the tables of `Full Tilt! Pinball`, running on the open source engine of `3D Pinball for Windows – Space Cadet`.
+Android app that plays the tables of `Full Tilt! Pinball` (from your own copy of the game) on the open source engine of `3D Pinball for Windows – Space Cadet`.
 
 This is a fork of [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on-Android) with build updates and bug fixes. Thanks to [k4zmu2a](https://github.com/k4zmu2a) for the original source code, to [iscle](https://github.com/Iscle) for the original Android porting and to [fexed](https://github.com/fexed) for the Android app.
 

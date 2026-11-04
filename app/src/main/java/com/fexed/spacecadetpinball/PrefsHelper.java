@@ -6,7 +6,6 @@ public class PrefsHelper {
     static private SharedPreferences prefs;
 
     private static final String KEY_USERID = "userid";
-    private static final String KEY_USERNAME = "username";
     private static final String KEY_HIGHSCORE = "highscore";
     private static final String KEY_CHEATHIGHSCORE = "cheathighscore";
     private static final String KEY_CHEATSUSED = "cheatsused";
@@ -43,14 +42,6 @@ public class PrefsHelper {
 
     public static void setSoundFx(boolean value) {
         prefs.edit().putBoolean(KEY_SOUNDFX, value).apply();
-    }
-
-    public static String getUsername(String defaultvalue) {
-        return prefs.getString(KEY_USERNAME, defaultvalue);
-    }
-
-    public static void setUsername(String value) {
-        prefs.edit().putString(KEY_USERNAME, value).apply();
     }
 
     public static boolean getFullScreenPlunger() {

@@ -15,12 +15,10 @@ final class ScoreBoard {
     static final int MAX_ENTRIES = 10;
 
     static final class Entry {
-        final String name;
         final int score;
         final long date;
 
-        Entry(String name, int score, long date) {
-            this.name = name;
+        Entry(int score, long date) {
             this.score = score;
             this.date = date;
         }
@@ -39,7 +37,7 @@ final class ScoreBoard {
             JSONArray array = new JSONArray(prefs(context).getString(tableId, "[]"));
             for (int i = 0; i < array.length(); i++) {
                 JSONObject o = array.getJSONObject(i);
-                entries.add(new Entry(o.getString("name"), o.getInt("score"), o.getLong("date")));
+                entries.add(new Entry(o.getInt("score"), o.getLong("date")));
             }
         } catch (JSONException ignored) {
         }
@@ -47,18 +45,18 @@ final class ScoreBoard {
     }
 
     /** Adds a score and returns its rank (1-based), or 0 if it did not make the top 10. */
-    static int add(Context context, String tableId, String name, int score, long date) {
+    static int add(Context context, String tableId, int score, long date) {
         List<Entry> entries = get(context, tableId);
         int index = 0;
         while (index < entries.size() && entries.get(index).score >= score) index++;
         if (index >= MAX_ENTRIES) return 0;
-        entries.add(index, new Entry(name, score, date));
+        entries.add(index, new Entry(score, date));
         while (entries.size() > MAX_ENTRIES) entries.remove(entries.size() - 1);
 
         JSONArray array = new JSONArray();
         try {
             for (Entry e : entries) {
-                array.put(new JSONObject().put("name", e.name).put("score", e.score).put("date", e.date));
+                array.put(new JSONObject().put("score", e.score).put("date", e.date));
             }
         } catch (JSONException e) {
             return 0;
