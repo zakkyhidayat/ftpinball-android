@@ -13,7 +13,22 @@
     app:strokeColor="@color/flipper_stroke"
     app:strokeWidth="1dp">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/cardart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignTop="@+id/cardcontent"
+        android:layout_alignBottom="@+id/cardcontent"
+        android:alpha="0.3"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop" />
+
     <LinearLayout
+        android:id="@+id/cardcontent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
@@ -51,4 +66,5 @@
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
+    </RelativeLayout>
 </com.google.android.material.card.MaterialCardView>

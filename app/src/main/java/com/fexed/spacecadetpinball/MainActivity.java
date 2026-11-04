@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
@@ -452,6 +453,8 @@ public class MainActivity extends SDLActivity {
         @Override
         public void onGameReady() {
             isGameReady = true;
+            // the table's painting is only drawn once the table runs: keep a copy for the menu and the HUD
+            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(MainActivity.this::saveSidebarArt, 3000);
         }
 
         @Override
@@ -495,6 +498,7 @@ public class MainActivity extends SDLActivity {
         setFullscreen();
         setTiltButtons();
         tintHud();
+        applySidebarArt();
         setCustomFonts();
         setBallsText();
     }
@@ -531,6 +535,9 @@ public class MainActivity extends SDLActivity {
         ViewGroup.LayoutParams top = mBinding.toppanel.getLayoutParams();
         top.height = margin;
         mBinding.toppanel.setLayoutParams(top);
+        ViewGroup.LayoutParams back = mBinding.backdrop.getLayoutParams();
+        back.height = margin;
+        mBinding.backdrop.setLayoutParams(back);
         ViewGroup.LayoutParams bottom = mBinding.bottompanel.getLayoutParams();
         bottom.height = margin;
         mBinding.bottompanel.setLayoutParams(bottom);
@@ -670,6 +677,39 @@ public class MainActivity extends SDLActivity {
     private native void setSoundEnabled(boolean enabled);
 
     private native void setSoundVolume(int volume);
+
+    private native int[] captureSidebarArt();
+
+    private File sidebarArtFile() {
+        return new File(getFilesDir(), currentTable.id + "/" + ArtFiles.SIDEBAR);
+    }
+
+    /** Copies the sidebar painting out of the engine once, so it can also be used by the menu. */
+    private void saveSidebarArt() {
+        File file = sidebarArtFile();
+        if (!file.exists()) {
+            int[] data = captureSidebarArt();
+            if (data == null || data.length < 3) return;
+            Bitmap art = Bitmap.createBitmap(data, 2, data[0], data[0], data[1], Bitmap.Config.ARGB_8888);
+            try (java.io.FileOutputStream out = new java.io.FileOutputStream(file)) {
+                art.compress(Bitmap.CompressFormat.PNG, 100, out);
+            } catch (IOException ignored) {
+                return;
+            }
+        }
+        applySidebarArt();
+    }
+
+    /** Shows the saved painting behind the top panel and on the pause screen. */
+    private void applySidebarArt() {
+        File file = sidebarArtFile();
+        if (!file.exists()) return;
+        Bitmap art = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
+        if (art == null) return;
+        mBinding.backdrop.setImageBitmap(art);
+        mBinding.backdrop.setVisibility(View.VISIBLE);
+        mBinding.pauseart.setImageBitmap(art);
+    }
 
     private native float getPlungerPower();
 

@@ -72,6 +72,11 @@ public class MenuActivity extends AppCompatActivity {
             }
             ((TextView) card.findViewById(R.id.tabledesc)).setText(desc);
 
+            java.io.File sidebar = new java.io.File(getFilesDir(), table.id + "/" + ArtFiles.SIDEBAR);
+            if (sidebar.exists()) {
+                ((ImageView) card.findViewById(R.id.cardart)).setImageBitmap(BitmapFactory.decodeFile(sidebar.getAbsolutePath()));
+            }
+
             ImageView icon = card.findViewById(R.id.tableicon);
             Bitmap art = loadIcon(table);
             if (art != null) icon.setImageBitmap(art);

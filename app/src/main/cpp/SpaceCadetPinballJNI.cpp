@@ -7,6 +7,7 @@
 #include "../../../../SpaceCadetPinball/pb.h"
 #include "../../../../SpaceCadetPinball/TPinballTable.h"
 #include "../../../../SpaceCadetPinball/TPlunger.h"
+#include <vector>
 #include <jni.h>
 #include <android/log.h>
 
@@ -134,6 +135,38 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_fexed_spacecadetpinball_MainActivity_setSoundEnabled(JNIEnv *env, jobject thiz, jboolean enabled) {
     Sound::Enable(enabled);
+}
+
+// The painting of the table's sidebar (above its score boxes) as {width, height, argb...}
+extern "C"
+JNIEXPORT jintArray JNICALL
+Java_com_fexed_spacecadetpinball_MainActivity_captureSidebarArt(JNIEnv *env, jobject thiz) {
+    if (!pb::MainTable || !render::vscreen)
+        return nullptr;
+    // the painting sits inside a frame of the sidebar: leave the frame and the black around it out
+    int sideX = static_cast<int>(pb::MainTable->Width);
+    int sideW = render::vscreen->Width - sideX;
+    int x0 = sideX + sideW * 6 / 100;
+    int x1 = render::vscreen->Width - sideW * 6 / 100;
+    int y0 = render::vscreen->Height * 3 / 100;
+    int y1 = render::vscreen->Height / 2;
+    int w = x1 - x0, h = y1 - y0;
+    if (w <= 0 || h <= 0)
+        return nullptr;
+    jintArray out = env->NewIntArray(2 + w * h);
+    if (!out)
+        return nullptr;
+    std::vector<jint> buf(2 + w * h);
+    buf[0] = w;
+    buf[1] = h;
+    for (int y = 0; y < h; ++y)
+    {
+        const ColorRgba* row = render::vscreen->BmpBufPtr1 + (y + y0) * render::vscreen->Stride + x0;
+        for (int x = 0; x < w; ++x)
+            buf[2 + y * w + x] = static_cast<jint>(0xFF000000u | (row[x].rgba.Red << 16) | (row[x].rgba.Green << 8) | row[x].rgba.Blue);
+    }
+    env->SetIntArrayRegion(out, 0, 2 + w * h, buf.data());
+    return out;
 }
 
 extern "C"
