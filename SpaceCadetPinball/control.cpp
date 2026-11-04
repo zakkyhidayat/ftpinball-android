@@ -921,6 +921,12 @@ namespace
 		if (!strncmp(s.name, "a_bump", 6))
 		{
 			int step = BumperHits++ / 12;
+			if (Rules == &Pirates && BumperHits % 12 == 0 && step < 6)
+			{
+				// Every twelve bumper hits add crew: the bumpers are worth more
+				snprintf(Line, sizeof Line, "Crew Added Bumpers Now %d", Rules->scores[index].values[step + 1]);
+				say(pinball::InfoTextBox, Line, 2.0f, 2);
+			}
 			return s.values[step < s.count ? step : s.count - 1];
 		}
 		int group = 0, done = 0;
