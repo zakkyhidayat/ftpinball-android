@@ -492,24 +492,24 @@ void render::DrawPlungerWindow()
 		PlungerAnchorSet = true;
 	}
 
-	// Square window just left of the lane
+	// Square window centered on the table
 	SDL_Rect win;
 	// Only the board (left part of the virtual screen) is visible, the sidebar sits off screen
 	int boardWidth = pb::MainTable ? std::min(static_cast<int>(pb::MainTable->Width), vscreen->Width) : vscreen->Width;
 	float boardDestW = static_cast<float>(dest.w) * boardWidth / vscreen->Width;
-	win.w = win.h = static_cast<int>(boardDestW * 0.36f);
-	win.x = dest.x + static_cast<int>(boardDestW * 0.78f) - win.w;
-	win.y = dest.y + static_cast<int>(dest.h * 0.80f) - win.h;
+	win.w = win.h = static_cast<int>(boardDestW * 0.42f);
+	win.x = dest.x + static_cast<int>(boardDestW / 2) - win.w / 2;
+	win.y = dest.y + dest.h / 2 - win.h / 2;
 
-	// Source: the lane around the anchor, 3x magnified, showing more of the lane above the ball
-	const float magnification = 2.2f;
+	// Source: the lower right of the table, with the lane, ball and plunger at the right-bottom of the view
+	const float magnification = 1.0f;
 	float scaleX = static_cast<float>(dest.w) / vscreen->Width;
 	float scaleY = static_cast<float>(dest.h) / vscreen->Height;
 	SDL_Rect src;
 	src.w = static_cast<int>(win.w / (scaleX * magnification));
 	src.h = static_cast<int>(win.h / (scaleY * magnification));
-	src.x = std::max(0, std::min(static_cast<int>(PlungerAnchorX - src.w * 0.5f), boardWidth - src.w));
-	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY - src.h * 0.07f), vscreen->Height - src.h));
+	src.x = std::max(0, std::min(static_cast<int>(PlungerAnchorX - src.w * 0.86f), boardWidth - src.w));
+	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY - src.h * 0.4f), vscreen->Height - src.h));
 
 	Uint8 oldR, oldG, oldB, oldA;
 	SDL_GetRenderDrawColor(winmain::Renderer, &oldR, &oldG, &oldB, &oldA);
