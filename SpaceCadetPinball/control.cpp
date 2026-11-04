@@ -655,7 +655,8 @@ namespace
 		const char* questWord;
 		Roles targets, sinks;
 		int questCount;
-		Quest quests[6];
+		Quest quests[8];
+		const char* selectTarget;
 	};
 
 	const char* const DragonStart[] = {"a_sink1", "a_sink2", nullptr};
@@ -678,7 +679,8 @@ namespace
 			{"Dragon Pass: hit the kickouts", Kickouts, 5, {100000, 100000, 100000, 100000, JACKPOT, 0}, 0, 250000},
 			{"Wizard's Fury: put the ball in the well", Well, 4, {MYSTERY, MYSTERY, MYSTERY, MYSTERY, 0, 0}, 0, 0},
 			{"Dragon Hoard: steal the gems", Gems, 8, {50000, 60000, 70000, 100000, 200000, 250000}, 0, 0},
-		}
+		},
+		"a_spot27"
 	};
 
 	const char* const PirateStart[] = {"a_drop*", "a_spot*", nullptr};
@@ -688,22 +690,25 @@ namespace
 	const char* const Hideaways[] = {"a_sink17", "a_sink15", "a_sink14", nullptr};
 	const char* const WindLanes[] = {"a_roll2", "a_roll9", "a_roll8", "a_roll6", nullptr};
 	const char* const TavernParts[] = {"a_drop13", "a_drop14", "a_drop15", "a_sink5", "a_sink6", "a_sink7", nullptr};
-	const char* const IslandTargets[] = {"a_drop10", "a_drop11", "a_drop12", "a_spot8", "a_spot9", "a_spot10", "a_spot11", nullptr};
+	const char* const ParrotVolcano[] = {"a_drop10", "a_drop11", "a_drop12", "a_spot8", "a_spot9", "a_spot10", "a_spot11", nullptr};
 	const char* const Bumpers[] = {"a_bump*", nullptr};
 
 	const Profile Pirates = {
 		PirateScores, sizeof PirateScores / sizeof PirateScores[0],
 		1000000, 20000, 40000, 750000,
 		PirateStart, 10, 200000, "Hit targets to spell SKULDUGGERY",
-		10000, 200000, "Mode", PirateTargets, PirateSinks, 6,
+		10000, 200000, "Mode", PirateTargets, PirateSinks, 7,
 		{
+			// The order of the original: its mode messages are Attack, Treasure Hunt, Tavern, Bermuda, Storm, Mutiny, Swordfight
 			{"Attack Ship: hit the ship targets", ShipTargets, 5, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000},
 			{"Treasure Hunt: find the hideaways", Hideaways, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0},
-			{"Bermuda Triangle: take the wind lanes", WindLanes, 5, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
 			{"Tavern: hit targets and sinks", TavernParts, 6, {25000, 25000, 25000, 25000, 25000, JACKPOT}, 0, 50000},
-			{"Storm: bail the water", IslandTargets, 8, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
+			{"Bermuda Triangle: take the wind lanes", WindLanes, 5, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
+			{"Storm: bail the water", ShipTargets, 8, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
 			{"Mutiny: hit the bumpers", Bumpers, 10, {25000, 25000, 25000, 25000, 25000, 25000}, 10, 0},
-		}
+			{"Swordfight: parrot and volcano targets", ParrotVolcano, 7, {30000, 30000, 30000, 30000, 30000, 30000}, 0, 0},
+		},
+		"a_spot102"
 	};
 
 	const Profile* Rules = &Dragon;
@@ -719,12 +724,13 @@ namespace
 	// Dragon's Keep quest flow of the original code: the next quest is drawn at random from the quests not completed
 	// yet, the quest selection target draws again, a quest that has ended can be restarted for ten seconds, and
 	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
-	bool QuestDone[6];
-	int Armor, Mystery;
+	bool QuestDone[8];
+	int Armor, Mystery, MysteryIdx;
 	unsigned RestartEnd;
 	int RestartQuest;
 	const char* const SpellTargets[] = {"a_spot4", "a_spot5", "a_spot6", "a_spot7", "a_spot22"};
-	const int SpellAwards[] = {1000000, JACKPOT, MAX_WEAPONS, MAX_ARMOR, EXTRA_BALL};
+	// Mystery award per spell target, from the original handlers (state 8): extra ball, max armor, max weapons, jackpot, one million
+	const int SpellAwards[] = {EXTRA_BALL, MAX_ARMOR, MAX_WEAPONS, JACKPOT, 1000000};
 
 	bool match(Roles roles, const char* name)
 	{
@@ -767,7 +773,13 @@ namespace
 			say(pinball::InfoTextBox, "Extra Ball", 3.0f, 2);
 		}
 		else if (value == MYSTERY)
+		{
 			award(Mystery);
+			// After the well pays, the mystery award changes to another one at random
+			int next = rand() % 4;
+			MysteryIdx = next >= MysteryIdx ? next + 1 : next;
+			Mystery = SpellAwards[MysteryIdx];
+		}
 		else if (value == MAX_WEAPONS)
 		{
 			Weapons = 4;
@@ -785,7 +797,7 @@ namespace
 	// The next quest: any of the quests not completed yet (-1 when there are none left)
 	int draw_quest(int avoid)
 	{
-		int open[6], count = 0;
+		int open[8], count = 0;
 		for (int i = 0; i < Rules->questCount; ++i)
 			if (!QuestDone[i] && i != avoid)
 				open[count++] = i;
@@ -812,13 +824,13 @@ namespace
 		Armor = RestartQuest = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
+		MysteryIdx = 4;
 		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = Weapons = SwordHits = SlayHits = SlayNeed = 0;
 		SuperJackpot = 2500000;
 		SlayActive = false;
 		QuestActive = LastBallLost = false;
 		LaunchTicks = 0;
-		if (Rules == &Dragon)
-			QuestIndex = draw_quest(-1);
+		QuestIndex = draw_quest(-1);
 		memset(Hits, 0, sizeof Hits);
 		memset(BankPaid, 0, sizeof BankPaid);
 	}
@@ -967,24 +979,28 @@ namespace
 			dragon_slay(name);
 			// The spell targets set the mystery award of Wizard's Fury
 			for (int i = 0; i < 5; ++i)
-				if (!strcmp(name, SpellTargets[i]) && Mystery != SpellAwards[i])
+				if (!strcmp(name, SpellTargets[i]) && QuestActive && QuestIndex == 3 && MysteryIdx != i)
 				{
 					Mystery = SpellAwards[i];
-					static const char* const names[] = {"One Million", "Jackpot", "Max Weapons", "Max Armor", "Extra Ball"};
+					MysteryIdx = i;
+					static const char* const names[] = {"Extra Ball", "Max Armor", "Max Weapons", "Jackpot", "One Million"};
 					snprintf(Line, sizeof Line, "Mystery Bonus set to: %s", names[i]);
 					say(pinball::InfoTextBox, Line, 3.0f, 2);
 				}
-			// The quest selection target draws another of the quests not completed yet
-			if (!strcmp(name, "a_spot27") && !QuestActive && !SlayActive)
+		}
+
+		// The quest selection target draws another of the quests not completed yet
+		if (!strcmp(name, Rules->selectTarget) && !QuestActive && !SlayActive)
+		{
+			int next = draw_quest(QuestIndex);
+			if (next >= 0)
 			{
-				int next = draw_quest(QuestIndex);
-				if (next >= 0)
-				{
-					QuestIndex = next;
-					static const char* const picks[] = {"Fire Lizards", "Rescue Maiden", "Dragon Pass", "Wizard's Fury", "Dragon Hoard"};
-					snprintf(Line, sizeof Line, "%s Quest Selected", picks[next]);
-					say(pinball::InfoTextBox, Line, 2.0f, 2);
-				}
+				QuestIndex = next;
+				static const char* const dragonPicks[] = {"Fire Lizards", "Rescue Maiden", "Dragon Pass", "Wizard's Fury", "Dragon Hoard"};
+				static const char* const piratePicks[] = {"Attack", "Treasure Hunt", "Tavern", "Bermuda", "Storm", "Mutiny", "Swordfight"};
+				const char* const* picks = Rules == &Dragon ? dragonPicks : piratePicks;
+				snprintf(Line, sizeof Line, Rules == &Dragon ? "%s Quest Selected" : "%s Mode Selected", picks[next]);
+				say(pinball::InfoTextBox, Line, 2.0f, 2);
 			}
 		}
 
@@ -1046,7 +1062,16 @@ namespace
 			}
 		}
 		else
-			QuestIndex = (QuestIndex + 1) % Rules->questCount;
+		{
+			// Modes are drawn at random from those not completed; once all are done they come round again
+			QuestDone[QuestIndex] = true;
+			QuestIndex = draw_quest(-1);
+			if (QuestIndex < 0)
+			{
+				memset(QuestDone, 0, sizeof QuestDone);
+				QuestIndex = draw_quest(-1);
+			}
+		}
 		if (pb::MainTable->ScoreMultiplier < 4)
 			++pb::MainTable->ScoreMultiplier;
 		show_quest();
