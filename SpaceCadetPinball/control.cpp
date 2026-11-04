@@ -6,6 +6,7 @@
 #include "winmain.h"
 #include "lenient_scores.h"
 #include "lenient_lights.h"
+#include "lenient_sounds.h"
 #include "pinball.h"
 #include "TBlocker.h"
 #include "TBumper.h"
@@ -860,6 +861,21 @@ namespace
 		show_quest();
 	}
 
+	// The sounds the original code of this component plays when it is hit
+	void play_sounds(const char* component)
+	{
+		const SoundOp* ops = Rules == &Pirates ? PirateSounds : DragonSounds;
+		size_t count = Rules == &Pirates ? sizeof PirateSounds / sizeof PirateSounds[0] : sizeof DragonSounds / sizeof DragonSounds[0];
+		for (size_t i = 0; i < count; ++i)
+		{
+			if (strcmp(ops[i].component, component))
+				continue;
+			auto sound = dynamic_cast<TSound*>(pb::MainTable->find_component(ops[i].sound));
+			if (sound)
+				sound->Play();
+		}
+	}
+
 	// The lights the original code of this component switches on or makes flash
 	void apply_lights(const char* component)
 	{
@@ -885,6 +901,7 @@ namespace
 			return;
 		pb::MainTable->AddScore(component_score(index));
 		apply_lights(name);
+		play_sounds(name);
 		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && BumperHits % 8 == 0 && Weapons < 4)
 		{
 			// Every eighth forest bumper hit awards the next weapon (25,000 more each time, from the original code)
