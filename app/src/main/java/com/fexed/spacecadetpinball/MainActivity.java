@@ -603,6 +603,11 @@ public class MainActivity extends SDLActivity {
     }
 
     /** Puts a button's icon in the middle of the button: an icon on a button without text sits at the top. */
+    private static int darken(int color, float factor) {
+        return 0xFF000000 | ((int) (((color >> 16) & 0xFF) * factor) << 16) | ((int) (((color >> 8) & 0xFF) * factor) << 8)
+                | (int) ((color & 0xFF) * factor);
+    }
+
     private void centerIcon(android.widget.Button button, android.graphics.drawable.Drawable icon) {
         button.setCompoundDrawablesWithIntrinsicBounds(null, icon, null, null);
         button.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
@@ -623,6 +628,25 @@ public class MainActivity extends SDLActivity {
         mBinding.right.setContentDescription(getString(R.string.right));
         centerIcon(mBinding.left, tintedIcon(R.drawable.ic_flipper_left, accent));
         centerIcon(mBinding.right, tintedIcon(R.drawable.ic_flipper_right, accent));
+
+        // top buttons: pills outlined in the table's color
+        float[] pill = {24, 24, 24, 24, 24, 24, 24, 24};
+        for (android.widget.ImageButton b : new android.widget.ImageButton[]{mBinding.exitbtn, mBinding.replay, mBinding.playpause, mBinding.settingsbtn}) {
+            b.setBackground(controlBackground(pill, 0x44, 0x88, 0xCC));
+        }
+        // shoot button: a disc in the table's color
+        android.graphics.drawable.GradientDrawable disc = new android.graphics.drawable.GradientDrawable();
+        disc.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        disc.setColor(darken(accent, 0.45f));
+        disc.setStroke((int) (2 * getResources().getDisplayMetrics().density), accent);
+        android.graphics.drawable.GradientDrawable discPressed = new android.graphics.drawable.GradientDrawable();
+        discPressed.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        discPressed.setColor(darken(accent, 0.8f));
+        discPressed.setStroke((int) (2 * getResources().getDisplayMetrics().density), accent);
+        android.graphics.drawable.StateListDrawable discStates = new android.graphics.drawable.StateListDrawable();
+        discStates.addState(new int[]{android.R.attr.state_pressed}, discPressed);
+        discStates.addState(new int[0], disc);
+        mBinding.plunger.setBackground(discStates);
 
         int quiet = (0xAA << 24) | (accent & 0x00FFFFFF);
         float[] r = {12, 12, 12, 12, 12, 12, 12, 12};
