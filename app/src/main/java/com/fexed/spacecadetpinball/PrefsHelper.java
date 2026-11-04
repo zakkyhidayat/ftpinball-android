@@ -16,7 +16,6 @@ public class PrefsHelper {
     private static final String KEY_REMAININGBALLS = "remainingballs";
     private static final String KEY_SHOULDSHOWBOTTOMPLUNGER = "shouldshowbottomplunger";
     private static final String KEY_TILTBUTTONS = "tiltbuttons";
-    private static final String KEY_CUSTOMFONTS = "customfonts";
     private static final String KEY_HAPTICFEEDBACK = "hapticfeedback";
     private static final String KEY_SHOWMESSAGES = "showmessages";
 
@@ -84,13 +83,7 @@ public class PrefsHelper {
         prefs.edit().putBoolean(KEY_TILTBUTTONS, value).apply();
     }
 
-    public static boolean getCustomFonts() {
-        return prefs.getBoolean(KEY_CUSTOMFONTS, true);
-    }
 
-    public static void setCustomFonts(boolean value) {
-        prefs.edit().putBoolean(KEY_CUSTOMFONTS, value).apply();
-    }
 
     public static boolean getHapticFeedback() {
         return prefs.getBoolean(KEY_HAPTICFEEDBACK, true);

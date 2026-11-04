@@ -26,8 +26,6 @@ public class Settings extends AppCompatActivity {
         mBinding.tiltbtns.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setTiltButtons(checked));
         mBinding.hapticfeedback.setChecked(PrefsHelper.getHapticFeedback());
         mBinding.hapticfeedback.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setHapticFeedback(checked));
-        mBinding.cstmfnts.setChecked(PrefsHelper.getCustomFonts());
-        mBinding.cstmfnts.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setCustomFonts(checked));
         mBinding.showmessages.setChecked(PrefsHelper.getShowMessages());
         mBinding.showmessages.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setShowMessages(checked));
         mBinding.remainingballs.setChecked(PrefsHelper.getRemainingBalls());

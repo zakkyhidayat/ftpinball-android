@@ -213,7 +213,6 @@ public class MainActivity extends SDLActivity {
             Intent i = new Intent(this, Settings.class);
             startActivity(i);
         });
-
     }
 
     @Override
@@ -663,47 +662,25 @@ public class MainActivity extends SDLActivity {
     }
 
     private void setCustomFonts() {
-        if (PrefsHelper.getCustomFonts()) {
-            mBinding.ballstxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.ballstxt.setTextColor(currentTable.accent);
-            mBinding.txtscore.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.txtscore.setTextColor(currentTable.accent);
-            mBinding.infotxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.infotxt.setTextColor(currentTable.accent);
-            mBinding.missiontxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.missiontxt.setTextColor(currentTable.accent);
-            mBinding.plunger.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.tiltLeft.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.tiltLeft.setTextColor(currentTable.accent);
-            mBinding.tiltBottom.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.tiltBottom.setTextColor(currentTable.accent);
-            mBinding.tiltRight.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.tiltRight.setTextColor(currentTable.accent);
-            mBinding.left.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.left.setTextColor(currentTable.accent);
-            mBinding.right.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.right.setTextColor(currentTable.accent);
-        } else {
-            mBinding.ballstxt.setTypeface(Typeface.DEFAULT);
-            mBinding.ballstxt.setTextColor(Color.WHITE);
-            mBinding.txtscore.setTypeface(Typeface.DEFAULT);
-            mBinding.txtscore.setTextColor(Color.WHITE);
-            mBinding.infotxt.setTypeface(Typeface.DEFAULT);
-            mBinding.infotxt.setTextColor(Color.WHITE);
-            mBinding.missiontxt.setTypeface(Typeface.DEFAULT);
-            mBinding.missiontxt.setTextColor(Color.WHITE);
-            mBinding.plunger.setTypeface(Typeface.DEFAULT);
-            mBinding.tiltLeft.setTypeface(Typeface.DEFAULT);
-            mBinding.tiltLeft.setTextColor(Color.WHITE);
-            mBinding.tiltBottom.setTypeface(Typeface.DEFAULT);
-            mBinding.tiltBottom.setTextColor(Color.WHITE);
-            mBinding.tiltRight.setTypeface(Typeface.DEFAULT);
-            mBinding.tiltRight.setTextColor(Color.WHITE);
-            mBinding.left.setTypeface(Typeface.DEFAULT);
-            mBinding.left.setTextColor(Color.WHITE);
-            mBinding.right.setTypeface(Typeface.DEFAULT);
-            mBinding.right.setTextColor(Color.WHITE);
-        }
+        mBinding.ballstxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.ballstxt.setTextColor(currentTable.accent);
+        mBinding.txtscore.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.txtscore.setTextColor(currentTable.accent);
+        mBinding.infotxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.infotxt.setTextColor(currentTable.accent);
+        mBinding.missiontxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.missiontxt.setTextColor(currentTable.accent);
+        mBinding.plunger.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.tiltLeft.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.tiltLeft.setTextColor(currentTable.accent);
+        mBinding.tiltBottom.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.tiltBottom.setTextColor(currentTable.accent);
+        mBinding.tiltRight.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.tiltRight.setTextColor(currentTable.accent);
+        mBinding.left.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.left.setTextColor(currentTable.accent);
+        mBinding.right.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
+        mBinding.right.setTextColor(currentTable.accent);
     }
 
     @Override
