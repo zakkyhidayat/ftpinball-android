@@ -100,8 +100,6 @@
     <string name="hold_to_shoot">HOLD\nto shoot</string>
     <string name="pause">PAUSE</string>
     <string name="pause_hint">Tap to resume</string>
-    <string name="plungerzoom">Plunger window</string>
-    <string name="desc_plungerzoom">Show a magnified window of the plunger lane while a ball waits</string>
     <string name="vol_effects">Effects volume</string>
     <string name="vol_music">Music volume</string>
 </resources>

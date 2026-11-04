@@ -32,8 +32,6 @@ public class Settings extends AppCompatActivity {
         mBinding.showmessages.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setShowMessages(checked));
         mBinding.remainingballs.setChecked(PrefsHelper.getRemainingBalls());
         mBinding.remainingballs.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setRemainingBalls(checked));
-        mBinding.plungerzoom.setChecked(PrefsHelper.getPlungerZoom());
-        mBinding.plungerzoom.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setPlungerZoom(checked));
         mBinding.soundfx.setChecked(PrefsHelper.getSoundFx());
         mBinding.soundfx.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setSoundFx(checked));
         mBinding.music.setChecked(PrefsHelper.getMusic());

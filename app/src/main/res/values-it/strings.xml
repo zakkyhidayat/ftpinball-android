@@ -101,6 +101,4 @@
     <string name="hold_to_shoot">TIENI\nper lanciare</string>
     <string name="pause">PAUSA</string>
     <string name="pause_hint">Tocca per riprendere</string>
-    <string name="plungerzoom">Finestra lanciapalle</string>
-    <string name="desc_plungerzoom">Mostra una finestra ingrandita del lanciapalle mentre una pallina attende</string>
 </resources>

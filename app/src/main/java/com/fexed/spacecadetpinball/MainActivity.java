@@ -386,7 +386,6 @@ public class MainActivity extends SDLActivity {
 
         @Override
         public void onBallInPlungerChanged(boolean isBallInPlunger) {
-            setPlungerWindow(isBallInPlunger && PrefsHelper.getPlungerZoom());
             runOnUiThread(() -> showPlunger(isBallInPlunger));
         }
 
@@ -683,8 +682,6 @@ public class MainActivity extends SDLActivity {
         setSoundVolume(PrefsHelper.getSoundVolume() * 128 / 100);
         if (player != null) player.setVolume(musicVolume(), musicVolume());
     }
-    private native void setPlungerWindow(boolean enabled);
-
     private native void putString(int id, String str);
 
     private native boolean checkCheatsUsed();

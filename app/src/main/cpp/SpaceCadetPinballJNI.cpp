@@ -132,12 +132,6 @@ Java_com_fexed_spacecadetpinball_MainActivity_initNative(JNIEnv *env, jobject th
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_fexed_spacecadetpinball_MainActivity_setPlungerWindow(JNIEnv *env, jobject thiz, jboolean enabled) {
-    render::PlungerWindow = enabled;
-}
-
-extern "C"
-JNIEXPORT void JNICALL
 Java_com_fexed_spacecadetpinball_MainActivity_setSoundEnabled(JNIEnv *env, jobject thiz, jboolean enabled) {
     Sound::Enable(enabled);
 }

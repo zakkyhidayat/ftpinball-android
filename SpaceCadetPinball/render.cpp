@@ -464,100 +464,6 @@ void render::BlitVScreen()
 	SDL_UnlockTexture(vScreenTex);
 }
 
-bool render::PlungerWindow = false;
-bool render::BallInPlunger = false;
-
-// Fixed, square, magnified view of the shooter lane with ball and plunger (it does not follow the ball), drawn on top of the table
-static bool PlungerAnchorSet = false;
-static float PlungerAnchorX = 0, PlungerAnchorY = 0;
-
-
-static float LaneBallX = 0, LaneBallY = 0;
-static bool LaneBallKnown = false;
-
-// While the ball waits in the lane its own (sloped) position is the anchor; afterwards the last one stays
-static void UpdateLaneBall()
-{
-	if (!render::BallInPlunger || !pb::MainTable || pb::MainTable->BallList.empty())
-		return;
-	int xy[2]{};
-	proj::xform_to_2d(&pb::MainTable->BallList[0]->Position, xy);
-	LaneBallX = static_cast<float>(xy[0]);
-	LaneBallY = static_cast<float>(xy[1]);
-	LaneBallKnown = true;
-}
-
-void render::DrawPlungerWindow()
-{
-	auto& dest = DestinationRect;
-
-	// The lane is fixed: project the plunger position onto the virtual screen once per opening
-	if (!PlungerAnchorSet)
-	{
-		PlungerAnchorX = vscreen->Width * 0.9f;
-		PlungerAnchorY = vscreen->Height * 0.9f;
-		if (pb::MainTable && !pb::MainTable->BallList.empty())
-		{
-			vector3 plunger{};
-			plunger.X = pb::MainTable->PlungerPositionX;
-			plunger.Y = pb::MainTable->PlungerPositionY;
-			plunger.Z = pb::MainTable->BallList[0]->Position.Z;
-			int xy[2]{};
-			proj::xform_to_2d(&plunger, xy);
-			PlungerAnchorX = static_cast<float>(xy[0]);
-			PlungerAnchorY = static_cast<float>(xy[1]);
-		}
-		PlungerAnchorSet = true;
-	}
-	UpdateLaneBall();
-	if (LaneBallKnown)
-	{
-		PlungerAnchorX = LaneBallX;
-		PlungerAnchorY = LaneBallY;
-	}
-
-	// Square (1:1) window centered on the table
-	SDL_Rect win;
-	// Only the board (left part of the virtual screen) is visible, the sidebar sits off screen
-	int boardWidth = pb::MainTable ? std::min(static_cast<int>(pb::MainTable->Width), vscreen->Width) : vscreen->Width;
-	float boardDestW = static_cast<float>(dest.w) * boardWidth / vscreen->Width;
-	win.w = win.h = static_cast<int>(boardDestW * 0.40f);
-	win.x = dest.x + static_cast<int>(boardDestW / 2) - win.w / 2;
-	win.y = dest.y + dest.h / 2 - win.h / 2;
-
-	// Source: the lower right of the table, with the lane, ball and plunger at the right-bottom of the view
-	const float magnification = 2.0f;
-	float scaleX = static_cast<float>(dest.w) / vscreen->Width;
-	float scaleY = static_cast<float>(dest.h) / vscreen->Height;
-	SDL_Rect src;
-	src.w = static_cast<int>(win.w / (scaleX * magnification));
-	src.h = static_cast<int>(win.h / (scaleY * magnification));
-	// Ball centered horizontally; past the right edge of the board there is only the off screen sidebar, so
-	// the source is cut there and the window is filled with black on that side
-	src.x = std::max(0, static_cast<int>(PlungerAnchorX - src.w * 0.5f));
-	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY - src.h * 0.40f), vscreen->Height - src.h));
-
-	Uint8 oldR, oldG, oldB, oldA;
-	SDL_GetRenderDrawColor(winmain::Renderer, &oldR, &oldG, &oldB, &oldA);
-	SDL_SetRenderDrawColor(winmain::Renderer, 0, 0, 0, 255);
-	SDL_RenderFillRect(winmain::Renderer, &win);
-	SDL_Rect copyDst = win;
-	if (src.x + src.w > boardWidth)
-	{
-		int cut = src.x + src.w - boardWidth;
-		copyDst.w = win.w - static_cast<int>(cut * win.w / static_cast<float>(src.w));
-		src.w -= cut;
-	}
-	SDL_RenderCopy(winmain::Renderer, vScreenTex, &src, &copyDst);
-	SDL_SetRenderDrawColor(winmain::Renderer, 255, 183, 77, 255);
-	for (int i = 0; i < 3; i++)
-	{
-		SDL_Rect border{ win.x - i, win.y - i, win.w + 2 * i, win.h + 2 * i };
-		SDL_RenderDrawRect(winmain::Renderer, &border);
-	}
-	SDL_SetRenderDrawColor(winmain::Renderer, oldR, oldG, oldB, oldA);
-}
-
 void render::PresentVScreen()
 {
 	static bool fitted = false;
@@ -567,10 +473,6 @@ void render::PresentVScreen()
 		fullscrn::window_size_changed(); // centers tables narrower than Space Cadet
 	}
 	PresentVScreenTable();
-	if (PlungerWindow)
-		DrawPlungerWindow();
-	else
-		PlungerAnchorSet = false;
 }
 
 void render::PresentVScreenTable()
