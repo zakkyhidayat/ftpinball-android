@@ -3,6 +3,7 @@
 #include "../../../../SpaceCadetPinball/Sound.h"
 #include "../../../../SpaceCadetPinball/pinball.h"
 #include "../../../../SpaceCadetPinball/control.h"
+#include "../../../../SpaceCadetPinball/render.h"
 #include <jni.h>
 #include <android/log.h>
 
@@ -126,6 +127,12 @@ Java_com_fexed_spacecadetpinball_MainActivity_initNative(JNIEnv *env, jobject th
     winmain::FullTiltOverride = full_tilt;
     env->GetJavaVM(&g_JavaVM);
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_fexed_spacecadetpinball_MainActivity_setPlungerWindow(JNIEnv *env, jobject thiz, jboolean enabled) {
+    render::PlungerWindow = enabled;
+}
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_fexed_spacecadetpinball_MainActivity_setSoundEnabled(JNIEnv *env, jobject thiz, jboolean enabled) {

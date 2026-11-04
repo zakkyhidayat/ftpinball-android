@@ -12,6 +12,7 @@ public class PrefsHelper {
     private static final String KEY_CHEATSUSED = "cheatsused";
     private static final String KEY_SOUNDFX = "soundfx";
     private static final String KEY_MUSIC = "music";
+    private static final String KEY_PLUNGERZOOM = "plungerzoom";
     private static final String KEY_FULLSCREENPLUNGER = "fullscreenplunger";
     private static final String KEY_PLUNGERPOPUP = "plungerPopup";
     private static final String KEY_REMAININGBALLS = "remainingballs";
@@ -35,6 +36,14 @@ public class PrefsHelper {
 
     public static void setCheatsUsed(boolean value) {
         prefs.edit().putBoolean(KEY_CHEATSUSED, value).apply();
+    }
+
+    public static boolean getPlungerZoom() {
+        return prefs.getBoolean(KEY_PLUNGERZOOM, true);
+    }
+
+    public static void setPlungerZoom(boolean value) {
+        prefs.edit().putBoolean(KEY_PLUNGERZOOM, value).apply();
     }
 
     public static boolean getSoundFx() {

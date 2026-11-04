@@ -90,6 +90,9 @@ public class MainActivity extends SDLActivity {
         mLayout.addView(mBinding.getRoot(), layoutParams);
 
         mBinding.getRoot().bringToFront();
+        // Only the buttons play: taps on the empty parts of the screen must not reach the table
+        mBinding.getRoot().setClickable(true);
+        mBinding.getRoot().setOnTouchListener((v, event) -> true);
         mBinding.getRoot().addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
             if (r - l != or - ol || b - t != ob - ot) fitPanelsToTable();
         });
@@ -371,6 +374,7 @@ public class MainActivity extends SDLActivity {
 
         @Override
         public void onBallInPlungerChanged(boolean isBallInPlunger) {
+            setPlungerWindow(isBallInPlunger && PrefsHelper.getPlungerZoom());
             runOnUiThread(() -> showPlunger(isBallInPlunger));
         }
 
@@ -453,6 +457,8 @@ public class MainActivity extends SDLActivity {
     protected void onResume() {
         super.onResume();
         StateHelper.INSTANCE.addListener(mStateListener);
+        // the ball may have been placed in the plunger before this screen was listening
+        mStateListener.onBallInPlungerChanged(StateHelper.INSTANCE.isBallInPlunger());
         if (PrefsHelper.getMusic()) {
             if (player == null) {
                 player = new MediaPlayer();
@@ -633,6 +639,7 @@ public class MainActivity extends SDLActivity {
     private native void initNative(String dataPath, String datFile, boolean fullTilt);
 
     private native void setSoundEnabled(boolean enabled);
+    private native void setPlungerWindow(boolean enabled);
 
     private native void putString(int id, String str);
 

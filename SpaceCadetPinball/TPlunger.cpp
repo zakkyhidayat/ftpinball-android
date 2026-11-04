@@ -96,7 +96,11 @@ int TPlunger::Message(int code, float value)
 				timer::kill(PullbackTimer_);
 			PullbackTimer_ = 0;
 			if (code == 1005)
+			{
+				// The plunger was released: the ball is on its way
+				SpaceCadetPinballJNI::setBallInPlunger(false);
 				loader::play_sound(SoundIndexP2);
+			}
 			auto bmp = ListBitmap->at(0);
 			auto zMap = ListZMap->at(0);
 			render::sprite_set(

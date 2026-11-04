@@ -34,6 +34,10 @@ public enum StateHelper {
         }
     }
 
+    public boolean isBallInPlunger() {
+        return mIsBallInPlunger;
+    }
+
     public void setBallInPlunger(boolean b) {
         mIsBallInPlunger = b;
 

@@ -32,6 +32,8 @@ class render
 public:
 	static gdrv_bitmap8 *vscreen, *background_bitmap;
 	static SDL_Rect DestinationRect;
+	// Floating magnified window of the plunger lane while a ball waits to be shot
+	static bool PlungerWindow;
 
 	static void init(gdrv_bitmap8* bmp, float zMin, float zScaler, int width, int height);
 	static void uninit();
@@ -62,6 +64,8 @@ private:
 	static zmap_header_type* zscreen;
 	static SDL_Texture* vScreenTex;
 
+	static void PresentVScreenTable();
+	static void DrawPlungerWindow();
 	static void repaint(struct render_sprite_type_struct* sprite);
 	static void paint_balls();
 	static void unpaint_balls();

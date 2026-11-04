@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "render.h"
+#include "proj.h"
+#include "TBall.h"
 
 #include "fullscrn.h"
 #include "GroupData.h"
@@ -461,7 +463,79 @@ void render::BlitVScreen()
 	SDL_UnlockTexture(vScreenTex);
 }
 
+bool render::PlungerWindow = false;
+
+// Fixed, magnified view of the shooter lane (it does not follow the ball), drawn on top of the table
+static bool PlungerAnchorSet = false;
+static float PlungerAnchorX = 0, PlungerAnchorY = 0;
+
+void render::DrawPlungerWindow()
+{
+	auto& dest = DestinationRect;
+
+	// The lane is fixed: project the plunger position onto the virtual screen once per opening
+	if (!PlungerAnchorSet)
+	{
+		PlungerAnchorX = vscreen->Width * 0.9f;
+		PlungerAnchorY = vscreen->Height * 0.9f;
+		if (pb::MainTable && !pb::MainTable->BallList.empty())
+		{
+			vector3 plunger{};
+			plunger.X = pb::MainTable->PlungerPositionX;
+			plunger.Y = pb::MainTable->PlungerPositionY;
+			plunger.Z = pb::MainTable->BallList[0]->Position.Z;
+			int xy[2]{};
+			proj::xform_to_2d(&plunger, xy);
+			PlungerAnchorX = static_cast<float>(xy[0]);
+			PlungerAnchorY = static_cast<float>(xy[1]);
+		}
+		PlungerAnchorSet = true;
+	}
+
+	// Tall rectangle on the left of the lane
+	SDL_Rect win;
+	// Only the board (left part of the virtual screen) is visible, the sidebar sits off screen
+	int boardWidth = pb::MainTable ? std::min(static_cast<int>(pb::MainTable->Width), vscreen->Width) : vscreen->Width;
+	float boardDestW = static_cast<float>(dest.w) * boardWidth / vscreen->Width;
+	win.w = static_cast<int>(boardDestW * 0.27f);
+	win.h = static_cast<int>(dest.h * 0.46f);
+	win.x = dest.x + static_cast<int>(boardDestW * 0.10f);
+	win.y = dest.y + static_cast<int>(dest.h * 0.30f);
+
+	// Source: the lane around the anchor, 3x magnified, showing more of the lane above the ball
+	const float magnification = 2.2f;
+	float scaleX = static_cast<float>(dest.w) / vscreen->Width;
+	float scaleY = static_cast<float>(dest.h) / vscreen->Height;
+	SDL_Rect src;
+	src.w = static_cast<int>(win.w / (scaleX * magnification));
+	src.h = static_cast<int>(win.h / (scaleY * magnification));
+	src.x = std::max(0, std::min(static_cast<int>(PlungerAnchorX - src.w * 0.5f), boardWidth - src.w));
+	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY - src.h * 0.4f), vscreen->Height - src.h));
+
+	Uint8 oldR, oldG, oldB, oldA;
+	SDL_GetRenderDrawColor(winmain::Renderer, &oldR, &oldG, &oldB, &oldA);
+	SDL_SetRenderDrawColor(winmain::Renderer, 0, 0, 0, 255);
+	SDL_RenderFillRect(winmain::Renderer, &win);
+	SDL_RenderCopy(winmain::Renderer, vScreenTex, &src, &win);
+	SDL_SetRenderDrawColor(winmain::Renderer, 255, 183, 77, 255);
+	for (int i = 0; i < 3; i++)
+	{
+		SDL_Rect border{ win.x - i, win.y - i, win.w + 2 * i, win.h + 2 * i };
+		SDL_RenderDrawRect(winmain::Renderer, &border);
+	}
+	SDL_SetRenderDrawColor(winmain::Renderer, oldR, oldG, oldB, oldA);
+}
+
 void render::PresentVScreen()
+{
+	PresentVScreenTable();
+	if (PlungerWindow)
+		DrawPlungerWindow();
+	else
+		PlungerAnchorSet = false;
+}
+
+void render::PresentVScreenTable()
 {
 	BlitVScreen();
 
