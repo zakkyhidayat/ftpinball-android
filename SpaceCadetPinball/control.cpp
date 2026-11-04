@@ -823,6 +823,17 @@ namespace
 		say(pinball::InfoTextBox, "Coin Award", 3.0f, 2);
 	}
 
+	// Special treasures in the order of the original: gold ingots, silver chalice, signet ring, Frantz ruby, sceptre, crown
+	void special_treasure()
+	{
+		static const int treasure[] = {100000, 250000, 500000, 750000, 1000000, 1500000};
+		static const char* const names[] = {"Gold Ingots", "Silver Chalice", "Signet Ring", "Frantz Ruby", "Sceptre", "Crown of Sandige"};
+		int n = Treasures < 5 ? Treasures : 5;
+		pb::MainTable->AddScore(treasure[n]);
+		++Treasures;
+		say(pinball::InfoTextBox, names[n], 3.0f, 2);
+	}
+
 	void map_piece()
 	{
 		pb::MainTable->AddScore(1000000);
@@ -1012,6 +1023,13 @@ namespace
 				snprintf(Line, sizeof Line, "Dragon Egg %d", Eggs);
 				say(pinball::InfoTextBox, Line, 2.0f, 2);
 			}
+			// The armor kickout (a_kout1) awards the next piece of armor (25,000 / 50,000 / 100,000 in the original handler)
+			if (!strcmp(name, "a_kout1") && !SlayActive && Armor < 3)
+			{
+				static const int armorPoints[] = {25000, 50000, 100000};
+				pb::MainTable->AddScore(armorPoints[Armor++]);
+				say(pinball::InfoTextBox, "Armor", 3.0f, 2);
+			}
 			dragon_slay(name);
 			// The spell targets set the mystery award of Wizard's Fury
 			for (int i = 0; i < 5; ++i)
@@ -1062,10 +1080,7 @@ namespace
 			// Peg Leg's Loot (state 0xb of the original): the hideaways award special treasures, the ship sink finds the loot
 			if (match(Hideaways, name))
 			{
-				static const int treasure[] = {100000, 250000, 500000, 750000, 1000000, 1500000};
-				pb::MainTable->AddScore(treasure[Treasures < 5 ? Treasures : 5]);
-				++Treasures;
-				say(pinball::InfoTextBox, "Special Treasure", 3.0f, 2);
+				special_treasure();
 			}
 			else if (!strcmp(name, "a_sink4"))
 			{
@@ -1131,7 +1146,7 @@ namespace
 				switch (rand() % 4)
 				{
 				case 0: coin_award(); break;
-				case 1: award(1000000 / 2); say(pinball::InfoTextBox, "Special Treasure", 3.0f, 2); ++Treasures; break;
+				case 1: special_treasure(); break;
 				case 2: map_piece(); break;
 				default: award(EXTRA_BALL); break;
 				}
