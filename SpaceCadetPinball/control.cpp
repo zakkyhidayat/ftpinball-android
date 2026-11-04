@@ -726,6 +726,7 @@ namespace
 	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
 	bool QuestDone[8];
 	int Armor, Mystery, MysteryIdx, Treasures;
+	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
 	unsigned RestartEnd;
 	int RestartQuest;
@@ -826,6 +827,7 @@ namespace
 		memset(QuestDone, 0, sizeof QuestDone);
 		Armor = RestartQuest = Treasures = 0;
 		LootActive = false;
+		ModeEnd = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
@@ -993,6 +995,12 @@ namespace
 				}
 		}
 
+		if (Rules == &Pirates && QuestActive && !strcmp(name, Rules->selectTarget))
+		{
+			ModeEnd += 10000;
+			say(pinball::InfoTextBox, "Time Extended", 2.0f, 2);
+		}
+
 		// The quest selection target draws another of the quests not completed yet
 		if (!strcmp(name, Rules->selectTarget) && !QuestActive && !SlayActive)
 		{
@@ -1006,6 +1014,14 @@ namespace
 				snprintf(Line, sizeof Line, Rules == &Dragon ? "%s Quest Selected" : "%s Mode Selected", picks[next]);
 				say(pinball::InfoTextBox, Line, 2.0f, 2);
 			}
+		}
+
+		if (Rules == &Pirates && QuestActive && SDL_GetTicks() > ModeEnd)
+		{
+			QuestActive = false;
+			QuestHits = 0;
+			say(pinball::InfoTextBox, "Mode Over", 3.0f, 2);
+			show_quest();
 		}
 
 		if (LootActive)
@@ -1041,6 +1057,7 @@ namespace
 				StartHits = 0;
 				QuestActive = true;
 				QuestHits = 0;
+				ModeEnd = SDL_GetTicks() + 30000;
 				if (restart)
 				{
 					QuestIndex = RestartQuest;
