@@ -508,14 +508,23 @@ void render::DrawPlungerWindow()
 	SDL_Rect src;
 	src.w = static_cast<int>(win.w / (scaleX * magnification));
 	src.h = static_cast<int>(win.h / (scaleY * magnification));
-	src.x = std::max(0, std::min(static_cast<int>(PlungerAnchorX - src.w * 0.5f), boardWidth - src.w));
+	// Ball centered horizontally; past the right edge of the board there is only the off screen sidebar, so
+	// the source is cut there and the window is filled with black on that side
+	src.x = std::max(0, static_cast<int>(PlungerAnchorX - src.w * 0.5f));
 	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY + src.h * 0.12f), vscreen->Height - src.h));
 
 	Uint8 oldR, oldG, oldB, oldA;
 	SDL_GetRenderDrawColor(winmain::Renderer, &oldR, &oldG, &oldB, &oldA);
 	SDL_SetRenderDrawColor(winmain::Renderer, 0, 0, 0, 255);
 	SDL_RenderFillRect(winmain::Renderer, &win);
-	SDL_RenderCopy(winmain::Renderer, vScreenTex, &src, &win);
+	SDL_Rect copyDst = win;
+	if (src.x + src.w > boardWidth)
+	{
+		int cut = src.x + src.w - boardWidth;
+		copyDst.w = win.w - static_cast<int>(cut * win.w / static_cast<float>(src.w));
+		src.w -= cut;
+	}
+	SDL_RenderCopy(winmain::Renderer, vScreenTex, &src, &copyDst);
 	SDL_SetRenderDrawColor(winmain::Renderer, 255, 183, 77, 255);
 	for (int i = 0; i < 3; i++)
 	{

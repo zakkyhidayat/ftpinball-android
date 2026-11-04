@@ -4,6 +4,9 @@
 #include "../../../../SpaceCadetPinball/pinball.h"
 #include "../../../../SpaceCadetPinball/control.h"
 #include "../../../../SpaceCadetPinball/render.h"
+#include "../../../../SpaceCadetPinball/pb.h"
+#include "../../../../SpaceCadetPinball/TPinballTable.h"
+#include "../../../../SpaceCadetPinball/TPlunger.h"
 #include <jni.h>
 #include <android/log.h>
 
@@ -137,6 +140,15 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_fexed_spacecadetpinball_MainActivity_setSoundEnabled(JNIEnv *env, jobject thiz, jboolean enabled) {
     Sound::Enable(enabled);
+}
+
+extern "C"
+JNIEXPORT jfloat JNICALL
+Java_com_fexed_spacecadetpinball_MainActivity_getPlungerPower(JNIEnv *env, jobject thiz) {
+    if (!pb::MainTable || !pb::MainTable->Plunger || pb::MainTable->Plunger->MaxPullback <= 0)
+        return 0.0f;
+    float power = pb::MainTable->Plunger->Boost / pb::MainTable->Plunger->MaxPullback;
+    return power < 0.0f ? 0.0f : (power > 1.0f ? 1.0f : power);
 }
 
 extern "C"

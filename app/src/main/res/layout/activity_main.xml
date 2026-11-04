@@ -93,7 +93,7 @@
     </LinearLayout>
 
     <!-- Hold to shoot: sits just below the floating shooter window, top margin set in code -->
-    <Button
+    <com.fexed.spacecadetpinball.PlungerButton
         android:id="@+id/plunger"
         android:layout_width="@dimen/plunger_button_size"
         android:layout_height="@dimen/plunger_button_size"
@@ -157,6 +157,56 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/exitbtn"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_button_size"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_icon_pill"
+                android:contentDescription="@string/menutitle"
+                android:src="@drawable/ic_exit" />
+
+            <ImageButton
+                android:id="@+id/replay"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_button_size"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_icon_pill"
+                android:contentDescription="@string/restarttitle"
+                android:src="@drawable/replay" />
+
+            <ImageButton
+                android:id="@+id/playpause"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_button_size"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_icon_pill"
+                android:contentDescription="@string/pause"
+                android:src="@drawable/pause" />
+
+            <ImageButton
+                android:id="@+id/settingsbtn"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_button_size"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_icon_pill"
+                android:contentDescription="@string/settings_title"
+                android:src="@drawable/settings" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:baselineAligned="false"
             android:gravity="bottom"
             android:orientation="horizontal">
@@ -214,55 +264,5 @@
             android:textSize="13sp"
             tools:text="mission text" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/exitbtn"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/icon_button_size"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_icon_pill"
-                android:contentDescription="@string/menutitle"
-                android:src="@drawable/ic_exit" />
-
-            <ImageButton
-                android:id="@+id/replay"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/icon_button_size"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_icon_pill"
-                android:contentDescription="@string/restarttitle"
-                android:src="@drawable/replay" />
-
-            <ImageButton
-                android:id="@+id/playpause"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/icon_button_size"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_icon_pill"
-                android:contentDescription="@string/pause"
-                android:src="@drawable/pause" />
-
-            <ImageButton
-                android:id="@+id/settingsbtn"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/icon_button_size"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="4dp"
-                android:layout_weight="1"
-                android:background="@drawable/bg_icon_pill"
-                android:contentDescription="@string/settings_title"
-                android:src="@drawable/settings" />
-        </LinearLayout>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

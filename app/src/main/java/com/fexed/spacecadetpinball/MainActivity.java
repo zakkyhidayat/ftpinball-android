@@ -43,6 +43,15 @@ public class MainActivity extends SDLActivity {
     private ActivityMainBinding mBinding;
     private boolean leavingToMenu = false;
     private android.animation.ObjectAnimator plungerPulse;
+    private boolean plungerHeld;
+    private final Runnable plungerPowerUpdater = new Runnable() {
+        @Override
+        public void run() {
+            if (!plungerHeld) return;
+            mBinding.plunger.setPower(getPlungerPower());
+            mBinding.plunger.postOnAnimation(this);
+        }
+    };
     // table height / width as rendered by the engine
     private static final float TABLE_ASPECT = 825f / 720f;
     private Table currentTable = Table.CADET;
@@ -142,9 +151,13 @@ public class MainActivity extends SDLActivity {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_SPACE);
                 hapticTick();
+                plungerHeld = true;
+                mBinding.plunger.postOnAnimation(plungerPowerUpdater);
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SPACE);
+                plungerHeld = false;
+                mBinding.plunger.setPower(0f);
             }
             return false;
         });
@@ -526,7 +539,7 @@ public class MainActivity extends SDLActivity {
         int windowBottom = height / 2 + (int) (width * 0.40f / 2);
         androidx.constraintlayout.widget.ConstraintLayout.LayoutParams plunger =
                 (androidx.constraintlayout.widget.ConstraintLayout.LayoutParams) mBinding.plunger.getLayoutParams();
-        plunger.topMargin = windowBottom + (int) (10 * density);
+        plunger.topMargin = windowBottom + (int) (10 * density) + 20;
         mBinding.plunger.setLayoutParams(plunger);
     }
 
@@ -646,6 +659,8 @@ public class MainActivity extends SDLActivity {
     private native void setSoundEnabled(boolean enabled);
 
     private native void setSoundVolume(int volume);
+
+    private native float getPlungerPower();
 
     private float musicVolume() {
         return PrefsHelper.getMusicVolume() / 100f;
