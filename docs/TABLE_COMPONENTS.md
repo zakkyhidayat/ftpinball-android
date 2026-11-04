@@ -121,10 +121,14 @@ Rules that are implemented (`control.cpp`):
 
 * Per component scores, banks and bank bonuses from the game data.
 * Jackpot: starts at 1,000,000; targets add 50,000, sinks 75,000, each completed quest 500,000.
-* Five quests, drawn at random from the ones not completed: Fire Lizard Attack, Rescue Maiden, Dragon Pass, Wizard's Fury,
-  Dragon Hoard. Completing a quest raises the table score multiplier.
-* Slay Dragon: starts on the third sword hit or when all five quests are done. Needs eight minus the weapons won hits in the
-  dragon's mouth, in 30 seconds plus five per armor piece. The super jackpot grows with every component hit.
+* Five timed quests (about 27 to 32 seconds each), drawn at random from the ones not completed. Their order in the original is Dragon Hoard,
+  Fire Lizard Attack, Rescue Maiden, Dragon Pass, Wizard's Fury. Starting a quest pays 100,000. A quest ends when its timer runs out; the original
+  credits it then (jackpot +500,000, quest light lit, next quest drawn) and the table score multiplier rises.
+* Dragon Hoard: each gem has its own value (gold 10,000 bumpers, diamond 50,000 spell targets, pearl 60,000 tower targets, sapphire 70,000 gargoyle targets,
+  ruby 100,000 fire lizard sinks, opal 100,000 accelerator, emerald 200,000 and amethyst 250,000 ramps); all nine give the extra ball.
+* Fire Lizards: each sink hit is worth 100,000 more than the one before (up to 1,000,000) and every fourth hit awards the jackpot.
+* Slay Dragon: starts on the third sword hit or when all five quests are done. Starting it pays 500,000. Needs eight minus the weapons and offensive spells hits in the
+  dragon's mouth, in 30 seconds plus five per armor piece or defensive spell. The super jackpot grows with every component hit.
 * Skill shot: the first spell target the ball hits after the launch gives a spell, dragon egg, weapon or armor (top to bottom: `a_spot22`, `a_spot7`, `a_spot6`, `a_spot5`, `a_spot4`).
 * Spell bank: hitting all five spell targets casts a spell (75,000 each in the ball bonus).
 * Ball drain: shoot again in the first 15 seconds, then the bonus (targets, quests, armor, spells, dragon eggs), extra balls, game over.
@@ -155,7 +159,9 @@ Peg Leg's Loot. The captive ball (`a_spot102`) draws another mode and adds ten s
 Implemented:
 
 * Per component scores and banks from the game data, jackpot, ball bonus, shoot again, lights, sounds.
-* Seven modes drawn at random from those not completed, each timed (about 30 seconds).
+* Seven modes drawn at random from those not completed, each timed (24 to 31 seconds where the original timers were read).
+* Treasure Hunt: only the hideaway with the flashing X counts; the X then moves. Special treasures, jackpot on the fifth.
+* Bermuda Triangle: the indicated wind lane pays 125,000 / 250,000 / 500,000 / 1,000,000 / jackpot, other lanes 50,000 (the indicator speed is approximated).
 * Storm: any drop target bails water; value and jackpot interval follow the storm level (squall, tropical storm, monsoon,
   hurricane). The level is approximated from the wind lane passes, because the eight wind lights are not tracked.
 * Swordfight: parrot and volcano targets, 30,000 each; completing a bank pays a coin award, special treasure, map piece or extra ball.

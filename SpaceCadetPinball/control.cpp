@@ -706,7 +706,7 @@ namespace
 			{"Attack Ship: hit the ship targets", ShipTargets, 5, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000},
 			{"Treasure Hunt: find the hideaways", Hideaways, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0},
 			{"Tavern: hit targets and sinks", TavernParts, 6, {25000, 25000, 25000, 25000, 25000, JACKPOT}, 0, 50000},
-			{"Bermuda Triangle: take the wind lanes", WindLanes, 5, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
+			{"Bermuda Triangle: take the wind lanes", WindLanes, 9999, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
 			// Storm: any drop target bails water (type 1006 events in the original); value and jackpot interval follow the storm level
 			{"Storm: bail the water", DropTargets, 9999, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
 			{"Mutiny: hit the bumpers", Bumpers, 10, {25000, 25000, 25000, 25000, 25000, 25000}, 10, 0},
@@ -736,6 +736,8 @@ namespace
 	// Quest and mode lengths in seconds, from the timers the original code sets for each
 	const float DragonSeconds[] = {27.73f, 31.69f, 30.45f, 30.65f, 30.69f};
 	const float PirateSeconds[] = {30.0f, 30.68f, 27.4f, 31.14f, 24.14f, 30.0f, 30.0f};
+	unsigned ModeStart;
+	int BermudaCount;
 	int HoardMask, TreasureX; // Treasure Hunt: the hideaway where the X is flashing
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
@@ -1248,6 +1250,8 @@ namespace
 				QuestActive = true;
 				QuestHits = 0;
 				HoardMask = 0;
+				BermudaCount = 0;
+				ModeStart = SDL_GetTicks();
 				TreasureX = rand() % 5;
 				ParrotMask = VolcanoMask = 0;
 				if (Rules == &Pirates && QuestIndex == 4)
@@ -1326,6 +1330,27 @@ namespace
 				return;
 			}
 			end_quest();
+			return;
+		}
+		if (Rules == &Pirates && QuestIndex == 3)
+		{
+			// Bermuda Triangle: the indicated wind lane pays 125,000 / 250,000 / 500,000 / 1,000,000 / jackpot, the others 50,000.
+			// The indicator moves on every two seconds (the speed of the original light cycle is approximated).
+			static const char* const lanes[] = {"a_roll2", "a_roll9", "a_roll8", "a_roll6"};
+			if (strcmp(name, lanes[((SDL_GetTicks() - ModeStart) / 2000) % 4]))
+				pb::MainTable->AddScore(50000);
+			else
+			{
+				static const int pay[] = {125000, 250000, 500000, 1000000};
+				if (BermudaCount < 4)
+					pb::MainTable->AddScore(pay[BermudaCount++]);
+				else
+				{
+					BermudaCount = 0;
+					award(JACKPOT);
+				}
+			}
+			++QuestHits;
 			return;
 		}
 		int n = QuestHits++;
