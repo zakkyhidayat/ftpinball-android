@@ -692,6 +692,7 @@ namespace
 	const char* const TavernParts[] = {"a_drop13", "a_drop14", "a_drop15", "a_sink5", "a_sink6", "a_sink7", nullptr};
 	const char* const ParrotVolcano[] = {"a_drop10", "a_drop11", "a_drop12", "a_spot8", "a_spot9", "a_spot10", "a_spot11", nullptr};
 	const char* const Bumpers[] = {"a_bump*", nullptr};
+	const char* const DropTargets[] = {"a_drop*", nullptr};
 
 	const Profile Pirates = {
 		PirateScores, sizeof PirateScores / sizeof PirateScores[0],
@@ -704,7 +705,8 @@ namespace
 			{"Treasure Hunt: find the hideaways", Hideaways, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0},
 			{"Tavern: hit targets and sinks", TavernParts, 6, {25000, 25000, 25000, 25000, 25000, JACKPOT}, 0, 50000},
 			{"Bermuda Triangle: take the wind lanes", WindLanes, 5, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
-			{"Storm: bail the water", ShipTargets, 8, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
+			// Storm: any drop target bails water (type 1006 events in the original); value and jackpot interval follow the storm level
+			{"Storm: bail the water", DropTargets, 9999, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
 			{"Mutiny: hit the bumpers", Bumpers, 10, {25000, 25000, 25000, 25000, 25000, 25000}, 10, 0},
 			{"Swordfight: parrot and volcano targets", ParrotVolcano, 7, {30000, 30000, 30000, 30000, 30000, 30000}, 0, 0},
 		},
@@ -726,6 +728,7 @@ namespace
 	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
 	bool QuestDone[8];
 	int Armor, Mystery, MysteryIdx, Treasures, Eggs;
+	int WindHits, StormEvery, StormValue;
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
 	unsigned RestartEnd;
@@ -828,6 +831,7 @@ namespace
 		Armor = RestartQuest = Treasures = Eggs = 0;
 		LootActive = false;
 		ModeEnd = 0;
+		WindHits = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
@@ -1023,6 +1027,9 @@ namespace
 			}
 		}
 
+		if (Rules == &Pirates && (!strcmp(name, "a_roll2") || !strcmp(name, "a_roll9") || !strcmp(name, "a_roll8") || !strcmp(name, "a_roll6")) && WindHits < 12)
+			++WindHits;
+
 		if (Rules == &Pirates && QuestActive && SDL_GetTicks() > ModeEnd)
 		{
 			QuestActive = false;
@@ -1065,6 +1072,14 @@ namespace
 				QuestActive = true;
 				QuestHits = 0;
 				ModeEnd = SDL_GetTicks() + 30000;
+				if (Rules == &Pirates && QuestIndex == 4)
+				{
+					// The storm level comes from the wind lights: squall, tropical storm, monsoon or hurricane. The lights are
+					// approximated from the wind lane passes.
+					int level = WindHits * 16 / 12;
+					StormValue = level <= 5 ? 10000 : level <= 10 ? 25000 : level <= 15 ? 50000 : 100000;
+					StormEvery = level <= 5 ? 8 : level <= 10 ? 7 : level <= 15 ? 6 : 5;
+				}
 				if (restart)
 				{
 					QuestIndex = RestartQuest;
@@ -1083,8 +1098,17 @@ namespace
 			return;
 		int n = QuestHits++;
 		Jackpot += q.jackpotAdd;
-		award(q.awards[n < 5 ? n : 5]);
-		if (q.jackpotEvery && QuestHits % q.jackpotEvery == 0)
+		if (Rules == &Pirates && QuestIndex == 4)
+		{
+			pb::MainTable->AddScore(StormValue);
+			if (QuestHits % StormEvery == 0)
+				award(JACKPOT);
+		}
+		else
+			award(q.awards[n < 5 ? n : 5]);
+		if (Rules == &Pirates && QuestIndex == 4)
+			;
+		else if (q.jackpotEvery && QuestHits % q.jackpotEvery == 0)
 			award(JACKPOT);
 		if (QuestHits < q.goal)
 		{
