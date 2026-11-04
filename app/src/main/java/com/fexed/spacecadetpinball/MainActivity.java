@@ -626,6 +626,12 @@ public class MainActivity extends SDLActivity {
         mBinding.right.setText("");
         mBinding.left.setContentDescription(getString(R.string.left));
         mBinding.right.setContentDescription(getString(R.string.right));
+        int padHeight = getResources().getDimensionPixelSize(R.dimen.pad_height) * PrefsHelper.getPadSize() / 100;
+        for (android.view.View pad : new android.view.View[]{mBinding.left, mBinding.right}) {
+            ViewGroup.LayoutParams lp = pad.getLayoutParams();
+            lp.height = padHeight;
+            pad.setLayoutParams(lp);
+        }
         centerIcon(mBinding.left, tintedIcon(R.drawable.ic_flipper_left, accent));
         centerIcon(mBinding.right, tintedIcon(R.drawable.ic_flipper_right, accent));
 

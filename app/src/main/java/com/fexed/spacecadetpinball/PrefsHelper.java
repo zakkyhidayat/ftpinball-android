@@ -147,4 +147,13 @@ public class PrefsHelper {
     public static void setMusicVolume(int value) {
         prefs.edit().putInt("musicvolume", value).apply();
     }
+
+    /** Size of the flipper pads in percent of the default height. */
+    public static int getPadSize() {
+        return prefs.getInt("padsize", 100);
+    }
+
+    public static void setPadSize(int value) {
+        prefs.edit().putInt("padsize", value).apply();
+    }
 }

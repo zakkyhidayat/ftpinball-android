@@ -42,6 +42,23 @@ public class Settings extends AppCompatActivity {
         mBinding.musicvol.setProgress(PrefsHelper.getMusicVolume());
         mBinding.musicvol.setOnSeekBarChangeListener(new VolumeListener(false));
 
+        // 70..130 percent of the default pad height
+        mBinding.padsize.setProgress(PrefsHelper.getPadSize() - 70);
+        mBinding.padsize.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+                PrefsHelper.setPadSize(70 + progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar bar) {
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar bar) {
+            }
+        });
+
         mBinding.verstxtv.setText(getString(R.string.current_ver) + " " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
     }
 
