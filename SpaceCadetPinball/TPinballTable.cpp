@@ -114,6 +114,10 @@ TPinballTable::TPinballTable(): TPinballComponent(nullptr, -1, false)
 				if (loader::Lenient)
 					new TReturnExit(this, groupIndex);
 				break;
+			case 1043:
+				if (loader::Lenient)
+					new TOneway(this, groupIndex);
+				break;
 			case 1042:
 				if (loader::Lenient)
 					new TMagnet(this, groupIndex);

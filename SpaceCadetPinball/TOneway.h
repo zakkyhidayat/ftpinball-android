@@ -13,6 +13,9 @@ public:
 	void put_scoring(int index, int score) override;
 	int get_scoring(int index) override;
 
-	TLine* Line;
+	void AddLines(const float* points, unsigned int collisionGroup);
+	bool IsBackLine(TEdgeSegment* edge) const;
+
+	TLine* Line{};
 	int Scores[6]{};
 };
