@@ -79,18 +79,9 @@ public class MainActivity extends SDLActivity {
         initNative(tableDir.getAbsolutePath() + "/", table.datFile, table.fullTilt);
         PrefsHelper.setPrefs(getSharedPreferences("com.fexed.spacecadetpinball", Context.MODE_PRIVATE));
 
-        try {
-            if (PrefsHelper.getMusic()) {
-                player = new MediaPlayer();
-                AssetFileDescriptor afd = getAssets().openFd("PINBALL.mp3");
-                player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                player.prepare();
-                player.setLooping(true);
-                player.setVolume(musicVolume(), musicVolume());
-                player.start();
-            }
-        } catch (IOException ignored) {
-            player = null;
+        if (PrefsHelper.getMusic()) {
+            player = createMusicPlayer(tableDir);
+            if (player != null) player.start();
         }
 
         mBinding = ActivityMainBinding.inflate(getLayoutInflater(), mLayout, false);
@@ -482,20 +473,9 @@ public class MainActivity extends SDLActivity {
         // the ball may have been placed in the plunger before this screen was listening
         mStateListener.onBallInPlungerChanged(StateHelper.INSTANCE.isBallInPlunger());
         if (PrefsHelper.getMusic()) {
-            if (player == null) {
-                player = new MediaPlayer();
-                try {
-                    AssetFileDescriptor afd = getAssets().openFd("PINBALL.mp3");
-                    player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                    player.prepare();
-                    player.setLooping(true);
-                    player.setVolume(musicVolume(), musicVolume());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            if (player == null) player = createMusicPlayer(new File(getFilesDir(), currentTable.id));
+            if (player != null) player.start();
 
-            player.start();
         }
 
         if (!isPlaying) pauseNativeThread();
@@ -777,6 +757,30 @@ public class MainActivity extends SDLActivity {
     private native void setSoundEnabled(boolean enabled);
 
     private native void setSoundVolume(int volume);
+
+    private native boolean convertMds(String mdsPath, String midiPath);
+
+    /** The table's own music (its MIDI file, converted from the .MDS one if needed), else the shared track. */
+    private MediaPlayer createMusicPlayer(File tableDir) {
+        try {
+            File midi = new File(tableDir, currentTable.musicName + ".MID");
+            File mds = new File(tableDir, currentTable.musicName + ".MDS");
+            if (!midi.exists() && mds.exists()) convertMds(mds.getAbsolutePath(), midi.getAbsolutePath());
+            MediaPlayer mp = new MediaPlayer();
+            if (midi.exists() && midi.length() > 0) {
+                mp.setDataSource(midi.getAbsolutePath());
+            } else {
+                AssetFileDescriptor afd = getAssets().openFd("PINBALL.mp3");
+                mp.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+            }
+            mp.prepare();
+            mp.setLooping(true);
+            mp.setVolume(musicVolume(), musicVolume());
+            return mp;
+        } catch (IOException | RuntimeException e) {
+            return null;
+        }
+    }
 
     private native int[] captureSidebarArt();
 

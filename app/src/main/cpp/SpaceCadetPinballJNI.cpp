@@ -5,6 +5,7 @@
 #include "../../../../SpaceCadetPinball/control.h"
 #include "../../../../SpaceCadetPinball/render.h"
 #include "../../../../SpaceCadetPinball/pb.h"
+#include "../../../../SpaceCadetPinball/midi.h"
 #include "../../../../SpaceCadetPinball/TPinballTable.h"
 #include "../../../../SpaceCadetPinball/TPlunger.h"
 #include <vector>
@@ -135,6 +136,17 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_fexed_spacecadetpinball_MainActivity_setSoundEnabled(JNIEnv *env, jobject thiz, jboolean enabled) {
     Sound::Enable(enabled);
+}
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_fexed_spacecadetpinball_MainActivity_convertMds(JNIEnv *env, jobject thiz, jstring mds, jstring midi) {
+    const char *in = env->GetStringUTFChars(mds, nullptr);
+    const char *out = env->GetStringUTFChars(midi, nullptr);
+    bool ok = midi::ConvertMds(in, out);
+    env->ReleaseStringUTFChars(mds, in);
+    env->ReleaseStringUTFChars(midi, out);
+    return ok;
 }
 
 // The painting of the table's sidebar (above its score boxes) as {width, height, argb...}

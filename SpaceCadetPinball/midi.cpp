@@ -172,6 +172,19 @@ bool midi::play_track(Mix_Music* midi)
 /// </summary>
 /// <param name="file">Path to .MDS file</param>
 /// <returns>Vector that contains MIDI file</returns>
+bool midi::ConvertMds(const std::string& mdsPath, const std::string& midiPath)
+{
+	auto midi = MdsToMidi(mdsPath);
+	if (!midi)
+		return false;
+	FILE* out = fopen(midiPath.c_str(), "wb");
+	bool ok = out && fwrite(midi->data(), 1, midi->size(), out) == midi->size();
+	if (out)
+		fclose(out);
+	delete midi;
+	return ok;
+}
+
 std::vector<uint8_t>* midi::MdsToMidi(std::string file)
 {
 	auto fileHandle = fopen(file.c_str(), "rb");

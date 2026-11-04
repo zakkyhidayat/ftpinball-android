@@ -89,6 +89,8 @@ public:
 	static int play_pb_theme();
 	static int music_stop();
 	static int music_init(int volume);
+	// Writes a Full Tilt .MDS music file as a standard MIDI file; false if the file cannot be read
+	static bool ConvertMds(const std::string& mdsPath, const std::string& midiPath);
 	static void music_shutdown();
 	static void SetVolume(int volume);
 private:
