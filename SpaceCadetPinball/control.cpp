@@ -4,6 +4,7 @@
 
 #include "pb.h"
 #include "winmain.h"
+#include "lenient_scores.h"
 #include "pinball.h"
 #include "TBlocker.h"
 #include "TBumper.h"
@@ -623,17 +624,17 @@ TPinballComponent* control::make_component_link(component_tag_base* tag)
 
 namespace
 {
-	// Rules for the Full Tilt tables other than Space Cadet. The point values, jackpot growth, bonuses and the
-	// quest / mode awards come from the table rules in the original game's help file. Which table component
-	// plays which role is not stored in the data files, so components are grouped by kind: a quest asks for
-	// hits on one kind of component (sinks, kickouts, ramps, targets, bumpers or lanes).
-	enum Kind { KBumper, KTarget, KLane, KRamp, KSink, KKickout, KRebound, KSpinner, KindCount, KNone };
+	// Rules for the Full Tilt tables other than Space Cadet. Every component's score values come from the data
+	// tables of the original game executables (lenient_scores.h); jackpots, bonuses and the quests / modes follow
+	// the table rules of the original help file. The handler code of the original is not ported, so the quest
+	// flow is a reconstruction from those rules.
 	enum { JACKPOT = -1, EXTRA_BALL = -2 };
+	typedef const char* const* Roles; // null terminated; a trailing '*' matches a name prefix
 
 	struct Quest
 	{
 		const char* name;
-		Kind kind;
+		Roles roles;       // components that count towards the quest
 		int goal;
 		int awards[6];     // award for the 1st, 2nd... hit (last one repeats): points, JACKPOT or EXTRA_BALL
 		int jackpotEvery;  // also award the jackpot on every nth hit (0 = never)
@@ -642,53 +643,86 @@ namespace
 
 	struct Profile
 	{
-		int points[KindCount];
-		int jackpotStart;
-		int jackpotAdd[KindCount];
-		int questJackpotAdd;
-		int startPoints;
-		Kind startKind;
-		int startHits;
+		const ComponentScore* scores;
+		int scoreCount;
+		int jackpotStart, jackpotTarget, jackpotSink, jackpotQuest;
+		Roles startRoles;
+		int startHits, startPoints;
 		const char* startText;
 		int bonusPerTarget, bonusPerQuest;
 		const char* questWord;
+		Roles targets, sinks;
 		int questCount;
 		Quest quests[6];
 	};
 
-	// Dragon's Keep: quests are started by two hits on the fire lizard sinks
+	const char* const DragonStart[] = {"a_sink1", "a_sink2", nullptr};
+	const char* const DragonTargets[] = {"a_spot*", nullptr};
+	const char* const DragonSinks[] = {"a_sink*", "a_kout*", nullptr};
+	const char* const FireLizards[] = {"a_sink1", "a_sink2", nullptr};
+	const char* const PrisonTower[] = {"s_trip5", "s_trip6", nullptr};
+	const char* const Kickouts[] = {"a_kout*", "a_sink19", nullptr};
+	const char* const Well[] = {"a_sink4", nullptr};
+	const char* const Gems[] = {"a_spot*", "a_bump*", nullptr};
+
 	const Profile Dragon = {
-		{1500, 2500, 500, 25000, 5000, 25000, 1000, 100},
-		1000000, {0, 50000, 0, 0, 75000, 0, 0, 0}, 500000, 0, KSink, 2, "Hit fire lizard sinks to begin quest",
-		2000, 100000, "Quest", 5,
+		DragonScores, sizeof DragonScores / sizeof DragonScores[0],
+		1000000, 50000, 75000, 500000,
+		DragonStart, 2, 0, "Hit fire lizard sinks to begin quest",
+		2000, 100000, "Quest", DragonTargets, DragonSinks, 5,
 		{
-			{"Fire Lizard Attack: hit sinks", KSink, 8, {100000, 200000, 300000, 400000, 500000, 600000}, 4, 0},
-			{"Rescue Maiden: hit kickouts", KKickout, 4, {250000, 500000, JACKPOT, EXTRA_BALL, 0, 0}, 0, 0},
-			{"Dragon Pass: hit ramps", KRamp, 5, {100000, 100000, 100000, 100000, 100000, 100000}, 0, 250000},
-			{"Wizard's Fury: hit targets", KTarget, 5, {1000000, JACKPOT, 1000000, JACKPOT, EXTRA_BALL, 0}, 0, 0},
-			{"Dragon Hoard: steal the gems", KBumper, 8, {10000, 10000, 10000, 10000, 10000, JACKPOT}, 0, 0},
+			{"Fire Lizard Attack: hit the sinks", FireLizards, 8, {100000, 200000, 300000, 400000, 500000, 1000000}, 4, 0},
+			{"Rescue Maiden: prison tower", PrisonTower, 4, {250000, 500000, JACKPOT, EXTRA_BALL, 0, 0}, 0, 0},
+			{"Dragon Pass: hit the kickouts", Kickouts, 5, {100000, 100000, 100000, 100000, JACKPOT, 0}, 0, 250000},
+			{"Wizard's Fury: put the ball in the well", Well, 4, {1000000, JACKPOT, 1000000, EXTRA_BALL, 0, 0}, 0, 0},
+			{"Dragon Hoard: steal the gems", Gems, 8, {50000, 60000, 70000, 100000, 200000, 250000}, 0, 0},
 		}
 	};
 
-	// Skulduggery: modes are started by spelling SKULDUGGERY, one letter per target hit
+	const char* const PirateStart[] = {"a_drop*", "a_spot*", nullptr};
+	const char* const PirateTargets[] = {"a_drop*", "a_spot*", nullptr};
+	const char* const PirateSinks[] = {"a_sink*", nullptr};
+	const char* const ShipTargets[] = {"a_drop5", "a_drop6", "a_drop7", "a_drop8", "a_drop9", nullptr};
+	const char* const Hideaways[] = {"a_sink17", "a_sink15", "a_sink14", nullptr};
+	const char* const WindLanes[] = {"a_roll2", "a_roll9", "a_roll8", "a_roll6", nullptr};
+	const char* const TavernParts[] = {"a_drop13", "a_drop14", "a_drop15", "a_sink5", "a_sink6", "a_sink7", nullptr};
+	const char* const IslandTargets[] = {"a_drop10", "a_drop11", "a_drop12", "a_spot8", "a_spot9", "a_spot10", "a_spot11", nullptr};
+	const char* const Bumpers[] = {"a_bump*", nullptr};
+
 	const Profile Pirates = {
-		{1500, 4000, 500, 100000, 40000, 75000, 350, 100},
-		1000000, {0, 20000, 0, 0, 40000, 0, 0, 0}, 750000, 200000, KTarget, 10, "Hit targets to spell SKULDUGGERY",
-		10000, 200000, "Mode", 5,
+		PirateScores, sizeof PirateScores / sizeof PirateScores[0],
+		1000000, 20000, 40000, 750000,
+		PirateStart, 10, 200000, "Hit targets to spell SKULDUGGERY",
+		10000, 200000, "Mode", PirateTargets, PirateSinks, 6,
 		{
-			{"Attack Ship: hit the ship", KTarget, 5, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000},
-			{"Treasure Hunt: find the hideaway", KSink, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0},
-			{"Bermuda Triangle: take the lanes", KLane, 5, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
-			{"Storm: bail the water", KTarget, 8, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
-			{"Mutiny: hit the bumpers", KBumper, 10, {25000, 25000, 25000, 25000, 25000, 25000}, 10, 0},
+			{"Attack Ship: hit the ship targets", ShipTargets, 5, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000},
+			{"Treasure Hunt: find the hideaways", Hideaways, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0},
+			{"Bermuda Triangle: take the wind lanes", WindLanes, 5, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
+			{"Tavern: hit targets and sinks", TavernParts, 6, {25000, 25000, 25000, 25000, 25000, JACKPOT}, 0, 50000},
+			{"Storm: bail the water", IslandTargets, 8, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
+			{"Mutiny: hit the bumpers", Bumpers, 10, {25000, 25000, 25000, 25000, 25000, 25000}, 10, 0},
 		}
 	};
 
 	const Profile* Rules = &Dragon;
-	int Jackpot, QuestIndex, QuestHits, QuestsDone, StartHits, TargetsHit, BallHits, ExtraLightHits;
-	bool QuestActive, LastBallLost, ShootAgain;
+	int Jackpot, QuestIndex, QuestHits, QuestsDone, StartHits, TargetsHit;
+	bool QuestActive, LastBallLost;
 	unsigned LaunchTicks;
+	int Hits[128];       // hits per score entry this ball
+	bool BankPaid[128];  // bank bonus already awarded this ball
+	int BumperHits;
 	char Line[96];
+
+	bool match(Roles roles, const char* name)
+	{
+		for (; *roles; ++roles)
+		{
+			size_t n = strlen(*roles);
+			if ((*roles)[n - 1] == '*' ? !strncmp(*roles, name, n - 1) : !strcmp(*roles, name))
+				return true;
+		}
+		return false;
+	}
 
 	void say(TTextBox* box, const char* text, float time, int type)
 	{
@@ -723,43 +757,75 @@ namespace
 			pb::MainTable->AddScore(value);
 	}
 
-	Kind classify(int code, TPinballComponent* cmp)
-	{
-		if (code == 57 && dynamic_cast<THole*>(cmp)) return KSink;
-		if (code != 63) return KNone;
-		if (dynamic_cast<TBumper*>(cmp)) return KBumper;
-		if (dynamic_cast<TPopupTarget*>(cmp) || dynamic_cast<TSoloTarget*>(cmp)) return KTarget;
-		if (dynamic_cast<TLightRollover*>(cmp) || dynamic_cast<TRollover*>(cmp)) return KLane;
-		if (dynamic_cast<TRamp*>(cmp)) return KRamp;
-		if (dynamic_cast<TSink*>(cmp)) return KSink;
-		if (dynamic_cast<TKickout*>(cmp)) return KKickout;
-		if (dynamic_cast<TFlagSpinner*>(cmp)) return KSpinner;
-		if (dynamic_cast<TWall*>(cmp) && cmp->GroupName && !strncmp(cmp->GroupName, "a_rebo", 6)) return KRebound;
-		return KNone;
-	}
-
 	void new_game()
 	{
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
-		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BallHits = 0;
-		QuestActive = LastBallLost = ShootAgain = false;
+		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = 0;
+		QuestActive = LastBallLost = false;
 		LaunchTicks = 0;
+		memset(Hits, 0, sizeof Hits);
+		memset(BankPaid, 0, sizeof BankPaid);
 	}
 
-	void hit(Kind kind)
+	// The component's own score: flat, stepping up per hit, or a per hit value plus a bank bonus
+	int component_score(int index)
 	{
-		if (kind == KNone)
+		const ComponentScore& s = Rules->scores[index];
+		int hits = Hits[index]++;
+		if (s.count == 1)
+			return s.values[0];
+		if (!strncmp(s.name, "a_bump", 6))
+		{
+			int step = BumperHits++ / 12;
+			return s.values[step < s.count ? step : s.count - 1];
+		}
+		int group = 0, done = 0;
+		for (int i = 0; i < Rules->scoreCount; ++i)
+		{
+			const ComponentScore& o = Rules->scores[i];
+			if (o.count == s.count && !memcmp(o.values, s.values, sizeof(int) * s.count))
+			{
+				++group;
+				if (Hits[i] > 0)
+					++done;
+			}
+		}
+		if (s.count == 2 && group >= 2)
+		{
+			int value = s.values[0];
+			if (done == group && !BankPaid[index])
+			{
+				for (int i = 0; i < Rules->scoreCount; ++i)
+					if (!memcmp(Rules->scores[i].values, s.values, sizeof(int) * 2) && Rules->scores[i].count == 2)
+						BankPaid[i] = true;
+				value += s.values[1];
+			}
+			return value;
+		}
+		return s.values[hits < s.count ? hits : s.count - 1];
+	}
+
+	void hit(const char* name)
+	{
+		int index = -1;
+		for (int i = 0; i < Rules->scoreCount; ++i)
+			if (!strcmp(Rules->scores[i].name, name))
+				index = i;
+		if (index < 0)
 			return;
-		pb::MainTable->AddScore(Rules->points[kind]);
-		Jackpot += Rules->jackpotAdd[kind];
-		++BallHits;
-		if (kind == KTarget)
+		pb::MainTable->AddScore(component_score(index));
+		if (match(Rules->targets, name))
+		{
+			Jackpot += Rules->jackpotTarget;
 			++TargetsHit;
+		}
+		else if (match(Rules->sinks, name))
+			Jackpot += Rules->jackpotSink;
 
 		if (!QuestActive)
 		{
-			if (kind == Rules->startKind && ++StartHits >= Rules->startHits)
+			if (match(Rules->startRoles, name) && ++StartHits >= Rules->startHits)
 			{
 				StartHits = 0;
 				QuestActive = true;
@@ -773,7 +839,7 @@ namespace
 		}
 
 		const Quest& q = Rules->quests[QuestIndex];
-		if (kind != q.kind)
+		if (!match(q.roles, name))
 			return;
 		int n = QuestHits++;
 		Jackpot += q.jackpotAdd;
@@ -790,7 +856,7 @@ namespace
 		QuestActive = false;
 		QuestHits = 0;
 		++QuestsDone;
-		Jackpot += Rules->questJackpotAdd;
+		Jackpot += Rules->jackpotQuest;
 		snprintf(Line, sizeof Line, "%s complete!", Rules->questWord);
 		say(pinball::InfoTextBox, Line, 4.0f, 2);
 		QuestIndex = (QuestIndex + 1) % Rules->questCount;
@@ -831,7 +897,9 @@ namespace
 				say(pinball::InfoTextBox, Line, 3.0f, 2);
 			}
 		}
-		TargetsHit = BallHits = 0;
+		TargetsHit = 0;
+		memset(Hits, 0, sizeof Hits);
+		memset(BankPaid, 0, sizeof BankPaid);
 		table->ScoreMultiplier = 0;
 		if (table->ExtraBalls)
 		{
@@ -864,12 +932,11 @@ namespace
 			LaunchTicks = SDL_GetTicks();
 			return;
 		}
-		Kind kind = classify(code, cmp);
-		if (kind == KNone)
+		if ((code != 63 && code != 57) || !cmp->GroupName)
 			return;
 		if (pb::MainTable->CurScore == 0 && pb::MainTable->CurScoreE9 == 0)
 			new_game();
-		hit(kind);
+		hit(cmp->GroupName);
 	}
 }
 

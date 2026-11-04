@@ -6,6 +6,7 @@
 #include "loader.h"
 #include "GroupData.h"
 #include "pb.h"
+#include "TPinballTable.h"
 #include "render.h"
 
 
@@ -132,7 +133,9 @@ void score::update(scoreStruct* score)
 		erase(score, 0);
 		if (score->Score >= 0)
 		{
-            SpaceCadetPinballJNI::postScore(score->Score);
+            // The ball counter is a score struct too: only the player's score goes to the score box
+            if (!pb::MainTable || score == pb::MainTable->CurScoreStruct)
+                SpaceCadetPinballJNI::postScore(score->Score);
 			snprintf(scoreBuf, sizeof scoreBuf, "%d", score->Score);
 			for (ptrdiff_t index = strlen(scoreBuf) - 1; index >= 0; index--)
 			{
