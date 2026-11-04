@@ -35,7 +35,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.fexed.spacecadetpinball.databinding.ActivityMainBinding;
-import com.google.firebase.analytics.FirebaseAnalytics;
 
 public class MainActivity extends SDLActivity {
     private static final String TAG = "MainActivity";
@@ -63,7 +62,6 @@ public class MainActivity extends SDLActivity {
     private int ballCount = 0;
     private int remainingBalls = 0;
 
-    private FirebaseAnalytics firebaseAnalytics;
     private int gamesInSession = 0;
 
     static private MediaPlayer player;
@@ -147,6 +145,7 @@ public class MainActivity extends SDLActivity {
                 mBinding.plunger.postOnAnimation(plungerPowerUpdater);
             }
             if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
+                hapticRelease(getPlungerPower());
                 SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SPACE);
                 plungerHeld = false;
                 mBinding.plunger.setPower(0f);
@@ -215,8 +214,6 @@ public class MainActivity extends SDLActivity {
             startActivity(i);
         });
 
-        firebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        firebaseAnalytics.logEvent(FirebaseAnalytics.Event.APP_OPEN, null);
     }
 
     @Override
@@ -293,6 +290,19 @@ public class MainActivity extends SDLActivity {
         SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_F2);
         SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_F2);
         PrefsHelper.setCheatsUsed(false);
+    }
+
+    /** A stronger pulse when the plunger lets go, the longer the pull the stronger. */
+    private void hapticRelease(float power) {
+        if (!PrefsHelper.getHapticFeedback()) return;
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (vibrator == null || !vibrator.hasVibrator()) return;
+        int ms = 20 + (int) (60 * power);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(ms, 100 + (int) (155 * power)));
+        } else {
+            vibrator.vibrate(ms);
+        }
     }
 
     private void hapticTick() {
@@ -376,12 +386,8 @@ public class MainActivity extends SDLActivity {
 
             if (state == GameState.RUNNING) {
                 gamesInSession++;
-                runOnUiThread(() -> firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LEVEL_START, null));
             }
 
-            if (state == GameState.FINISHED) {
-                runOnUiThread(() -> firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LEVEL_END, null));
-            }
         }
 
         @Override
@@ -446,7 +452,6 @@ public class MainActivity extends SDLActivity {
         @Override
         public void onCheatsUsed() {
             PrefsHelper.setCheatsUsed(true);
-            runOnUiThread(() -> firebaseAnalytics.logEvent("cheat_used", null));
         }
 
         @Override
@@ -725,9 +730,6 @@ public class MainActivity extends SDLActivity {
 
     @Override
     protected void onStop() {
-        Bundle bndl = new Bundle();
-        bndl.putInt("games_per_session", gamesInSession);
-        firebaseAnalytics.logEvent("games_per_session", bndl);
         super.onStop();
     }
 
