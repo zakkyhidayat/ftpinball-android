@@ -3,5 +3,5 @@
     <dimen name="icon_button_size">48dp</dimen>
     <dimen name="pad_height">116dp</dimen>
     <dimen name="plunger_button_size">78dp</dimen>
-    <dimen name="tilt_height">44dp</dimen>
+    <dimen name="tilt_height">38dp</dimen>
 </resources>

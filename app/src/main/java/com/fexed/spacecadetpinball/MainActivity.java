@@ -503,6 +503,7 @@ public class MainActivity extends SDLActivity {
         setFullscreen();
         setTiltButtons();
         tintHud();
+        styleControls();
         applySidebarArt();
         setCustomFonts();
         setBallsText();
@@ -568,6 +569,69 @@ public class MainActivity extends SDLActivity {
 
     private void setTiltButtons() {
         mBinding.tiltrow.setVisibility(PrefsHelper.getTiltButtons() ? View.VISIBLE : View.GONE);
+    }
+
+    private android.graphics.drawable.Drawable controlBackground(float[] radii, int fillAlpha, int pressedAlpha, int strokeAlpha) {
+        float density = getResources().getDisplayMetrics().density;
+        int rgb = currentTable.accent & 0x00FFFFFF;
+        android.graphics.drawable.GradientDrawable normal = new android.graphics.drawable.GradientDrawable();
+        normal.setColor((fillAlpha << 24) | rgb);
+        normal.setStroke((int) (1.5f * density), (strokeAlpha << 24) | rgb);
+        android.graphics.drawable.GradientDrawable pressed = new android.graphics.drawable.GradientDrawable();
+        pressed.setColor((pressedAlpha << 24) | rgb);
+        pressed.setStroke((int) (1.5f * density), 0xFF000000 | rgb);
+        float[] px = new float[8];
+        for (int i = 0; i < 8; i++) {
+            px[i] = radii[i] * density;
+        }
+        normal.setCornerRadii(px);
+        pressed.setCornerRadii(px);
+        android.graphics.drawable.StateListDrawable states = new android.graphics.drawable.StateListDrawable();
+        states.addState(new int[]{android.R.attr.state_pressed}, pressed);
+        states.addState(new int[0], normal);
+        return states;
+    }
+
+    private android.graphics.drawable.Drawable tintedIcon(int res, int color) {
+        android.graphics.drawable.Drawable icon = androidx.core.graphics.drawable.DrawableCompat.wrap(
+                androidx.core.content.ContextCompat.getDrawable(this, res).mutate());
+        androidx.core.graphics.drawable.DrawableCompat.setTint(icon, color);
+        return icon;
+    }
+
+    /** Puts a button's icon in the middle of the button: an icon on a button without text sits at the top. */
+    private void centerIcon(android.widget.Button button, android.graphics.drawable.Drawable icon) {
+        button.setCompoundDrawablesWithIntrinsicBounds(null, icon, null, null);
+        button.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            int top = Math.max(0, (b - t - icon.getIntrinsicHeight()) / 2);
+            if (v.getPaddingTop() != top) v.setPadding(0, top, 0, 0);
+        });
+    }
+
+    /** Pads and tilt buttons: the table's color, flipper silhouettes on the pads, quiet arrows for the tilt row. */
+    private void styleControls() {
+        int accent = currentTable.accent | 0xFF000000;
+        // the inner bottom corner of each pad slopes down like a flipper does
+        mBinding.left.setBackground(controlBackground(new float[]{26, 26, 12, 12, 44, 44, 26, 26}, 0x1A, 0x66, 0xCC));
+        mBinding.right.setBackground(controlBackground(new float[]{12, 12, 26, 26, 26, 26, 44, 44}, 0x1A, 0x66, 0xCC));
+        mBinding.left.setText("");
+        mBinding.right.setText("");
+        mBinding.left.setContentDescription(getString(R.string.left));
+        mBinding.right.setContentDescription(getString(R.string.right));
+        centerIcon(mBinding.left, tintedIcon(R.drawable.ic_flipper_left, accent));
+        centerIcon(mBinding.right, tintedIcon(R.drawable.ic_flipper_right, accent));
+
+        int quiet = (0xAA << 24) | (accent & 0x00FFFFFF);
+        float[] r = {12, 12, 12, 12, 12, 12, 12, 12};
+        android.widget.Button[] tilts = {mBinding.tiltLeft, mBinding.tiltBottom, mBinding.tiltRight};
+        int[] icons = {R.drawable.chevron_left, R.drawable.ic_arrow_up, R.drawable.chevron_right};
+        int[] names = {R.string.tilt_left, R.string.tilt_center, R.string.tilt_right};
+        for (int i = 0; i < 3; i++) {
+            tilts[i].setBackground(controlBackground(r, 0x00, 0x44, 0x66));
+            tilts[i].setText("");
+            tilts[i].setContentDescription(getString(names[i]));
+            centerIcon(tilts[i], tintedIcon(icons[i], quiet));
+        }
     }
 
     /** The score and balls bar takes the outline color of the table's own sidebar text. */
