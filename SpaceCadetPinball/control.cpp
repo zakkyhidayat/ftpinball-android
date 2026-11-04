@@ -620,24 +620,96 @@ TPinballComponent* control::make_component_link(component_tag_base* tag)
 	return nullptr;
 }
 
+namespace
+{
+	// Generic rules for Full Tilt tables whose original rules are unknown:
+	// flat points per hit plus a cycle of simple missions
+	enum class Kind { None, Bumper, Target, Rollover, Ramp, Hole };
+
+	struct Mission { Kind kind; int goal; int bonus; const char* text; };
+
+	const Mission Missions[] = {
+		{Kind::Target, 5, 25000, "Hit 5 targets"},
+		{Kind::Bumper, 10, 20000, "Hit 10 bumpers"},
+		{Kind::Ramp, 3, 30000, "Shoot 3 ramps"},
+		{Kind::Rollover, 6, 15000, "Roll over 6 lanes"},
+		{Kind::Hole, 3, 40000, "Sink 3 holes"},
+	};
+	constexpr int MissionCount = sizeof Missions / sizeof Missions[0];
+
+	int MissionIndex = 0, MissionProgress = 0, MissionLap = 0;
+
+	void show_mission()
+	{
+		static char text[96];
+		const Mission& m = Missions[MissionIndex];
+		snprintf(text, sizeof text, "Mission: %s (%d/%d)", m.text, MissionProgress, m.goal);
+		if (pinball::MissTextBox)
+			pinball::MissTextBox->Display(text, -1.0f, 1);
+	}
+
+	void lenient_rules(int code, TPinballComponent* cmp)
+	{
+		if (!pb::MainTable)
+			return;
+		Kind kind = Kind::None;
+		int points = 0;
+		if (code == 63)
+		{
+			if (dynamic_cast<TBumper*>(cmp)) { kind = Kind::Bumper; points = 500; }
+			else if (dynamic_cast<TPopupTarget*>(cmp) || dynamic_cast<TSoloTarget*>(cmp)) { kind = Kind::Target; points = 1000; }
+			else if (dynamic_cast<TLightRollover*>(cmp)) { kind = Kind::Rollover; points = 250; }
+			else if (dynamic_cast<TKickout*>(cmp) || dynamic_cast<TSink*>(cmp)) { kind = Kind::Hole; points = 2500; }
+			else if (dynamic_cast<TRamp*>(cmp)) { kind = Kind::Ramp; points = 2000; }
+			else if (dynamic_cast<TFlagSpinner*>(cmp)) points = 100;
+		}
+		else if (code == 57 && dynamic_cast<THole*>(cmp))
+		{
+			kind = Kind::Hole;
+			points = 2500;
+		}
+		if (!points)
+			return;
+
+		if (pb::MainTable->CurScore == 0 && pb::MainTable->CurScoreE9 == 0)
+			MissionIndex = MissionProgress = MissionLap = 0; // new game
+		pb::MainTable->AddScore(points);
+
+		const Mission& m = Missions[MissionIndex];
+		if (kind != m.kind)
+		{
+			if (MissionProgress == 0)
+				show_mission();
+			return;
+		}
+		if (++MissionProgress < m.goal)
+		{
+			show_mission();
+			return;
+		}
+
+		static char done[96];
+		int bonus = m.bonus * (1 + MissionLap);
+		snprintf(done, sizeof done, "Mission complete! %d", bonus);
+		pb::MainTable->AddScore(bonus);
+		if (pinball::InfoTextBox)
+			pinball::InfoTextBox->Display(done, 4.0f, 2);
+		MissionProgress = 0;
+		if (++MissionIndex == MissionCount)
+		{
+			MissionIndex = 0;
+			++MissionLap;
+		}
+		show_mission();
+	}
+}
+
 void control::handler(int code, TPinballComponent* cmp)
 {
 	// The table rules in this file are Space Cadet's: other Full Tilt tables run without rules
 	if (loader::Lenient)
 	{
-		// Generic scoring for tables whose rules are unknown: a flat score per kind of component hit
-		if (code == 63 && pb::MainTable)
-		{
-			int points = 0;
-			if (dynamic_cast<TBumper*>(cmp)) points = 500;
-			else if (dynamic_cast<TPopupTarget*>(cmp) || dynamic_cast<TSoloTarget*>(cmp)) points = 1000;
-			else if (dynamic_cast<TLightRollover*>(cmp)) points = 250;
-			else if (dynamic_cast<TKickout*>(cmp) || dynamic_cast<TSink*>(cmp)) points = 2500;
-			else if (dynamic_cast<TRamp*>(cmp)) points = 2000;
-			else if (dynamic_cast<TFlagSpinner*>(cmp)) points = 100;
-			if (points)
-				pb::MainTable->AddScore(points);
-		}
+		lenient_rules(code, cmp);
 		return;
 	}
 	component_control* control = cmp->Control;
