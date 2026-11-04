@@ -725,7 +725,7 @@ namespace
 	// yet, the quest selection target draws again, a quest that has ended can be restarted for ten seconds, and
 	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
 	bool QuestDone[8];
-	int Armor, Mystery, MysteryIdx, Treasures;
+	int Armor, Mystery, MysteryIdx, Treasures, Eggs;
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
 	unsigned RestartEnd;
@@ -825,7 +825,7 @@ namespace
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
 		memset(QuestDone, 0, sizeof QuestDone);
-		Armor = RestartQuest = Treasures = 0;
+		Armor = RestartQuest = Treasures = Eggs = 0;
 		LootActive = false;
 		ModeEnd = 0;
 		RestartEnd = 0;
@@ -880,7 +880,7 @@ namespace
 	}
 
 	// The super jackpot grows with every component hit; the sword target starts the slay dragon quest on its third
-	// hit, which needs the ball in the dragon's mouth (a_kout3) as often as eight minus the weapons won, in 30 seconds
+	// hit, which needs the ball in the dragon's mouth (a_sink19, from the original handler; a_kout3 only sets a flag) as often as eight minus the weapons won, in 30 seconds
 	void dragon_slay(const char* name)
 	{
 		if (!strncmp(name, "a_bump", 6)) SuperJackpot += 50000;
@@ -904,7 +904,7 @@ namespace
 			show_quest();
 			return;
 		}
-		if (strcmp(name, "a_kout3"))
+		if (strcmp(name, "a_sink19"))
 			return;
 		static const int fire[] = {100000, 1000000, JACKPOT, EXTRA_BALL, EXTRA_BALL};
 		int n = SlayHits++;
@@ -982,6 +982,13 @@ namespace
 
 		if (Rules == &Dragon)
 		{
+			// The dragon egg kickout (a_kout2) awards an egg, up to the eight egg lights
+			if (!strcmp(name, "a_kout2") && !SlayActive && Eggs < 8)
+			{
+				++Eggs;
+				snprintf(Line, sizeof Line, "Dragon Egg %d", Eggs);
+				say(pinball::InfoTextBox, Line, 2.0f, 2);
+			}
 			dragon_slay(name);
 			// The spell targets set the mystery award of Wizard's Fury
 			for (int i = 0; i < 5; ++i)
@@ -1148,7 +1155,7 @@ namespace
 		LaunchTicks = 0;
 		if (!table->TiltLockFlag)
 		{
-			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 : 0);
+			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Eggs * 150000 : 0);
 			if (bonus > 0)
 			{
 				snprintf(Line, sizeof Line, "Total Bonus %d", bonus);
@@ -1157,6 +1164,7 @@ namespace
 			}
 		}
 		TargetsHit = 0;
+		Eggs = 0;
 		RestartEnd = 0;
 		memset(Hits, 0, sizeof Hits);
 		memset(BankPaid, 0, sizeof BankPaid);
