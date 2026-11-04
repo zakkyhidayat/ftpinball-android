@@ -725,7 +725,8 @@ namespace
 	// yet, the quest selection target draws again, a quest that has ended can be restarted for ten seconds, and
 	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
 	bool QuestDone[8];
-	int Armor, Mystery, MysteryIdx;
+	int Armor, Mystery, MysteryIdx, Treasures;
+	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
 	unsigned RestartEnd;
 	int RestartQuest;
 	const char* const SpellTargets[] = {"a_spot4", "a_spot5", "a_spot6", "a_spot7", "a_spot22"};
@@ -752,7 +753,9 @@ namespace
 	void show_quest()
 	{
 		const Quest& q = Rules->quests[QuestIndex];
-		if (QuestActive)
+		if (LootActive)
+			snprintf(Line, sizeof Line, "Hit X to find Peg Leg's Loot");
+		else if (QuestActive)
 			snprintf(Line, sizeof Line, "%s (%d/%d)", q.name, QuestHits, q.goal);
 		else
 			snprintf(Line, sizeof Line, "%s", Rules->startText);
@@ -821,7 +824,8 @@ namespace
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
 		memset(QuestDone, 0, sizeof QuestDone);
-		Armor = RestartQuest = 0;
+		Armor = RestartQuest = Treasures = 0;
+		LootActive = false;
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
@@ -1004,6 +1008,31 @@ namespace
 			}
 		}
 
+		if (LootActive)
+		{
+			// Peg Leg's Loot (state 0xb of the original): the hideaways award special treasures, the ship sink finds the loot
+			if (match(Hideaways, name))
+			{
+				static const int treasure[] = {100000, 250000, 500000, 750000, 1000000, 1500000};
+				pb::MainTable->AddScore(treasure[Treasures < 5 ? Treasures : 5]);
+				++Treasures;
+				say(pinball::InfoTextBox, "Special Treasure", 3.0f, 2);
+			}
+			else if (!strcmp(name, "a_sink4"))
+			{
+				int loot = QuestsDone * 1000000 + Treasures * 500000;
+				pb::MainTable->AddScore(loot);
+				snprintf(Line, sizeof Line, "Peg Leg's Loot %d", loot);
+				say(pinball::InfoTextBox, Line, 5.0f, 2);
+				LootActive = false;
+				memset(QuestDone, 0, sizeof QuestDone);
+				QuestIndex = draw_quest(-1);
+				pb::MainTable->ScoreMultiplier = 4;
+				show_quest();
+			}
+			return;
+		}
+
 		if (!QuestActive)
 		{
 			bool restart = Rules == &Dragon && RestartEnd && SDL_GetTicks() < RestartEnd && match(Rules->startRoles, name);
@@ -1068,8 +1097,9 @@ namespace
 			QuestIndex = draw_quest(-1);
 			if (QuestIndex < 0)
 			{
-				memset(QuestDone, 0, sizeof QuestDone);
-				QuestIndex = draw_quest(-1);
+				LootActive = true;
+				QuestIndex = 0;
+				say(pinball::MissTextBox, "Hit X to find Peg Leg's Loot", -1.0f, 1);
 			}
 		}
 		if (pb::MainTable->ScoreMultiplier < 4)
