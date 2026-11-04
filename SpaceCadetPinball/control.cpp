@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "loader.h"
 #include "control.h"
 
 #include "pb.h"
@@ -621,6 +622,9 @@ TPinballComponent* control::make_component_link(component_tag_base* tag)
 
 void control::handler(int code, TPinballComponent* cmp)
 {
+	// The table rules in this file are Space Cadet's: other Full Tilt tables run without rules
+	if (loader::Lenient)
+		return;
 	component_control* control = cmp->Control;
 	
 	if (control)
@@ -2499,6 +2503,8 @@ void control::BallDrainControl(int code, TPinballComponent* caller)
 
 void control::table_control_handler(int code)
 {
+	if (loader::Lenient)
+		return;
 	if (code == 1011)
 	{
 		table_unlimited_balls = false;

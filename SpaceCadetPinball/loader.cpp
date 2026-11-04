@@ -42,6 +42,8 @@ errorMsg loader::loader_errors[] =
 int loader::sound_count = 1;
 int loader::loader_sound_count;
 DatFile* loader::loader_table;
+bool loader::Lenient = false;
+float loader::MissingAttr[64]{};
 DatFile* loader::sound_record_table;
 soundListStruct loader::sound_list[65];
 
@@ -235,19 +237,27 @@ int16_t* loader::query_iattribute(int groupIndex, int firstValue, int* arraySize
 	return nullptr;
 }
 
+static float* missing_attribute()
+{
+	if (!loader::Lenient)
+		return nullptr;
+	std::fill(std::begin(loader::MissingAttr), std::end(loader::MissingAttr), 0.0f);
+	return loader::MissingAttr;
+}
+
 float* loader::query_float_attribute(int groupIndex, int groupIndexOffset, int firstValue)
 {
 	if (groupIndex < 0)
 	{
 		error(0, 22);
-		return nullptr;
+		return missing_attribute();
 	}
 
 	int stateId = state_id(groupIndex, groupIndexOffset);
 	if (stateId < 0)
 	{
 		error(16, 22);
-		return nullptr;
+		return missing_attribute();
 	}
 
 	for (auto skipIndex = 0;; ++skipIndex)
@@ -261,7 +271,7 @@ float* loader::query_float_attribute(int groupIndex, int groupIndexOffset, int f
 	}
 
 	error(13, 22);
-	return nullptr;
+	return missing_attribute();
 }
 
 float loader::query_float_attribute(int groupIndex, int groupIndexOffset, int firstValue, float defVal)
@@ -417,6 +427,17 @@ int loader::kicker(int groupIndex, visualKickerStruct* kicker)
 
 
 int loader::query_visual(int groupIndex, int groupIndexOffset, visualStruct* visual)
+{
+	auto result = query_visual_impl(groupIndex, groupIndexOffset, visual);
+	if (Lenient && !visual->FloatArr)
+	{
+		std::fill(std::begin(MissingAttr), std::end(MissingAttr), 0.0f);
+		visual->FloatArr = MissingAttr;
+	}
+	return result;
+}
+
+int loader::query_visual_impl(int groupIndex, int groupIndexOffset, visualStruct* visual)
 {
 	default_vsi(visual);
 	if (groupIndex < 0)

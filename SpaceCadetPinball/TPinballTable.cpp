@@ -188,7 +188,18 @@ TPinballTable::TPinballTable(): TPinballComponent(nullptr, -1, false)
 	render::build_occlude_list();
 	pinball::InfoTextBox = dynamic_cast<TTextBox*>(find_component("info_text_box"));
 	pinball::MissTextBox = dynamic_cast<TTextBox*>(find_component("mission_text_box"));
-	control::make_links(this);
+	if (loader::Lenient)
+	{
+		// Other tables may have a single text box
+		if (!pinball::MissTextBox)
+			pinball::MissTextBox = pinball::InfoTextBox;
+		if (!pinball::InfoTextBox)
+			pinball::InfoTextBox = pinball::MissTextBox;
+	}
+	if (loader::Lenient)
+		control::TableG = this; // no Space Cadet rules to link for other tables
+	else
+		control::make_links(this);
 }
 
 
@@ -228,7 +239,10 @@ TPinballComponent* TPinballTable::find_component(LPCSTR componentName)
 		}
 	}
 
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Table cant find:", componentName, nullptr);
+	if (loader::Lenient)
+		SDL_Log("Table cant find: %s", componentName);
+	else
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Table cant find:", componentName, nullptr);
 	return nullptr;
 }
 
@@ -290,9 +304,9 @@ void TPinballTable::tilt(float time)
 {
 	if (!TiltLockFlag && !BallInSink)
 	{
-		pinball::InfoTextBox->Clear(2);
-		pinball::MissTextBox->Clear(1);
-		pinball::InfoTextBox->Display(pinball::get_rc_string(35, 0), -1.0, 2);
+		if (pinball::InfoTextBox) pinball::InfoTextBox->Clear(2);
+		if (pinball::MissTextBox) pinball::MissTextBox->Clear(1);
+		if (pinball::InfoTextBox) pinball::InfoTextBox->Display(pinball::get_rc_string(35, 0), -1.0, 2);
 		loader::play_sound(SoundIndex3);
 		TiltTimeoutTimer = timer::set(30.0, this, tilt_timeout);
 
@@ -300,7 +314,7 @@ void TPinballTable::tilt(float time)
 		{
 			component->Message(1011, time);
 		}
-		LightGroup->Message(8, 0);
+		if (LightGroup) LightGroup->Message(8, 0);
 		TiltLockFlag = 1;
 		control::table_control_handler(1011);
 	}
@@ -324,30 +338,30 @@ int TPinballTable::Message(int code, float value)
 	case 1000:
 		if (!TiltLockFlag)
 		{
-			FlipperL->Message(1, value);
+			if (FlipperL) FlipperL->Message(1, value);
 		}
 		break;
 	case 1001:
 		if (!TiltLockFlag)
 		{
-			FlipperL->Message(2, value);
+			if (FlipperL) FlipperL->Message(2, value);
 		}
 		break;
 	case 1002:
 		if (!TiltLockFlag)
 		{
-			FlipperR->Message(1, value);
+			if (FlipperR) FlipperR->Message(1, value);
 		}
 		break;
 	case 1003:
 		if (!TiltLockFlag)
 		{
-			FlipperR->Message(2, value);
+			if (FlipperR) FlipperR->Message(2, value);
 		}
 		break;
 	case 1004:
 	case 1005:
-		Plunger->Message(code, value);
+		if (Plunger) Plunger->Message(code, value);
 		break;
 	case 1008:
 	case 1009:
@@ -358,7 +372,7 @@ int TPinballTable::Message(int code, float value)
 		}
 		break;
 	case 1012:
-		LightGroup->Message(14, 0.0);
+		if (LightGroup) LightGroup->Message(14, 0.0);
 		if (TiltLockFlag)
 		{
 			TiltLockFlag = 0;
@@ -368,14 +382,14 @@ int TPinballTable::Message(int code, float value)
 		}
 		break;
 	case 1013:
-		LightGroup->Message(34, 0.0);
-		LightGroup->Message(20, 0.0);
-		Plunger->Message(1016, 0.0);
+		if (LightGroup) LightGroup->Message(34, 0.0);
+		if (LightGroup) LightGroup->Message(20, 0.0);
+		if (Plunger) Plunger->Message(1016, 0.0);
 		if (Demo && Demo->ActiveFlag)
 			rc_text = pinball::get_rc_string(30, 0);
 		else
 			rc_text = pinball::get_rc_string(26, 0);
-		pinball::InfoTextBox->Display(rc_text, -1.0, 2);
+		if (pinball::InfoTextBox) pinball::InfoTextBox->Display(rc_text, -1.0, 2);
 		if (Demo)
 			Demo->Message(1014, 0.0);
 		break;
@@ -446,9 +460,9 @@ int TPinballTable::Message(int code, float value)
 			ScoreSpecial3Flag = 0;
 			ScoreSpecial2Flag = 0;
 			UnknownP71 = 0;
-			pinball::InfoTextBox->Clear(2);
-			pinball::MissTextBox->Clear(1);
-			LightGroup->Message(28, 0.2f);
+			if (pinball::InfoTextBox) pinball::InfoTextBox->Clear(2);
+			if (pinball::MissTextBox) pinball::MissTextBox->Clear(1);
+			if (LightGroup) LightGroup->Message(28, 0.2f);
 			auto time = loader::play_sound(SoundIndex1);
 			if (time < 0) time = 5.0f;
 			LightShowTimer = timer::set(time, this, LightShow_timeout);
@@ -466,7 +480,7 @@ int TPinballTable::Message(int code, float value)
 			{
 				char* textboxText;
                 textboxText = pinball::get_rc_string(26, 0);
-				pinball::InfoTextBox->Display(textboxText, -1.0, 2);
+				if (pinball::InfoTextBox) pinball::InfoTextBox->Display(textboxText, -1.0, 2);
 				break;
 			}
 
@@ -534,7 +548,7 @@ int TPinballTable::Message(int code, float value)
 			}
 
 			if (textboxText != nullptr)
-				pinball::InfoTextBox->Display(textboxText, -1, 2);
+				if (pinball::InfoTextBox) pinball::InfoTextBox->Display(textboxText, -1, 2);
 			ScoreSpecial3Flag = 0;
 			ScoreSpecial2Flag = 0;
 			UnknownP71 = 0;
@@ -543,8 +557,8 @@ int TPinballTable::Message(int code, float value)
 		break;
 	case 1022:
 		loader::play_sound(SoundIndex2);
-		pinball::MissTextBox->Clear(1);
-		pinball::InfoTextBox->Display(pinball::get_rc_string(34, 0), -1.0, 2);
+		if (pinball::MissTextBox) pinball::MissTextBox->Clear(1);
+		if (pinball::InfoTextBox) pinball::InfoTextBox->Display(pinball::get_rc_string(34, 0), -1.0, 2);
 		EndGameTimeoutTimer = timer::set(3.0, this, EndGame_timeout);
 		break;
 	case 1024:
@@ -558,7 +572,7 @@ int TPinballTable::Message(int code, float value)
 		if (LightShowTimer)
 		{
 			timer::kill(LightShowTimer);
-			LightGroup->Message(34, 0.0);
+			if (LightGroup) LightGroup->Message(34, 0.0);
 		}
 		LightShowTimer = 0;
 		ScoreMultiplier = 0;
@@ -599,7 +613,7 @@ void TPinballTable::EndGame_timeout(int timerId, void* caller)
 	if (table->Demo)
 		table->Demo->Message(1022, 0.0);
 	control::handler(67, pinball::MissTextBox);
-	pinball::InfoTextBox->Display(pinball::get_rc_string(24, 0), -1.0, 2);
+	if (pinball::InfoTextBox) pinball::InfoTextBox->Display(pinball::get_rc_string(24, 0), -1.0, 2);
 }
 
 void TPinballTable::LightShow_timeout(int timerId, void* caller)

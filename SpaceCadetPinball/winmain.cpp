@@ -7,6 +7,7 @@
 #include "pinball.h"
 #include "options.h"
 #include "pb.h"
+#include "loader.h"
 #include "render.h"
 #include "Sound.h"
 
@@ -80,6 +81,8 @@ int winmain::WinMain(LPCSTR lpCmdLine)
 			pb::FullTiltMode = true;
 		}
 	}
+
+	loader::Lenient = pb::FullTiltMode && DatFileName != "CADET.DAT";
 
 	// SDL window
 	SDL_Window* window = SDL_CreateWindow

@@ -8,8 +8,8 @@ import java.io.IOException;
 public enum Table {
     CLASSIC("classic", "Space Cadet (3D Pinball)", "PINBALL.DAT", false, true),
     CADET("cadet", "Space Cadet", "CADET.DAT", true, true),
-    DRAGON("dragon", "Dragon's Keep", "DRAGON.DAT", true, false),
-    PIRATES("pirates", "Skulduggery", "PIRATES.DAT", true, false);
+    DRAGON("dragon", "Dragon's Keep", "DRAGON.DAT", true, true),
+    PIRATES("pirates", "Skulduggery", "PIRATES.DAT", true, true);
 
     public final String id;
     public final String title;

@@ -25,6 +25,19 @@ TRamp::TRamp(TPinballTable* table, int groupIndex) : TCollisionComponent(table, 
 	RampFlag1 = static_cast<int>(loader::query_float_attribute(groupIndex, 0, 1305, 0));
 
 	auto floatArr3Plane = loader::query_float_attribute(groupIndex, 0, 1300);
+	auto missing = [](float* attr) { return !attr || attr == loader::MissingAttr; };
+	if (missing(floatArr3Plane) || missing(loader::query_float_attribute(groupIndex, 0, 1303)) ||
+		missing(loader::query_float_attribute(groupIndex, 0, 1301)) ||
+		missing(loader::query_float_attribute(groupIndex, 0, 1302)))
+	{
+		// Not a Space Cadet style ramp (other Full Tilt tables): keep the component inert
+		RampPlaneCount = 0;
+		RampPlane = nullptr;
+		Line1 = Line2 = Line3 = nullptr;
+		Wall1PointFirst = Wall2PointFirst = 0;
+		Wall1PointLast = Wall2PointLast = 0;
+		return;
+	}
 	RampPlaneCount = static_cast<int>(floor(*floatArr3Plane));
 	RampPlane = reinterpret_cast<ramp_plane_type*>(floatArr3Plane + 1);
 

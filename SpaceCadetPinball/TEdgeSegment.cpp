@@ -24,6 +24,10 @@ TEdgeSegment* TEdgeSegment::install_wall(float* floatArr, TCollisionComponent* c
 	vector3 vec1{}, vec2{}, dstVec{};
 	TEdgeSegment* edge = nullptr;
 
+	// Other Full Tilt tables may lack the wall attribute
+	if (!floatArr)
+		return nullptr;
+
 	wall_type wallType = static_cast<wall_type>(static_cast<int>(floor(*floatArr) - 1.0f));
 	switch (wallType)
 	{

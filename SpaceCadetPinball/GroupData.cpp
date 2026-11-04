@@ -143,7 +143,7 @@ void GroupData::SplitSplicedBitmap(const gdrv_bitmap8& srcBmp, gdrv_bitmap8& bmp
 
 void GroupData::SetBitmap(gdrv_bitmap8* bmp)
 {
-	assertm(Bitmaps[bmp->Resolution] == nullptr, "GroupData: bitmap override");
+	// Some Full Tilt tables define a group's bitmap more than once: the last one wins
 	Bitmaps[bmp->Resolution] = bmp;
 
 	auto zMap = ZMaps[bmp->Resolution];
@@ -159,7 +159,6 @@ void GroupData::SetZMap(zmap_header_type* zMap)
 	// Flip zMap to match with flipped non-indexed bitmaps
 	zdrv::FlipZMapHorizontally(*zMap);
 
-	assertm(ZMaps[zMap->Resolution] == nullptr, "GroupData: zMap override");
 	ZMaps[zMap->Resolution] = zMap;
 
 	auto bmp = Bitmaps[zMap->Resolution];

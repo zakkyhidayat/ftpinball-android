@@ -95,11 +95,16 @@ public:
 	static int kicker(int groupIndex, visualKickerStruct* kicker);
 	static int state_id(int groupIndex, int groupIndexOffset);
 	static int query_visual(int groupIndex, int groupIndexOffset, visualStruct* visual);
+	static int query_visual_impl(int groupIndex, int groupIndexOffset, visualStruct* visual);
 	static char* query_name(int groupIndex);
 	static float* query_float_attribute(int groupIndex, int groupIndexOffset, int firstValue);
 	static float query_float_attribute(int groupIndex, int groupIndexOffset, int firstValue, float defVal);
 	static int16_t* query_iattribute(int groupIndex, int firstValue, int* arraySize);
 	static float play_sound(int soundIndex);
+	// Tables other than Space Cadet may lack attributes the Space Cadet code expects:
+	// when Lenient, a missing attribute reads as zeros instead of null
+	static bool Lenient;
+	static float MissingAttr[64];
 	static DatFile* loader_table;
 private:
 	static errorMsg loader_errors[];
