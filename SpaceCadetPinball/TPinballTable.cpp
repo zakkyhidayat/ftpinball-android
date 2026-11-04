@@ -18,6 +18,7 @@
 #include "timer.h"
 #include "TKickback.h"
 #include "TKickout.h"
+#include "TAccelerator.h"
 #include "TLight.h"
 #include "TLightBargraph.h"
 #include "TLightGroup.h"
@@ -106,6 +107,11 @@ TPinballTable::TPinballTable(): TPinballComponent(nullptr, -1, false)
 				// Skulduggery's launcher
 				if (loader::Lenient && !Plunger)
 					Plunger = new TPlunger(this, groupIndex);
+				break;
+			case 1036:
+				// Lane accelerator of Dragon's Keep and Skulduggery
+				if (loader::Lenient)
+					new TAccelerator(this, groupIndex);
 				break;
 			case 1002:
 				LightGroup->List.push_back(new TLight(this, groupIndex));

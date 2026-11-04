@@ -77,6 +77,8 @@ set(SOURCE_FILES
         ../../../../SpaceCadetPinball/timer.h
         ../../../../SpaceCadetPinball/TKickback.cpp
         ../../../../SpaceCadetPinball/TKickback.h
+        ../../../../SpaceCadetPinball/TAccelerator.cpp
+        ../../../../SpaceCadetPinball/TAccelerator.h
         ../../../../SpaceCadetPinball/TKickout.cpp
         ../../../../SpaceCadetPinball/TKickout.h
         ../../../../SpaceCadetPinball/TLight.cpp
