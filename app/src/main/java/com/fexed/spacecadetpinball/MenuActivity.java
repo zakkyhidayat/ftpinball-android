@@ -15,7 +15,7 @@ import android.widget.TextView;
 import java.text.DateFormat;
 import java.util.Date;
 
-import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
@@ -40,7 +40,7 @@ public class MenuActivity extends AppCompatActivity {
                     getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_LAST_TABLE, null));
             startActivity(intent);
         });
-        findViewById(R.id.menuabout).setOnClickListener(v -> new AlertDialog.Builder(this)
+        findViewById(R.id.menuabout).setOnClickListener(v -> new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.about)
                 .setMessage(R.string.menu_credits)
                 .setPositiveButton(android.R.string.ok, null)
@@ -77,7 +77,15 @@ public class MenuActivity extends AppCompatActivity {
                 ((ImageView) card.findViewById(R.id.cardart)).setImageBitmap(BitmapFactory.decodeFile(sidebar.getAbsolutePath()));
             }
 
+            ((TextView) card.findViewById(R.id.tabletitle)).setTextColor(table.accent);
             ImageView icon = card.findViewById(R.id.tableicon);
+            icon.setClipToOutline(true);
+            icon.setOutlineProvider(new android.view.ViewOutlineProvider() {
+                @Override
+                public void getOutline(View view, android.graphics.Outline outline) {
+                    outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), 16 * getResources().getDisplayMetrics().density);
+                }
+            });
             Bitmap art = loadIcon(table);
             if (art != null) icon.setImageBitmap(art);
             else icon.setImageResource(R.drawable.star);

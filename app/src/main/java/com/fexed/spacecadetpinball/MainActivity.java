@@ -171,7 +171,7 @@ public class MainActivity extends SDLActivity {
         mBinding.replay.setOnClickListener(view -> {
             final boolean wasPlaying = isPlaying;
             if (wasPlaying) pauseNativeThread();
-            new android.app.AlertDialog.Builder(this)
+            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.restarttitle)
                     .setMessage(R.string.restartmessage)
                     .setPositiveButton(R.string.yes, (dialog, which) -> restartGame())
@@ -254,6 +254,9 @@ public class MainActivity extends SDLActivity {
             if (player != null && PrefsHelper.getMusic()) player.start();
         }
         mBinding.pauseoverlay.setVisibility(paused ? View.VISIBLE : View.GONE);
+        // the shoot button has its own elevation and would show on top of the pause screen
+        if (paused) showPlunger(false);
+        else showPlunger(StateHelper.INSTANCE.isBallInPlunger());
         mBinding.playpause.setImageDrawable(ResourcesCompat.getDrawable(getResources(),
                 paused ? R.drawable.play : R.drawable.pause, getTheme()));
     }
@@ -277,7 +280,7 @@ public class MainActivity extends SDLActivity {
     private void confirmBackToMenu() {
         final boolean wasPlaying = isPlaying;
         if (wasPlaying) pauseNativeThread();
-        new android.app.AlertDialog.Builder(this)
+        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.menutitle)
                 .setMessage(R.string.menumessage)
                 .setPositiveButton(R.string.yes, (dialog, which) -> goToMenu())
