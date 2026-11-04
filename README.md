@@ -10,7 +10,13 @@ This is a fork of [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on
 
 ## Features of this fork
 
-- Main menu with one card per Full Tilt! table: Space Cadet, Dragon's Keep and Skulduggery. Space Cadet has full rules. Dragon's Keep and Skulduggery are experimental: original per-component scores read from the game executables, with jackpot, quests, bonus and shoot again reconstructed from the original help file.
+- Main menu with one card per Full Tilt! table: Space Cadet, Dragon's Keep and Skulduggery.
+  - **Space Cadet**: the full original rules.
+  - **Dragon's Keep** and **Skulduggery**: rules re-implemented from the original executables (scores, lights, sounds, quests or modes, jackpot, bonus, shoot again) plus the help file. They do not yet cover every part of the originals, see [the component guide](docs/TABLE_COMPONENTS.md) for what is and is not done.
+- Table parts new to Full Tilt in the engine: accelerators, return exits, magnets and multi-gate one-way gates
+- Dragon's Keep: random quest draw with the quest selection target, ten second quest restart, Slay Dragon, Wizard's Fury mystery award, armor and dragon eggs
+- Skulduggery: seven timed modes drawn at random (captive ball changes or extends them), Storm levels, Swordfight, coin awards, special treasures, map pieces and Peg Leg's Loot
+- Bauhaus table font and per-table accent colours, always on
 - Local top 10 high scores per table (name and date), shown after each game. Scores of games with cheats are not recorded
 - No online leaderboard. Sound effects and music have on/off toggles and volume sliders.
 - New touch controls, haptic feedback, a restart confirmation and a back-to-menu confirmation
@@ -26,6 +32,21 @@ tools/stage_fulltilt.sh /path/to/FULLTILT
 ```
 
 This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds but the menu has no tables. The original Windows 3D Pinball table is no longer bundled.
+
+## Documentation
+
+* [Pinball table components](docs/TABLE_COMPONENTS.md): what each part of a table is, how the game data names them, which engine class implements them, and which rules are implemented for each table.
+* [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Project layout
+
+| Path | Contents |
+| --- | --- |
+| `app/` | Android app (Java): menu, settings, high scores, touch controls |
+| `app/src/main/cpp/` | JNI bridge and CMake build of the engine and SDL |
+| `SpaceCadetPinball/` | The pinball engine (C++), table components and `control.cpp` rules |
+| `tools/` | Helper scripts, e.g. `stage_fulltilt.sh` |
+| `docs/` | Documentation |
 
 ## Building
 

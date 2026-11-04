@@ -1,0 +1,182 @@
+# Pinball table components
+
+This document describes the parts of a Full Tilt! Pinball table as the engine of this app sees them, how the
+game data names them, which engine class implements each, and how the Dragon's Keep and Skulduggery rules use them.
+No game data is included in this repository: the names and numbers below describe how the data is laid out and what
+the code does with it.
+
+## 1. How a table is built
+
+A table is a group in the game's `.DAT` file. Every component in it has a name (its *group name*, for example
+`a_bump1`) and an object type code stored in the data. At load time `TPinballTable` reads the type code and creates the
+matching C++ class (`SpaceCadetPinball/TPinballTable.cpp`). Components that react to the ball call
+`control::handler(code, component)` with a message code; the rules live in `SpaceCadetPinball/control.cpp`.
+
+* `63` (original `0x4a`): the ball hit this component.
+* `57`: a drop or solo target was knocked down.
+* `60`: the ball was lost (drain) or a timer expired.
+* `1005`: the plunger was released.
+
+Space Cadet has one hand-written control function per component. Dragon's Keep and Skulduggery use the generic,
+table driven rules (`lenient_rules`, enabled by `loader::Lenient`) described in section 5.
+
+## 2. Naming convention
+
+The first letters of a group name tell what kind of part it is.
+
+| Prefix | Part |
+| --- | --- |
+| `a_bump` | Pop bumper: kicks the ball away and scores |
+| `a_rebo` | Rebound: angled rubber post |
+| `a_spot` | Solo target: one stationary target with a light |
+| `a_drop` | Drop target: falls down when hit, resets as a bank |
+| `a_sink` | Sink: hole that captures the ball, then serves it out |
+| `a_kout` | Kickout: hole that fires the ball back into play |
+| `a_roll` | Rollover lane: sensor with a light |
+| `a_ramp` | Ramp the ball travels along |
+| `a_accl` | Accelerator: lane zone that speeds the ball up |
+| `a_flip` | Flipper |
+| `a_kick` | Kickback in an outlane |
+| `a_bloc` | Blocker: gate that opens and closes a passage |
+| `a_rock` | Sliding rock moved by a target |
+| `a_center_post` | Post between the flippers |
+| `s_trip` | Tripwire: lane sensor that counts passes |
+| `s_oneway` | One-way gate, may have several gates |
+| `s_rexit` | Return exit: lets the ball back out of a ramp or lane |
+| `s_hole` | Hole to a lower playfield |
+| `s_magnet` | Magnet that holds or pulls the ball |
+| `s_launcher`, `s_plunger` | Ball launcher |
+| `v_lite`, `v_wlite` | Lights, wall lights |
+
+The engine class is chosen by the object type code, not by the prefix. The codes the engine creates
+(`TPinballTable.cpp`):
+
+| Code | Class | Code | Class |
+| --- | --- | --- | --- |
+| 1000, 1010 | `TWall` | 1015 | `TRollover` |
+| 1001, 1034 | `TPlunger` | 1016 | `TOneway` |
+| 1002 | `TLight` | 1017 | `TSink` |
+| 1003, 1004 | `TFlipper` (left, right) | 1018 | `TFlagSpinner` |
+| 1005 | `TBumper` | 1019 | `TSoloTarget` |
+| 1006 | `TPopupTarget` | 1020 | `TLightRollover` |
+| 1007 | `TDrain` | 1021 | `TRamp` |
+| 1011 | `TBlocker` | 1022 | `THole` |
+| 1012, 1029 | `TKickout` | 1024 | `TTripwire` |
+| 1013 | `TGate` | 1026 | `TLightGroup` |
+| 1014 | `TKickback` | 1028 | `TComponentGroup` |
+| 1030 | `TLightBargraph` | 1031 | `TSound` |
+| 1032 | `TTimer` | 1033 | `TTextBox` |
+
+Object type codes that Full Tilt adds to the original 3D Pinball set (from the original executable's creation switch):
+
+| Code | Part | Notes |
+| --- | --- | --- |
+| 1034 | Launcher | handled as the plunger |
+| 1035 | Return exit | two lines from the data; passes the ball through and plays a sound |
+| 1036 | Accelerator | throw speed multipliers and angle from the data |
+| 1037 | The ball | `ball0`, not a table part |
+| 1038 | Light sweeps | light animation sequencer, not implemented (no gameplay effect) |
+| 1042 | Magnet | pulls the ball while it is not held; holds it for a short time |
+| 1043 | Multi-gate one-way | several gate lines, each with its back line |
+
+## 3. Dragon's Keep
+
+Theme: a battle with a dragon. Goal: complete the quests, or push the sword target in, to slay the dragon.
+
+Component inventory (counts from the game data):
+
+| Group | Count | Role |
+| --- | --- | --- |
+| `a_bump` | 4 | Forest bumpers, 1,500 each |
+| `a_rebo` | 2 | Rebounds, 1,000 each |
+| `a_spot` | 18 | Spell targets, tower targets, gargoyle targets, sword, quest selection and ricochet targets |
+| `a_sink` | 10 | Fire lizard sinks, well, prison tower, hideaways and more |
+| `a_kout` | 3 | Armor kickout, dragon egg kickout, gargoyle kickout |
+| `a_roll` | 5 | Lane rollovers, 10,000 to 30,000 |
+| `s_trip` | 8 | Ramp and lane sensors with stepped scores |
+| `a_ramp` | 2 | Tower ramp and dragon ramp |
+| `a_accl` | 1 | Lane accelerator (75,000 / 500,000) |
+| `a_rock` | 2 | Sliding rocks in front of the gargoyle passage |
+| `a_bloc` | 2 | Blockers |
+| `s_oneway`, `s_rexit`, `s_hole` | 2, 2, 1 | Gates, return exits, hole |
+
+Key components (names are the group names in the data):
+
+* `a_sink1`, `a_sink2`: the two **fire lizard sinks**, 5,000 each. Two sink hits start the next quest. A finished quest
+  can be restarted by a fire lizard sink for ten seconds.
+* `a_spot4`, `a_spot5`, `a_spot6`, `a_spot7`, `a_spot22`: the five **spell targets**, 2,500 each. During Wizard's Fury they
+  set the mystery award (extra ball, max armor, max weapons, jackpot, one million).
+* `a_spot1`, `a_spot2`, `a_spot3`: **tower targets**, 2,000 each, 10,000 for the bank.
+* `a_spot8`, `a_spot10`, `a_spot12`, `a_spot14`: **gargoyle targets**, 3,000 each, 15,000 for the bank.
+* `a_spot27`: the **quest selection target**, 5,000. Draws another quest that is not completed.
+* `a_spot19`, `a_spot26`: the **sword target**. Third hit starts the Slay Dragon quest.
+* `a_sink4`: the **well**. Pays the mystery award during Wizard's Fury.
+* `a_sink19`: the **dragon's mouth**. Counts the hits for Slay Dragon.
+* `a_kout1`: **armor kickout**. Awards the next piece of armor.
+* `a_kout2`: **dragon egg kickout**. Each hit adds a dragon egg.
+* `a_kout3`: a kickout that only sets a flag in the original.
+* `a_bump1` to `a_bump4`: forest bumpers. Every eighth hit awards the next weapon.
+
+Rules that are implemented (`control.cpp`):
+
+* Per component scores, banks and bank bonuses from the game data.
+* Jackpot: starts at 1,000,000; targets add 50,000, sinks 75,000, each completed quest 500,000.
+* Five quests, drawn at random from the ones not completed: Fire Lizard Attack, Rescue Maiden, Dragon Pass, Wizard's Fury,
+  Dragon Hoard. Completing a quest raises the table score multiplier.
+* Slay Dragon: starts on the third sword hit or when all five quests are done. Needs eight minus the weapons won hits in the
+  dragon's mouth, in 30 seconds plus five per armor piece. The super jackpot grows with every component hit.
+* Ball drain: shoot again in the first 15 seconds, then the bonus (targets, quests, armor, dragon eggs), extra balls, game over.
+* Lights and sounds as the original per-component code switches them.
+
+Not implemented: the dragon egg purchase menu, the random spells, tower lock and the multiball modes (Gargoyle Gaggle-Ball,
+Tower Barrage, Dragon Flurry), the gem lights of Dragon Hoard, and light sweeps.
+
+## 4. Skulduggery
+
+Theme: a hunt for pirate treasure. Goal: complete the modes, collect the six map pieces and find Peg Leg's loot.
+
+| Group | Count | Role |
+| --- | --- | --- |
+| `a_bump` | 3 | Bumpers with seven stepped scores (1,500 to 10,500) |
+| `a_drop` | 11 | Drop targets: ship (5), tavern (3), parrot (3) |
+| `a_spot` | 8 | Skulduggery letter targets, volcano targets, captive ball `a_spot102` |
+| `a_sink` | 10 | Hideaways, ship sink `a_sink4`, tavern window sinks |
+| `a_kout` | 2 | Kickouts |
+| `a_roll` | 10 | Wind lanes (four, 25,000 / 50,000 / 75,000) and island lanes |
+| `a_ramp` | 3 | Ramps |
+| `s_magnet` | 6 | Keg magnets under the tavern |
+| `s_trip`, `s_oneway`, `s_rexit`, `s_hole` | 5, 2, 1, 1 | Lane sensors, gates, return exit, hole |
+
+Modes, in the order of the original: Attack Ship, Treasure Hunt, Tavern, Bermuda Triangle, Storm, Mutiny, Swordfight, then
+Peg Leg's Loot. The captive ball (`a_spot102`) draws another mode and adds ten seconds during a mode.
+
+Implemented:
+
+* Per component scores and banks from the game data, jackpot, ball bonus, shoot again, lights, sounds.
+* Seven modes drawn at random from those not completed, each timed (about 30 seconds).
+* Storm: any drop target bails water; value and jackpot interval follow the storm level (squall, tropical storm, monsoon,
+  hurricane). The level is approximated from the wind lane passes, because the eight wind lights are not tracked.
+* Swordfight: parrot and volcano targets, 30,000 each; completing a bank pays a coin award, special treasure, map piece or extra ball.
+* Coin awards (50,000 doubling to 1,600,000), special treasures (100,000 up to 1,500,000), map pieces (1,000,000 each).
+* Peg Leg's Loot after all modes or all six map pieces: hideaways give special treasures, the ship sink finds the loot.
+
+Not implemented: the skill shot, the shipwreck mystery, buried treasure, wormhole style multiball and light sweeps.
+
+## 5. Engine classes added for Full Tilt
+
+| File | Purpose |
+| --- | --- |
+| `TAccelerator.cpp/.h` | Lane zone. Records the ball on collision and throws it with the multipliers read from the data. |
+| `TReturnExit.cpp/.h` | Two pass-through lines with collision masks from the data. |
+| `TMagnet.cpp/.h` | Core circle plus pull field; holds the ball for one second. |
+| `TOneway.cpp/.h` | Extended for multi-gate one-ways (several line pairs, back lines). |
+| `control.cpp` | Table rules: `lenient_rules`, the quest/mode state, bonus and drain handling. |
+| `lenient_scores.h` | Per component score values read from the original executables. |
+| `lenient_lights.h`, `lenient_sounds.h` | Lights and sounds switched by each component's original code. |
+
+## 6. Where the rules come from
+
+The score tables, light and sound operations and the state flow were read from the original executables with a decompiler
+(handler tables, quest selection, mystery award mapping, special treasure and coin tables, storm levels). Behavior that
+could not be read is taken from the original help file and marked above as approximated or not implemented. Nothing in
+this repository was copied from the original program's code; the rules are a re-implementation.
