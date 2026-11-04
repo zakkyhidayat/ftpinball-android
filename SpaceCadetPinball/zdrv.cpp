@@ -58,7 +58,8 @@ void zdrv::paint(int width, int height, gdrv_bitmap8* dstBmp, int dstBmpXOff, in
 	{
 		for (int x = width; x > 0; --x)
 		{
-			if (*dstPtrZ >= *srcPtrZ)
+			// 0xFFFF marks the empty parts of a sprite: they must not paint over areas with no depth either
+			if (*dstPtrZ >= *srcPtrZ && *srcPtrZ != 0xFFFF)
 			{
 				*dstPtr = *srcPtr;
 				*dstPtrZ = *srcPtrZ;

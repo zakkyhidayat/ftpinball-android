@@ -57,6 +57,7 @@ int TPlunger::Message(int code, float value)
 	case 1015:
 		{
 			SpaceCadetPinballJNI::setBallInPlunger(true);
+			render::BallInPlunger = true;
 			auto ball = PinballTable->BallList.at(0);
 			ball->Message(1024, 0.0);
 			ball->Position.X = PinballTable->PlungerPositionX;
@@ -99,6 +100,7 @@ int TPlunger::Message(int code, float value)
 			{
 				// The plunger was released: the ball is on its way
 				SpaceCadetPinballJNI::setBallInPlunger(false);
+				render::BallInPlunger = false;
 				loader::play_sound(SoundIndexP2);
 				if (loader::Lenient)
 					control::handler(code, this); // starts the shoot again window

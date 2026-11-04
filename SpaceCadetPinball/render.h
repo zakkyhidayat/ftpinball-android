@@ -34,6 +34,7 @@ public:
 	static SDL_Rect DestinationRect;
 	// Floating magnified window of the plunger lane while a ball waits to be shot
 	static bool PlungerWindow;
+	static bool BallInPlunger; // the ball waits in the shooter lane: its projected position is the lane anchor
 
 	static void init(gdrv_bitmap8* bmp, float zMin, float zScaler, int width, int height);
 	static void uninit();
