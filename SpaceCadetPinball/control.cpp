@@ -5,6 +5,7 @@
 #include "pb.h"
 #include "winmain.h"
 #include "lenient_scores.h"
+#include "lenient_lights.h"
 #include "pinball.h"
 #include "TBlocker.h"
 #include "TBumper.h"
@@ -859,6 +860,21 @@ namespace
 		show_quest();
 	}
 
+	// The lights the original code of this component switches on or makes flash
+	void apply_lights(const char* component)
+	{
+		const LightOp* ops = Rules == &Pirates ? PirateLights : DragonLights;
+		size_t count = Rules == &Pirates ? sizeof PirateLights / sizeof PirateLights[0] : sizeof DragonLights / sizeof DragonLights[0];
+		for (size_t i = 0; i < count; ++i)
+		{
+			if (strcmp(ops[i].component, component))
+				continue;
+			TPinballComponent* light = pb::MainTable->find_component(ops[i].light);
+			if (light)
+				light->Message(ops[i].code, ops[i].value);
+		}
+	}
+
 	void hit(const char* name)
 	{
 		int index = -1;
@@ -868,6 +884,7 @@ namespace
 		if (index < 0)
 			return;
 		pb::MainTable->AddScore(component_score(index));
+		apply_lights(name);
 		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && BumperHits % 8 == 0 && Weapons < 4)
 		{
 			// Every eighth forest bumper hit awards the next weapon (25,000 more each time, from the original code)
