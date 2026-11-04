@@ -163,12 +163,15 @@
 
             <TextView
                 android:id="@+id/txtscore"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="190dp"
+                app:autoSizeMaxTextSize="28sp"
+                app:autoSizeMinTextSize="14sp"
+                app:autoSizeTextType="uniform"
+                android:layout_height="48dp"
                 android:background="@drawable/bg_hud_score"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="4dp"
-                android:gravity="start"
+                android:gravity="center"
                 android:maxLines="1"
                 android:textColor="@color/white"
                 android:textSize="28sp"
@@ -179,7 +182,7 @@
             <TextView
                 android:id="@+id/ballstxt"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:background="@drawable/bg_hud_balls"
                 android:paddingHorizontal="14dp"
                 android:paddingVertical="4dp"
