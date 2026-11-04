@@ -680,7 +680,7 @@ namespace
 			{"Fire Lizard Attack: hit the sinks", FireLizards, 9999, {100000, 200000, 300000, 400000, 500000, 1000000}, 0, 0},
 			{"Rescue Maiden: prison tower", PrisonTower, 9999, {250000, 500000, JACKPOT, EXTRA_BALL, 0, 0}, 0, 0},
 			{"Dragon Pass: hit the kickouts", Kickouts, 9999, {100000, 100000, 100000, 100000, JACKPOT, 0}, 0, 250000},
-			{"Wizard's Fury: put the ball in the well", Well, 9999, {MYSTERY, MYSTERY, MYSTERY, MYSTERY, 0, 0}, 0, 0},
+			{"Wizard's Fury: put the ball in the well", Well, 9999, {MYSTERY, MYSTERY, MYSTERY, MYSTERY, MYSTERY, MYSTERY}, 0, 0},
 		},
 		"a_spot27"
 	};
