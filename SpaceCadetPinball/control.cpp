@@ -728,7 +728,7 @@ namespace
 	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
 	bool QuestDone[8];
 	int Armor, Mystery, MysteryIdx, Treasures, Eggs;
-	int WindHits, StormEvery, StormValue;
+	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
 	unsigned RestartEnd;
@@ -813,6 +813,25 @@ namespace
 		return count ? open[rand() % count] : -1;
 	}
 
+	// Coin awards (50,000 doubling), special treasures and the six map pieces of Skulduggery
+	void coin_award()
+	{
+		static const int coin[] = {50000, 100000, 200000, 400000, 800000, 1600000};
+		pb::MainTable->AddScore(coin[Coins < 5 ? Coins : 5]);
+		if (Coins < 6)
+			++Coins;
+		say(pinball::InfoTextBox, "Coin Award", 3.0f, 2);
+	}
+
+	void map_piece()
+	{
+		pb::MainTable->AddScore(1000000);
+		if (MapPieces < 6)
+			++MapPieces;
+		snprintf(Line, sizeof Line, "Map Piece %d", MapPieces);
+		say(pinball::InfoTextBox, Line, 3.0f, 2);
+	}
+
 	void start_slay()
 	{
 		SlayActive = true;
@@ -831,7 +850,7 @@ namespace
 		Armor = RestartQuest = Treasures = Eggs = 0;
 		LootActive = false;
 		ModeEnd = 0;
-		WindHits = 0;
+		WindHits = Coins = MapPieces = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
@@ -1050,11 +1069,12 @@ namespace
 			}
 			else if (!strcmp(name, "a_sink4"))
 			{
-				int loot = QuestsDone * 1000000 + Treasures * 500000;
+				int loot = QuestsDone * 1000000 + Treasures * 500000 + Coins * 500000 + MapPieces * 1000000;
 				pb::MainTable->AddScore(loot);
 				snprintf(Line, sizeof Line, "Peg Leg's Loot %d", loot);
 				say(pinball::InfoTextBox, Line, 5.0f, 2);
 				LootActive = false;
+				MapPieces = 0;
 				memset(QuestDone, 0, sizeof QuestDone);
 				QuestIndex = draw_quest(-1);
 				pb::MainTable->ScoreMultiplier = 4;
@@ -1072,6 +1092,7 @@ namespace
 				QuestActive = true;
 				QuestHits = 0;
 				ModeEnd = SDL_GetTicks() + 30000;
+				ParrotMask = VolcanoMask = 0;
 				if (Rules == &Pirates && QuestIndex == 4)
 				{
 					// The storm level comes from the wind lights: squall, tropical storm, monsoon or hurricane. The lights are
@@ -1091,6 +1112,35 @@ namespace
 			}
 			show_quest();
 			return;
+		}
+
+		if (Rules == &Pirates && QuestIndex == 6)
+		{
+			// Swordfight: finishing the parrot bank or the volcano bank gives a coin award, special treasure, map piece or extra ball
+			static const char* const parrot[] = {"a_drop10", "a_drop11", "a_drop12"};
+			static const char* const volcano[] = {"a_spot8", "a_spot9", "a_spot10", "a_spot11"};
+			bool full = false;
+			for (int i = 0; i < 3; ++i)
+				if (!strcmp(name, parrot[i]))
+					full = (ParrotMask |= 1 << i) == 7 && ((ParrotMask = 0), true);
+			for (int i = 0; i < 4; ++i)
+				if (!strcmp(name, volcano[i]))
+					full = (VolcanoMask |= 1 << i) == 15 && ((VolcanoMask = 0), true);
+			if (full)
+			{
+				switch (rand() % 4)
+				{
+				case 0: coin_award(); break;
+				case 1: award(1000000 / 2); say(pinball::InfoTextBox, "Special Treasure", 3.0f, 2); ++Treasures; break;
+				case 2: map_piece(); break;
+				default: award(EXTRA_BALL); break;
+				}
+				if (MapPieces >= 6 && !LootActive)
+				{
+					LootActive = true;
+					show_quest();
+				}
+			}
 		}
 
 		const Quest& q = Rules->quests[QuestIndex];
