@@ -426,7 +426,7 @@ public class MainActivity extends SDLActivity {
         @Override
         public void onStringPresented(String str, int type) {
             if (!PrefsHelper.getShowMessages()) return;
-            final String fstr = str.replace("\n", " ");
+            final String fstr = ScoreBoard.commas(str.replace("\n", " "));
             if (type == 1) runOnUiThread(() -> mBinding.missiontxt.setText(fstr));
             else runOnUiThread(() -> mBinding.infotxt.setText(fstr));
         }

@@ -54,6 +54,21 @@ final class ScoreBoard {
         return String.format(java.util.Locale.US, "%,d", score);
     }
 
+    /** Puts a comma between every three digits of each long number in a message. */
+    static String commas(String text) {
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("(?<![\\d.,])\\d{4,}(?![\\d.,])").matcher(text);
+        StringBuffer out = new StringBuffer();
+        while (m.find()) {
+            try {
+                m.appendReplacement(out, format(Integer.parseInt(m.group())));
+            } catch (NumberFormatException e) {
+                m.appendReplacement(out, m.group());
+            }
+        }
+        m.appendTail(out);
+        return out.toString();
+    }
+
     /** The latest games, newest first. */
     static List<Entry> getRecent(Context context, String tableId) {
         List<Entry> entries = new ArrayList<>();
