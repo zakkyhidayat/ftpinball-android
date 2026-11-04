@@ -12,6 +12,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -22,6 +25,7 @@ import java.io.InputStream;
 public class MenuActivity extends AppCompatActivity {
     private static final String PREFS = "com.fexed.spacecadetpinball.menu";
     private static final String KEY_LAST_TABLE = "lasttable";
+    private static final String KEY_PLAYED_AT = "playedat_";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +57,6 @@ public class MenuActivity extends AppCompatActivity {
         LinearLayout list = findViewById(R.id.tablelist);
         list.removeAllViews();
         SharedPreferences prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        Table last = Table.byId(prefs.getString(KEY_LAST_TABLE, null));
         LayoutInflater inflater = LayoutInflater.from(this);
 
         for (Table table : Table.values()) {
@@ -62,7 +65,11 @@ public class MenuActivity extends AppCompatActivity {
             ((TextView) card.findViewById(R.id.tabletitle)).setText(table.title);
 
             String desc = getString(table.hasRules ? R.string.table_fulltilt : R.string.table_norules);
-            if (table == last) desc += " \u00b7 " + getString(R.string.last_played);
+            long playedAt = prefs.getLong(KEY_PLAYED_AT + table.id, 0);
+            if (playedAt > 0) {
+                desc += "\n" + getString(R.string.last_played) + ": "
+                        + DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(new Date(playedAt));
+            }
             ((TextView) card.findViewById(R.id.tabledesc)).setText(desc);
 
             ImageView icon = card.findViewById(R.id.tableicon);
@@ -86,7 +93,8 @@ public class MenuActivity extends AppCompatActivity {
     }
 
     private void startTable(Table table) {
-        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_LAST_TABLE, table.id).apply();
+        getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY_LAST_TABLE, table.id)
+                .putLong(KEY_PLAYED_AT + table.id, System.currentTimeMillis()).apply();
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra(MainActivity.EXTRA_TABLE, table.id);
         startActivity(intent);

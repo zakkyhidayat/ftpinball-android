@@ -624,7 +624,22 @@ void control::handler(int code, TPinballComponent* cmp)
 {
 	// The table rules in this file are Space Cadet's: other Full Tilt tables run without rules
 	if (loader::Lenient)
+	{
+		// Generic scoring for tables whose rules are unknown: a flat score per kind of component hit
+		if (code == 63 && pb::MainTable)
+		{
+			int points = 0;
+			if (dynamic_cast<TBumper*>(cmp)) points = 500;
+			else if (dynamic_cast<TPopupTarget*>(cmp) || dynamic_cast<TSoloTarget*>(cmp)) points = 1000;
+			else if (dynamic_cast<TLightRollover*>(cmp)) points = 250;
+			else if (dynamic_cast<TKickout*>(cmp) || dynamic_cast<TSink*>(cmp)) points = 2500;
+			else if (dynamic_cast<TRamp*>(cmp)) points = 2000;
+			else if (dynamic_cast<TFlagSpinner*>(cmp)) points = 100;
+			if (points)
+				pb::MainTable->AddScore(points);
+		}
 		return;
+	}
 	component_control* control = cmp->Control;
 	
 	if (control)
