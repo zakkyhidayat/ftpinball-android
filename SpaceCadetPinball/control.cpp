@@ -1477,6 +1477,19 @@ namespace
 			if (QuestHits % StormEvery == 0)
 				award(JACKPOT);
 		}
+		else if (Rules == &Dragon && QuestIndex == 2)
+		{
+			// Rescue Maiden: the prison windows count 250,000, 500,000, jackpot, extra ball light, then start over
+			switch (n % 4)
+			{
+			case 0: pb::MainTable->AddScore(250000); break;
+			case 1: pb::MainTable->AddScore(500000); break;
+			case 2: award(JACKPOT); break;
+			default:
+				ExtraBallLight = true;
+				say(pinball::InfoTextBox, "Maiden Rescued Extra Ball Available", 3.0f, 2);
+			}
+		}
 		else if (Rules == &Dragon && QuestIndex == 1)
 		{
 			// Fire Lizards: each hit is worth 100,000 more, up to a million, and every fourth hit awards the jackpot
