@@ -671,14 +671,16 @@ namespace
 	const Profile Dragon = {
 		DragonScores, sizeof DragonScores / sizeof DragonScores[0],
 		1000000, 50000, 75000, 500000,
-		DragonStart, 2, 0, "Hit fire lizard sinks to begin quest",
+		DragonStart, 2, 100000, "Hit fire lizard sinks to begin quest",
 		2000, 100000, "Quest", DragonTargets, DragonSinks, 5,
 		{
-			{"Fire Lizard Attack: hit the sinks", FireLizards, 8, {100000, 200000, 300000, 400000, 500000, 1000000}, 4, 0},
-			{"Rescue Maiden: prison tower", PrisonTower, 4, {250000, 500000, JACKPOT, EXTRA_BALL, 0, 0}, 0, 0},
-			{"Dragon Pass: hit the kickouts", Kickouts, 5, {100000, 100000, 100000, 100000, JACKPOT, 0}, 0, 250000},
-			{"Wizard's Fury: put the ball in the well", Well, 4, {MYSTERY, MYSTERY, MYSTERY, MYSTERY, 0, 0}, 0, 0},
-			{"Dragon Hoard: steal the gems", Gems, 8, {50000, 60000, 70000, 100000, 200000, 250000}, 0, 0},
+			// The quest order of the original: its quest numbers 4 to 8 select the messages Dragon Hoard, Fire Lizards, Rescue Maiden,
+			// Dragon Pass and Wizard's Fury
+			{"Dragon Hoard: steal the gems", Gems, 9999, {50000, 60000, 70000, 100000, 200000, 250000}, 0, 0},
+			{"Fire Lizard Attack: hit the sinks", FireLizards, 9999, {100000, 200000, 300000, 400000, 500000, 1000000}, 0, 0},
+			{"Rescue Maiden: prison tower", PrisonTower, 9999, {250000, 500000, JACKPOT, EXTRA_BALL, 0, 0}, 0, 0},
+			{"Dragon Pass: hit the kickouts", Kickouts, 9999, {100000, 100000, 100000, 100000, JACKPOT, 0}, 0, 250000},
+			{"Wizard's Fury: put the ball in the well", Well, 9999, {MYSTERY, MYSTERY, MYSTERY, MYSTERY, 0, 0}, 0, 0},
 		},
 		"a_spot27"
 	};
@@ -731,13 +733,17 @@ namespace
 	int Spells, SpellMask;
 	bool FirstHit; // the next component hit after a launch decides the skill shot
 	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
+	// Quest and mode lengths in seconds, from the timers the original code sets for each
+	const float DragonSeconds[] = {27.73f, 31.69f, 30.45f, 30.65f, 30.69f};
+	const float PirateSeconds[] = {30.0f, 30.68f, 27.4f, 31.14f, 24.14f, 30.0f, 30.0f};
+	int HoardMask;
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
 	unsigned RestartEnd;
 	int RestartQuest;
 	const char* const SpellTargets[] = {"a_spot4", "a_spot5", "a_spot6", "a_spot7", "a_spot22"};
-	// Mystery award per spell target, from the original handlers (state 8): extra ball, max armor, max weapons, jackpot, one million
-	const int SpellAwards[] = {EXTRA_BALL, MAX_ARMOR, MAX_WEAPONS, JACKPOT, 1000000};
+	// Mystery award per spell target, from the original handlers (state 8): extra ball, max weapons, max armor, jackpot, one million
+	const int SpellAwards[] = {EXTRA_BALL, MAX_WEAPONS, MAX_ARMOR, JACKPOT, 1000000};
 
 	bool match(Roles roles, const char* name)
 	{
@@ -1004,6 +1010,90 @@ namespace
 		}
 	}
 
+	// A quest or mode ends when its timer runs out (or its goal is met). The original credits it either way: the jackpot
+	// grows, the quest light stays lit and the next quest is drawn.
+	void end_quest()
+	{
+		QuestActive = false;
+		QuestHits = 0;
+		++QuestsDone;
+		Jackpot += Rules->jackpotQuest;
+		snprintf(Line, sizeof Line, "%s over", Rules->questWord);
+		say(pinball::InfoTextBox, Line, 4.0f, 2);
+		if (Rules == &Dragon)
+		{
+			// Completed quests drop out of the draw; with none left the dragon can be slain. The quest can be restarted
+			// by a fire lizard sink for the next ten seconds.
+			QuestDone[QuestIndex] = true;
+			RestartQuest = QuestIndex;
+			RestartEnd = SDL_GetTicks() + 10000;
+			QuestIndex = draw_quest(-1);
+			if (QuestIndex < 0)
+			{
+				QuestIndex = RestartQuest;
+				if (!SlayActive)
+					start_slay();
+			}
+		}
+		else
+		{
+			// Modes are drawn at random from those not completed; once all are done Peg Leg's loot follows
+			QuestDone[QuestIndex] = true;
+			QuestIndex = draw_quest(-1);
+			if (QuestIndex < 0)
+			{
+				LootActive = true;
+				QuestIndex = 0;
+				say(pinball::MissTextBox, "Hit X to find Peg Leg's Loot", -1.0f, 1);
+			}
+		}
+		if (pb::MainTable->ScoreMultiplier < 4)
+			++pb::MainTable->ScoreMultiplier;
+		show_quest();
+	}
+
+	// Dragon Hoard: every gem is worth its own amount, all nine give the extra ball
+	void hoard_gem(const char* name)
+	{
+		struct Gem { const char* name; int bit, value; const char* text; };
+		static const Gem gems[] = {
+			{"a_spot4", 2, 50000, "Diamond"}, {"a_spot5", 2, 50000, "Diamond"}, {"a_spot6", 2, 50000, "Diamond"},
+			{"a_spot7", 2, 50000, "Diamond"}, {"a_spot22", 2, 50000, "Diamond"},
+			{"a_spot1", 4, 60000, "Pearl"}, {"a_spot2", 4, 60000, "Pearl"}, {"a_spot3", 4, 60000, "Pearl"},
+			{"a_spot8", 0x10, 70000, "Sapphire"}, {"a_spot10", 0x10, 70000, "Sapphire"},
+			{"a_spot12", 0x10, 70000, "Sapphire"}, {"a_spot14", 0x10, 70000, "Sapphire"},
+			{"a_sink1", 0x20, 100000, "Ruby"}, {"a_sink2", 0x20, 100000, "Ruby"},
+			{"a_accl1", 0x100, 100000, "Opal"}, {"a_ramp103", 0x80, 250000, "Amethyst"}, {"a_ramp6", 8, 200000, "Emerald"},
+			{"s_oneway5", 0x40, JACKPOT, "Jackpot"},
+		};
+		int bit = 0, value = 0;
+		const char* text = nullptr;
+		if (!strncmp(name, "a_bump", 6))
+		{
+			bit = 1;
+			value = 10000;
+			text = "Gold";
+		}
+		for (const Gem& g : gems)
+			if (!strcmp(g.name, name))
+			{
+				bit = g.bit;
+				value = g.value;
+				text = g.text;
+			}
+		if (!bit)
+			return;
+		award(value);
+		if (text)
+			say(pinball::InfoTextBox, text, 2.0f, 2);
+		HoardMask |= bit;
+		if (HoardMask == 0x1ff)
+		{
+			HoardMask = 0;
+			award(EXTRA_BALL);
+		}
+	}
+
 	void hit(const char* name)
 	{
 		int index = -1;
@@ -1038,7 +1128,7 @@ namespace
 			if (FirstHit)
 			{
 				FirstHit = false;
-				static const char* const skill[] = {"a_spot22", "a_spot7", "a_spot6", "a_spot5", "a_spot4"};
+				static const char* const skill[] = {"a_spot22", "a_spot7", "a_spot5", "a_spot6", "a_spot4"};
 				for (int i = 0; i < 5; ++i)
 					if (!strcmp(name, skill[i]))
 					{
@@ -1079,11 +1169,11 @@ namespace
 			dragon_slay(name);
 			// The spell targets set the mystery award of Wizard's Fury
 			for (int i = 0; i < 5; ++i)
-				if (!strcmp(name, SpellTargets[i]) && QuestActive && QuestIndex == 3 && MysteryIdx != i)
+				if (!strcmp(name, SpellTargets[i]) && QuestActive && QuestIndex == 4 && MysteryIdx != i)
 				{
 					Mystery = SpellAwards[i];
 					MysteryIdx = i;
-					static const char* const names[] = {"Extra Ball", "Max Armor", "Max Weapons", "Jackpot", "One Million"};
+					static const char* const names[] = {"Extra Ball", "Max Weapons", "Max Armor", "Jackpot", "One Million"};
 					snprintf(Line, sizeof Line, "Mystery Bonus set to: %s", names[i]);
 					say(pinball::InfoTextBox, Line, 3.0f, 2);
 				}
@@ -1102,7 +1192,7 @@ namespace
 			if (next >= 0)
 			{
 				QuestIndex = next;
-				static const char* const dragonPicks[] = {"Fire Lizards", "Rescue Maiden", "Dragon Pass", "Wizard's Fury", "Dragon Hoard"};
+				static const char* const dragonPicks[] = {"Dragon Hoard", "Fire Lizards", "Rescue Maiden", "Dragon Pass", "Wizard's Fury"};
 				static const char* const piratePicks[] = {"Attack", "Treasure Hunt", "Tavern", "Bermuda", "Storm", "Mutiny", "Swordfight"};
 				const char* const* picks = Rules == &Dragon ? dragonPicks : piratePicks;
 				snprintf(Line, sizeof Line, Rules == &Dragon ? "%s Quest Selected" : "%s Mode Selected", picks[next]);
@@ -1113,13 +1203,8 @@ namespace
 		if (Rules == &Pirates && (!strcmp(name, "a_roll2") || !strcmp(name, "a_roll9") || !strcmp(name, "a_roll8") || !strcmp(name, "a_roll6")) && WindHits < 12)
 			++WindHits;
 
-		if (Rules == &Pirates && QuestActive && SDL_GetTicks() > ModeEnd)
-		{
-			QuestActive = false;
-			QuestHits = 0;
-			say(pinball::InfoTextBox, "Mode Over", 3.0f, 2);
-			show_quest();
-		}
+		if (QuestActive && SDL_GetTicks() > ModeEnd)
+			end_quest();
 
 		if (LootActive)
 		{
@@ -1152,7 +1237,7 @@ namespace
 				StartHits = 0;
 				QuestActive = true;
 				QuestHits = 0;
-				ModeEnd = SDL_GetTicks() + 30000;
+				HoardMask = 0;
 				ParrotMask = VolcanoMask = 0;
 				if (Rules == &Pirates && QuestIndex == 4)
 				{
@@ -1167,6 +1252,7 @@ namespace
 					QuestIndex = RestartQuest;
 					RestartEnd = 0;
 				}
+				ModeEnd = SDL_GetTicks() + (unsigned)(1000 * (Rules == &Dragon ? DragonSeconds : PirateSeconds)[QuestIndex]);
 				pb::MainTable->AddScore(Rules->startPoints);
 				snprintf(Line, sizeof Line, "%s started", Rules->questWord);
 				say(pinball::InfoTextBox, Line, 3.0f, 2);
@@ -1203,6 +1289,11 @@ namespace
 		}
 
 		const Quest& q = Rules->quests[QuestIndex];
+		if (Rules == &Dragon && QuestIndex == 0)
+		{
+			hoard_gem(name);
+			return;
+		}
 		if (!match(q.roles, name))
 			return;
 		int n = QuestHits++;
@@ -1212,6 +1303,14 @@ namespace
 			pb::MainTable->AddScore(StormValue);
 			if (QuestHits % StormEvery == 0)
 				award(JACKPOT);
+		}
+		else if (Rules == &Dragon && QuestIndex == 1)
+		{
+			// Fire Lizards: each hit is worth 100,000 more, up to a million, and every fourth hit awards the jackpot
+			if (QuestHits % 4 == 0)
+				award(JACKPOT);
+			else
+				pb::MainTable->AddScore((QuestHits < 10 ? QuestHits : 10) * 100000);
 		}
 		else
 			award(q.awards[n < 5 ? n : 5]);
@@ -1225,43 +1324,7 @@ namespace
 			return;
 		}
 
-		// Quest complete
-		QuestActive = false;
-		QuestHits = 0;
-		++QuestsDone;
-		Jackpot += Rules->jackpotQuest;
-		snprintf(Line, sizeof Line, "%s complete!", Rules->questWord);
-		say(pinball::InfoTextBox, Line, 4.0f, 2);
-		if (Rules == &Dragon)
-		{
-			// Completed quests drop out of the draw; with none left the dragon can be slain. The quest can be restarted
-			// by a fire lizard sink for the next ten seconds.
-			QuestDone[QuestIndex] = true;
-			RestartQuest = QuestIndex;
-			RestartEnd = SDL_GetTicks() + 10000;
-			QuestIndex = draw_quest(-1);
-			if (QuestIndex < 0)
-			{
-				QuestIndex = RestartQuest;
-				if (!SlayActive)
-					start_slay();
-			}
-		}
-		else
-		{
-			// Modes are drawn at random from those not completed; once all are done they come round again
-			QuestDone[QuestIndex] = true;
-			QuestIndex = draw_quest(-1);
-			if (QuestIndex < 0)
-			{
-				LootActive = true;
-				QuestIndex = 0;
-				say(pinball::MissTextBox, "Hit X to find Peg Leg's Loot", -1.0f, 1);
-			}
-		}
-		if (pb::MainTable->ScoreMultiplier < 4)
-			++pb::MainTable->ScoreMultiplier;
-		show_quest();
+		end_quest();
 	}
 
 	// Ball lost: shoot again if it drains in the first 15 seconds, else the bonus, next ball or game over
@@ -1286,9 +1349,11 @@ namespace
 			return;
 		}
 		LaunchTicks = 0;
+		if (QuestActive)
+			end_quest();
 		if (!table->TiltLockFlag)
 		{
-			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 : 0);
+			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : 0);
 			if (bonus > 0)
 			{
 				snprintf(Line, sizeof Line, "Total Bonus %d", bonus);
