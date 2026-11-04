@@ -729,7 +729,9 @@ namespace
 	// yet, the quest selection target draws again, a quest that has ended can be restarted for ten seconds, and
 	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
 	bool QuestDone[8];
-	int Armor, Mystery, MysteryIdx, Treasures, Eggs;
+	int Armor, Mystery, MysteryIdx, Treasures, Eggs, LoopCount, MenuTier;
+	unsigned LoopTime, MenuEnd;
+	bool MenuOpen, ExtraBallLight;
 	int Spells, SpellMask;
 	bool FirstHit; // the next component hit after a launch decides the skill shot
 	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
@@ -780,6 +782,8 @@ namespace
 	{
 		if (value == JACKPOT)
 		{
+			if (Jackpot > 10000000)
+				Jackpot = 10000000;
 			pb::MainTable->AddScore(Jackpot);
 			snprintf(Line, sizeof Line, "Jackpot %d", Jackpot);
 			say(pinball::InfoTextBox, Line, 3.0f, 2);
@@ -893,7 +897,9 @@ namespace
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
 		memset(QuestDone, 0, sizeof QuestDone);
-		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = 0;
+		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = LoopCount = MenuTier = 0;
+		LoopTime = MenuEnd = 0;
+		MenuOpen = ExtraBallLight = false;
 		FirstHit = false;
 		LootActive = false;
 		ModeEnd = 0;
@@ -1071,6 +1077,109 @@ namespace
 		show_quest();
 	}
 
+	void begin_quest(bool restart)
+	{
+		if (restart)
+		{
+			QuestIndex = RestartQuest;
+			RestartEnd = 0;
+		}
+		StartHits = 0;
+		QuestActive = true;
+		QuestHits = 0;
+		HoardMask = 0;
+		BermudaCount = 0;
+		ModeStart = SDL_GetTicks();
+		TreasureX = rand() % 5;
+		ParrotMask = VolcanoMask = 0;
+		if (Rules == &Pirates && QuestIndex == 4)
+		{
+			// The storm level comes from the wind lights: squall, tropical storm, monsoon or hurricane. The lights are
+			// approximated from the wind lane passes.
+			int level = WindHits * 16 / 12;
+			StormValue = level <= 5 ? 10000 : level <= 10 ? 25000 : level <= 15 ? 50000 : 100000;
+			StormEvery = level <= 5 ? 8 : level <= 10 ? 7 : level <= 15 ? 6 : 5;
+		}
+		ModeEnd = SDL_GetTicks() + (unsigned)(1000 * (Rules == &Dragon ? DragonSeconds : PirateSeconds)[QuestIndex]);
+		pb::MainTable->AddScore(Rules->startPoints);
+		snprintf(Line, sizeof Line, "%s started", Rules->questWord);
+		say(pinball::InfoTextBox, Line, 3.0f, 2);
+	}
+
+	// Dragon eggs: the lights count up to eight; the award pays the number of eggs held times 100,000 (FUN_004232b0)
+	void egg_award(int count)
+	{
+		Eggs = Eggs + count > 8 ? 8 : Eggs + count;
+		pb::MainTable->AddScore(Eggs * 100000);
+		snprintf(Line, sizeof Line, "Dragon Eggs %d", Eggs);
+		say(pinball::InfoTextBox, Line, 2.0f, 2);
+	}
+
+	// The dragon egg kickout offers a purchase for the eggs held. The highest affordable item is offered; the left flipper
+	// buys it, the right flipper declines for 25,000. Costs: quest 1 egg, spell 4, weapon 5, armor 6, extra ball light 7,
+	// extra ball 8. An item that is already maxed falls back to the next cheaper one.
+	void open_egg_menu()
+	{
+		if (Eggs == 0)
+		{
+			pb::MainTable->AddScore(25000);
+			say(pinball::InfoTextBox, "No Dragon Eggs", 2.0f, 2);
+			return;
+		}
+		int tier = Eggs > 8 ? 8 : Eggs;
+		if (tier >= 8 && !ExtraBallLight)
+			tier = 7;
+		if (tier == 7 && ExtraBallLight)
+			tier = 6;
+		if (tier == 6 && Armor >= 3)
+			tier = 5;
+		if (tier == 5 && Weapons >= 4)
+			tier = 4;
+		if (tier < 4)
+			tier = 1;
+		MenuTier = tier;
+		MenuOpen = true;
+		MenuEnd = SDL_GetTicks() + 10000;
+		static const char* const texts[] = {"", "Start the next quest?", "", "", "Purchase Spell?", "Purchase Weapon?", "Purchase Armor?",
+			"Purchase Extra Ball Light?", "Purchase Extra Ball?"};
+		snprintf(Line, sizeof Line, "%s Yes [Left] No [Right]", texts[tier]);
+		say(pinball::InfoTextBox, Line, 10.0f, 2);
+	}
+
+	void answer_egg_menu(bool yes)
+	{
+		MenuOpen = false;
+		if (!yes)
+		{
+			pb::MainTable->AddScore(25000);
+			return;
+		}
+		static const int cost[] = {0, 1, 0, 0, 4, 5, 6, 7, 8};
+		Eggs -= cost[MenuTier];
+		switch (MenuTier)
+		{
+		case 1:
+			if (!QuestActive && QuestIndex >= 0 && !SlayActive)
+				begin_quest(false);
+			break;
+		case 4: cast_spell(); break;
+		case 5:
+			++Weapons;
+			pb::MainTable->AddScore(25000 + 10000 * (Weapons - 1));
+			say(pinball::InfoTextBox, "Weapon", 2.0f, 2);
+			break;
+		case 6:
+			++Armor;
+			say(pinball::InfoTextBox, "Armor", 2.0f, 2);
+			break;
+		case 7:
+			ExtraBallLight = true;
+			say(pinball::InfoTextBox, "Extra Ball Light", 2.0f, 2);
+			break;
+		default: award(EXTRA_BALL); break;
+		}
+	}
+
 	// Dragon Hoard: every gem is worth its own amount, all nine give the extra ball
 	void hoard_gem(const char* name)
 	{
@@ -1119,9 +1228,9 @@ namespace
 		for (int i = 0; i < Rules->scoreCount; ++i)
 			if (!strcmp(Rules->scores[i].name, name))
 				index = i;
-		if (index < 0)
-			return;
-		pb::MainTable->AddScore(component_score(index));
+		// Components without a score of their own (sinks, kickouts, ramps, return exits) still take part in the quests
+		if (index >= 0)
+			pb::MainTable->AddScore(component_score(index));
 		apply_lights(name);
 		play_sounds(name);
 		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && BumperHits % 8 == 0 && Weapons < 4)
@@ -1151,7 +1260,7 @@ namespace
 				for (int i = 0; i < 5; ++i)
 					if (!strcmp(name, skill[i]))
 					{
-						if (i == 1 && Eggs < 8) ++Eggs;
+						if (i == 1) egg_award(1);
 						else if (i == 2 && Weapons < 4) pb::MainTable->AddScore(25000 + 10000 * Weapons++);
 						else if (i == 3 && Armor < 3) ++Armor;
 						else cast_spell();
@@ -1170,19 +1279,26 @@ namespace
 						cast_spell();
 					}
 				}
-			// The dragon egg kickout (a_kout2) awards an egg, up to the eight egg lights
-			if (!strcmp(name, "a_kout2") && !SlayActive && Eggs < 8)
+			// The dragon egg kickout (a_kout2) offers a purchase for the eggs held; during Dragon Pass it awards an egg.
+			// The return exits give two eggs and the dragon ramp loop adds to the jackpot.
+			if (!strcmp(name, "a_kout2"))
 			{
-				++Eggs;
-				snprintf(Line, sizeof Line, "Dragon Egg %d", Eggs);
-				say(pinball::InfoTextBox, Line, 2.0f, 2);
+				if (QuestActive && QuestIndex == 3)
+					egg_award(1);
+				else if (!QuestActive && !SlayActive)
+					open_egg_menu();
 			}
-			// The armor kickout (a_kout1) awards the next piece of armor (25,000 / 50,000 / 100,000 in the original handler)
-			if (!strcmp(name, "a_kout1") && !SlayActive && Armor < 3)
+			if (!strcmp(name, "s_rexit18") || !strcmp(name, "s_rexit19"))
+				egg_award(2);
+			if (!strcmp(name, "a_ramp103") && !(QuestActive && QuestIndex == 0))
 			{
-				static const int armorPoints[] = {25000, 50000, 100000};
-				pb::MainTable->AddScore(armorPoints[Armor++]);
-				say(pinball::InfoTextBox, "Armor", 3.0f, 2);
+				LoopCount = SDL_GetTicks() - LoopTime > 10000 ? 0 : (LoopCount < 9 ? LoopCount + 1 : 9);
+				LoopTime = SDL_GetTicks();
+				int add = (LoopCount + 1) * 50000;
+				pb::MainTable->AddScore(add);
+				Jackpot += add;
+				snprintf(Line, sizeof Line, "Dragon Loop %d Added to Jackpot", add);
+				say(pinball::InfoTextBox, Line, 2.0f, 2);
 			}
 			dragon_slay(name);
 			// The spell targets set the mystery award of Wizard's Fury
@@ -1206,6 +1322,11 @@ namespace
 		// The quest selection target draws another of the quests not completed yet
 		if (!strcmp(name, Rules->selectTarget) && !QuestActive && !SlayActive)
 		{
+			if (Rules == &Dragon && ExtraBallLight)
+			{
+				ExtraBallLight = false;
+				award(EXTRA_BALL);
+			}
 			int next = draw_quest(QuestIndex);
 			if (next >= 0)
 			{
@@ -1252,31 +1373,7 @@ namespace
 			bool restart = Rules == &Dragon && RestartEnd && SDL_GetTicks() < RestartEnd && match(Rules->startRoles, name);
 			if (restart || (match(Rules->startRoles, name) && ++StartHits >= Rules->startHits))
 			{
-				StartHits = 0;
-				QuestActive = true;
-				QuestHits = 0;
-				HoardMask = 0;
-				BermudaCount = 0;
-				ModeStart = SDL_GetTicks();
-				TreasureX = rand() % 5;
-				ParrotMask = VolcanoMask = 0;
-				if (Rules == &Pirates && QuestIndex == 4)
-				{
-					// The storm level comes from the wind lights: squall, tropical storm, monsoon or hurricane. The lights are
-					// approximated from the wind lane passes.
-					int level = WindHits * 16 / 12;
-					StormValue = level <= 5 ? 10000 : level <= 10 ? 25000 : level <= 15 ? 50000 : 100000;
-					StormEvery = level <= 5 ? 8 : level <= 10 ? 7 : level <= 15 ? 6 : 5;
-				}
-				if (restart)
-				{
-					QuestIndex = RestartQuest;
-					RestartEnd = 0;
-				}
-				ModeEnd = SDL_GetTicks() + (unsigned)(1000 * (Rules == &Dragon ? DragonSeconds : PirateSeconds)[QuestIndex]);
-				pb::MainTable->AddScore(Rules->startPoints);
-				snprintf(Line, sizeof Line, "%s started", Rules->questWord);
-				say(pinball::InfoTextBox, Line, 3.0f, 2);
+				begin_quest(restart);
 			}
 			show_quest();
 			return;
@@ -1467,6 +1564,14 @@ namespace
 		{
 			if (code == 60 || code == 63)
 				drain(code);
+			return;
+		}
+		if (code == 1 && MenuOpen && cmp->GroupName && !strncmp(cmp->GroupName, "a_flip", 6))
+		{
+			if (SDL_GetTicks() > MenuEnd)
+				MenuOpen = false;
+			else
+				answer_egg_menu(!strcmp(cmp->GroupName, "a_flip1"));
 			return;
 		}
 		if (code == 1005 && dynamic_cast<TPlunger*>(cmp))
