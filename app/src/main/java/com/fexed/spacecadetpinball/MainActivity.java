@@ -439,7 +439,7 @@ public class MainActivity extends SDLActivity {
 
         @Override
         public void onScorePosted(int score) {
-            String str = "" + score;
+            String str = ScoreBoard.format(score);
             runOnUiThread(() -> mBinding.txtscore.setText(str));
         }
 
