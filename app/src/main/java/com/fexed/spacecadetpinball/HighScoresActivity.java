@@ -45,8 +45,8 @@ public class HighScoresActivity extends AppCompatActivity {
             title.setText(R.string.gameover_title);
             subtitle.setVisibility(View.VISIBLE);
             subtitle.setText(highlightRank > 0
-                    ? getString(R.string.gameover_rank, score, highlightRank)
-                    : getString(R.string.gameover_score, score));
+                    ? getString(R.string.gameover_rank, ScoreBoard.format(score), highlightRank)
+                    : getString(R.string.gameover_score, ScoreBoard.format(score)));
             primary.setVisibility(View.VISIBLE);
             primary.setOnClickListener(v -> {
                 setResult(RESULT_OK);
@@ -85,22 +85,34 @@ public class HighScoresActivity extends AppCompatActivity {
         }
     }
 
+    private static final int SHOWN = 3;
+
     private void buildList() {
-        LinearLayout list = findViewById(R.id.hs_list);
-        list.removeAllViews();
         ((TextView) findViewById(R.id.hs_table)).setText(table.title);
-        List<ScoreBoard.Entry> entries = ScoreBoard.get(this, table.id);
-        findViewById(R.id.hs_empty).setVisibility(entries.isEmpty() ? View.VISIBLE : View.GONE);
-        DateFormat dates = DateFormat.getDateInstance(DateFormat.MEDIUM);
+        List<ScoreBoard.Entry> top = ScoreBoard.get(this, table.id);
+        List<ScoreBoard.Entry> recent = ScoreBoard.getRecent(this, table.id);
+        boolean empty = top.isEmpty() && recent.isEmpty();
+        findViewById(R.id.hs_empty).setVisibility(empty ? View.VISIBLE : View.GONE);
+        findViewById(R.id.hs_top_header).setVisibility(empty ? View.GONE : View.VISIBLE);
+        findViewById(R.id.hs_recent_header).setVisibility(recent.isEmpty() ? View.GONE : View.VISIBLE);
+        boolean gameOver = getIntent().getBooleanExtra(EXTRA_GAME_OVER, false);
+        fillList((LinearLayout) findViewById(R.id.hs_list), top, highlightRank > 0 && gameOver ? highlightRank : 0, true);
+        // in the recent list the game just played is the first row
+        fillList((LinearLayout) findViewById(R.id.hs_recent_list), recent, gameOver ? 1 : 0, false);
+    }
+
+    private void fillList(LinearLayout list, List<ScoreBoard.Entry> entries, int highlight, boolean ranked) {
+        list.removeAllViews();
+        DateFormat dates = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
         LayoutInflater inflater = LayoutInflater.from(this);
-        for (int i = 0; i < entries.size(); i++) {
+        for (int i = 0; i < Math.min(SHOWN, entries.size()); i++) {
             ScoreBoard.Entry e = entries.get(i);
             View row = inflater.inflate(R.layout.item_score, list, false);
-            ((TextView) row.findViewById(R.id.sc_rank)).setText(String.valueOf(i + 1));
+            ((TextView) row.findViewById(R.id.sc_rank)).setText(ranked ? String.valueOf(i + 1) : "\u2022");
             ((TextView) row.findViewById(R.id.sc_date)).setText(dates.format(new Date(e.date)));
             TextView score = row.findViewById(R.id.sc_score);
-            score.setText(String.valueOf(e.score));
-            if (i + 1 == highlightRank && getIntent().getBooleanExtra(EXTRA_GAME_OVER, false)) {
+            score.setText(ScoreBoard.format(e.score));
+            if (i + 1 == highlight) {
                 row.setBackgroundResource(R.drawable.bg_card);
                 score.setTypeface(null, Typeface.BOLD);
             }

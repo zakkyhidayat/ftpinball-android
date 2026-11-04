@@ -82,8 +82,8 @@
     <string name="highscores_title">Migliori punteggi</string>
     <string name="highscores_empty">Nessun punteggio. Gioca una partita!</string>
     <string name="gameover_title">Partita finita</string>
-    <string name="gameover_score">Il tuo punteggio: %1$d</string>
-    <string name="gameover_rank">Il tuo punteggio: %1$d \u2014 posizione #%2$d!</string>
+    <string name="gameover_score">Il tuo punteggio: %1$s</string>
+    <string name="gameover_rank">Il tuo punteggio: %1$s \u2014 posizione #%2$d!</string>
     <string name="play_again">Gioca ancora</string>
     <string name="back_to_menu">Menu principale</string>
     <string name="close">Chiudi</string>

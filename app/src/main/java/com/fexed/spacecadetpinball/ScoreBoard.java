@@ -13,6 +13,7 @@ import java.util.List;
 /** Local top 10 high scores, one list per table. */
 final class ScoreBoard {
     static final int MAX_ENTRIES = 10;
+    static final int MAX_RECENT = 10;
 
     static final class Entry {
         final int score;
@@ -44,8 +45,45 @@ final class ScoreBoard {
         return entries;
     }
 
+    private static String recentKey(String tableId) {
+        return tableId + "_recent";
+    }
+
+    /** Formats a score with a comma between every three digits. */
+    static String format(int score) {
+        return String.format(java.util.Locale.US, "%,d", score);
+    }
+
+    /** The latest games, newest first. */
+    static List<Entry> getRecent(Context context, String tableId) {
+        List<Entry> entries = new ArrayList<>();
+        try {
+            JSONArray array = new JSONArray(prefs(context).getString(recentKey(tableId), "[]"));
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject o = array.getJSONObject(i);
+                entries.add(new Entry(o.getInt("score"), o.getLong("date")));
+            }
+        } catch (JSONException ignored) {
+        }
+        return entries;
+    }
+
+    private static void addRecent(Context context, String tableId, int score, long date) {
+        List<Entry> entries = getRecent(context, tableId);
+        entries.add(0, new Entry(score, date));
+        while (entries.size() > MAX_RECENT) entries.remove(entries.size() - 1);
+        JSONArray array = new JSONArray();
+        try {
+            for (Entry e : entries) array.put(new JSONObject().put("score", e.score).put("date", e.date));
+        } catch (JSONException e) {
+            return;
+        }
+        prefs(context).edit().putString(recentKey(tableId), array.toString()).apply();
+    }
+
     /** Adds a score and returns its rank (1-based), or 0 if it did not make the top 10. */
     static int add(Context context, String tableId, int score, long date) {
+        addRecent(context, tableId, score, date);
         List<Entry> entries = get(context, tableId);
         int index = 0;
         while (index < entries.size() && entries.get(index).score >= score) index++;
