@@ -710,7 +710,7 @@ namespace
 	unsigned LaunchTicks;
 	int Hits[128];       // hits per score entry this ball
 	bool BankPaid[128];  // bank bonus already awarded this ball
-	int BumperHits;
+	int BumperHits, Weapons;
 	char Line[96];
 
 	bool match(Roles roles, const char* name)
@@ -761,7 +761,7 @@ namespace
 	{
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
-		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = 0;
+		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = Weapons = 0;
 		QuestActive = LastBallLost = false;
 		LaunchTicks = 0;
 		memset(Hits, 0, sizeof Hits);
@@ -815,6 +815,14 @@ namespace
 		if (index < 0)
 			return;
 		pb::MainTable->AddScore(component_score(index));
+		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && BumperHits % 8 == 0 && Weapons < 4)
+		{
+			// Every eighth forest bumper hit awards the next weapon (25,000 more each time, from the original code)
+			static const char* const weapons[] = {"Frantz's Ax", "Firebow", "Sword of Virtue", "Dragon Lance"};
+			pb::MainTable->AddScore(25000 + 10000 * Weapons);
+			snprintf(Line, sizeof Line, "%s", weapons[Weapons++]);
+			say(pinball::InfoTextBox, Line, 3.0f, 2);
+		}
 		if (match(Rules->targets, name))
 		{
 			Jackpot += Rules->jackpotTarget;
