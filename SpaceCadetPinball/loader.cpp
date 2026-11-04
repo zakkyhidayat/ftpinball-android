@@ -152,9 +152,16 @@ int loader::get_sound_id(int groupIndex)
 				               [](unsigned char c) { return std::toupper(c); });
 				if (pb::FullTiltMode)
 				{
-					// FT sounds are in SOUND subfolder
-					fileName.insert(0, 1, PathSeparator);
-					fileName.insert(0, "SOUND");
+					// FT sounds are in SOUND subfolder; the app stores them next to the table data
+					auto flatPath = pinball::make_path_name(fileName);
+					auto flatFile = fopen(flatPath.c_str(), "rb");
+					if (flatFile)
+						fclose(flatFile);
+					else
+					{
+						fileName.insert(0, 1, PathSeparator);
+						fileName.insert(0, "SOUND");
+					}
 				}
 
 				float duration = -1;
