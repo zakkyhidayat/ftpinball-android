@@ -630,7 +630,7 @@ namespace
 	// tables of the original game executables (lenient_scores.h); jackpots, bonuses and the quests / modes follow
 	// the table rules of the original help file. The handler code of the original is not ported, so the quest
 	// flow is a reconstruction from those rules.
-	enum { JACKPOT = -1, EXTRA_BALL = -2 };
+	enum { JACKPOT = -1, EXTRA_BALL = -2, MYSTERY = -3, MAX_WEAPONS = -4, MAX_ARMOR = -5 };
 	typedef const char* const* Roles; // null terminated; a trailing '*' matches a name prefix
 
 	struct Quest
@@ -676,7 +676,7 @@ namespace
 			{"Fire Lizard Attack: hit the sinks", FireLizards, 8, {100000, 200000, 300000, 400000, 500000, 1000000}, 4, 0},
 			{"Rescue Maiden: prison tower", PrisonTower, 4, {250000, 500000, JACKPOT, EXTRA_BALL, 0, 0}, 0, 0},
 			{"Dragon Pass: hit the kickouts", Kickouts, 5, {100000, 100000, 100000, 100000, JACKPOT, 0}, 0, 250000},
-			{"Wizard's Fury: put the ball in the well", Well, 4, {1000000, JACKPOT, 1000000, EXTRA_BALL, 0, 0}, 0, 0},
+			{"Wizard's Fury: put the ball in the well", Well, 4, {MYSTERY, MYSTERY, MYSTERY, MYSTERY, 0, 0}, 0, 0},
 			{"Dragon Hoard: steal the gems", Gems, 8, {50000, 60000, 70000, 100000, 200000, 250000}, 0, 0},
 		}
 	};
@@ -716,6 +716,15 @@ namespace
 	bool SlayActive;
 	unsigned SlayEnd;
 	char Line[96];
+	// Dragon's Keep quest flow of the original code: the next quest is drawn at random from the quests not completed
+	// yet, the quest selection target draws again, a quest that has ended can be restarted for ten seconds, and
+	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
+	bool QuestDone[6];
+	int Armor, Mystery;
+	unsigned RestartEnd;
+	int RestartQuest;
+	const char* const SpellTargets[] = {"a_spot4", "a_spot5", "a_spot6", "a_spot7", "a_spot22"};
+	const int SpellAwards[] = {1000000, JACKPOT, MAX_WEAPONS, MAX_ARMOR, EXTRA_BALL};
 
 	bool match(Roles roles, const char* name)
 	{
@@ -757,19 +766,59 @@ namespace
 			++pb::MainTable->ExtraBalls;
 			say(pinball::InfoTextBox, "Extra Ball", 3.0f, 2);
 		}
+		else if (value == MYSTERY)
+			award(Mystery);
+		else if (value == MAX_WEAPONS)
+		{
+			Weapons = 4;
+			say(pinball::InfoTextBox, "Max Weapons", 3.0f, 2);
+		}
+		else if (value == MAX_ARMOR)
+		{
+			Armor = 3;
+			say(pinball::InfoTextBox, "Max Armor", 3.0f, 2);
+		}
 		else if (value > 0)
 			pb::MainTable->AddScore(value);
+	}
+
+	// The next quest: any of the quests not completed yet (-1 when there are none left)
+	int draw_quest(int avoid)
+	{
+		int open[6], count = 0;
+		for (int i = 0; i < Rules->questCount; ++i)
+			if (!QuestDone[i] && i != avoid)
+				open[count++] = i;
+		if (!count && avoid >= 0 && !QuestDone[avoid])
+			return avoid;
+		return count ? open[rand() % count] : -1;
+	}
+
+	void start_slay()
+	{
+		SlayActive = true;
+		SlayHits = 0;
+		SlayNeed = 8 - Weapons < 3 ? 3 : 8 - Weapons;
+		SlayEnd = SDL_GetTicks() + 30000 + 5000 * Armor;
+		snprintf(Line, sizeof Line, "Slay Dragon: ball in the dragon's mouth (%d)", SlayNeed);
+		say(pinball::MissTextBox, Line, -1.0f, 1);
 	}
 
 	void new_game()
 	{
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
+		memset(QuestDone, 0, sizeof QuestDone);
+		Armor = RestartQuest = 0;
+		RestartEnd = 0;
+		Mystery = 1000000;
 		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = Weapons = SwordHits = SlayHits = SlayNeed = 0;
 		SuperJackpot = 2500000;
 		SlayActive = false;
 		QuestActive = LastBallLost = false;
 		LaunchTicks = 0;
+		if (Rules == &Dragon)
+			QuestIndex = draw_quest(-1);
 		memset(Hits, 0, sizeof Hits);
 		memset(BankPaid, 0, sizeof BankPaid);
 	}
@@ -826,12 +875,7 @@ namespace
 			if ((!strcmp(name, "a_spot19") || !strcmp(name, "a_spot26")) && ++SwordHits >= 3)
 			{
 				SwordHits = 0;
-				SlayActive = true;
-				SlayHits = 0;
-				SlayNeed = 8 - Weapons < 3 ? 3 : 8 - Weapons;
-				SlayEnd = SDL_GetTicks() + 30000;
-				snprintf(Line, sizeof Line, "Slay Dragon: ball in the dragon's mouth (%d)", SlayNeed);
-				say(pinball::MissTextBox, Line, -1.0f, 1);
+				start_slay();
 			}
 			return;
 		}
@@ -919,15 +963,44 @@ namespace
 			Jackpot += Rules->jackpotSink;
 
 		if (Rules == &Dragon)
+		{
 			dragon_slay(name);
+			// The spell targets set the mystery award of Wizard's Fury
+			for (int i = 0; i < 5; ++i)
+				if (!strcmp(name, SpellTargets[i]) && Mystery != SpellAwards[i])
+				{
+					Mystery = SpellAwards[i];
+					static const char* const names[] = {"One Million", "Jackpot", "Max Weapons", "Max Armor", "Extra Ball"};
+					snprintf(Line, sizeof Line, "Mystery Bonus set to: %s", names[i]);
+					say(pinball::InfoTextBox, Line, 3.0f, 2);
+				}
+			// The quest selection target draws another of the quests not completed yet
+			if (!strcmp(name, "a_spot27") && !QuestActive && !SlayActive)
+			{
+				int next = draw_quest(QuestIndex);
+				if (next >= 0)
+				{
+					QuestIndex = next;
+					static const char* const picks[] = {"Fire Lizards", "Rescue Maiden", "Dragon Pass", "Wizard's Fury", "Dragon Hoard"};
+					snprintf(Line, sizeof Line, "%s Quest Selected", picks[next]);
+					say(pinball::InfoTextBox, Line, 2.0f, 2);
+				}
+			}
+		}
 
 		if (!QuestActive)
 		{
-			if (match(Rules->startRoles, name) && ++StartHits >= Rules->startHits)
+			bool restart = Rules == &Dragon && RestartEnd && SDL_GetTicks() < RestartEnd && match(Rules->startRoles, name);
+			if (restart || (match(Rules->startRoles, name) && ++StartHits >= Rules->startHits))
 			{
 				StartHits = 0;
 				QuestActive = true;
 				QuestHits = 0;
+				if (restart)
+				{
+					QuestIndex = RestartQuest;
+					RestartEnd = 0;
+				}
 				pb::MainTable->AddScore(Rules->startPoints);
 				snprintf(Line, sizeof Line, "%s started", Rules->questWord);
 				say(pinball::InfoTextBox, Line, 3.0f, 2);
@@ -957,7 +1030,23 @@ namespace
 		Jackpot += Rules->jackpotQuest;
 		snprintf(Line, sizeof Line, "%s complete!", Rules->questWord);
 		say(pinball::InfoTextBox, Line, 4.0f, 2);
-		QuestIndex = (QuestIndex + 1) % Rules->questCount;
+		if (Rules == &Dragon)
+		{
+			// Completed quests drop out of the draw; with none left the dragon can be slain. The quest can be restarted
+			// by a fire lizard sink for the next ten seconds.
+			QuestDone[QuestIndex] = true;
+			RestartQuest = QuestIndex;
+			RestartEnd = SDL_GetTicks() + 10000;
+			QuestIndex = draw_quest(-1);
+			if (QuestIndex < 0)
+			{
+				QuestIndex = RestartQuest;
+				if (!SlayActive)
+					start_slay();
+			}
+		}
+		else
+			QuestIndex = (QuestIndex + 1) % Rules->questCount;
 		if (pb::MainTable->ScoreMultiplier < 4)
 			++pb::MainTable->ScoreMultiplier;
 		show_quest();
@@ -987,7 +1076,7 @@ namespace
 		LaunchTicks = 0;
 		if (!table->TiltLockFlag)
 		{
-			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest;
+			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 : 0);
 			if (bonus > 0)
 			{
 				snprintf(Line, sizeof Line, "Total Bonus %d", bonus);
@@ -996,6 +1085,7 @@ namespace
 			}
 		}
 		TargetsHit = 0;
+		RestartEnd = 0;
 		memset(Hits, 0, sizeof Hits);
 		memset(BankPaid, 0, sizeof BankPaid);
 		table->ScoreMultiplier = 0;
