@@ -465,7 +465,7 @@ void render::BlitVScreen()
 
 bool render::PlungerWindow = false;
 
-// Fixed, magnified view of the shooter lane (it does not follow the ball), drawn on top of the table
+// Fixed, square, magnified view of the shooter lane with ball and plunger (it does not follow the ball), drawn on top of the table
 static bool PlungerAnchorSet = false;
 static float PlungerAnchorX = 0, PlungerAnchorY = 0;
 
@@ -492,15 +492,14 @@ void render::DrawPlungerWindow()
 		PlungerAnchorSet = true;
 	}
 
-	// Tall rectangle on the left of the lane
+	// Square window just left of the lane
 	SDL_Rect win;
 	// Only the board (left part of the virtual screen) is visible, the sidebar sits off screen
 	int boardWidth = pb::MainTable ? std::min(static_cast<int>(pb::MainTable->Width), vscreen->Width) : vscreen->Width;
 	float boardDestW = static_cast<float>(dest.w) * boardWidth / vscreen->Width;
-	win.w = static_cast<int>(boardDestW * 0.27f);
-	win.h = static_cast<int>(dest.h * 0.46f);
-	win.x = dest.x + static_cast<int>(boardDestW * 0.10f);
-	win.y = dest.y + static_cast<int>(dest.h * 0.30f);
+	win.w = win.h = static_cast<int>(boardDestW * 0.36f);
+	win.x = dest.x + static_cast<int>(boardDestW * 0.78f) - win.w;
+	win.y = dest.y + static_cast<int>(dest.h * 0.80f) - win.h;
 
 	// Source: the lane around the anchor, 3x magnified, showing more of the lane above the ball
 	const float magnification = 2.2f;
@@ -510,7 +509,7 @@ void render::DrawPlungerWindow()
 	src.w = static_cast<int>(win.w / (scaleX * magnification));
 	src.h = static_cast<int>(win.h / (scaleY * magnification));
 	src.x = std::max(0, std::min(static_cast<int>(PlungerAnchorX - src.w * 0.5f), boardWidth - src.w));
-	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY - src.h * 0.4f), vscreen->Height - src.h));
+	src.y = std::max(0, std::min(static_cast<int>(PlungerAnchorY - src.h * 0.07f), vscreen->Height - src.h));
 
 	Uint8 oldR, oldG, oldB, oldA;
 	SDL_GetRenderDrawColor(winmain::Renderer, &oldR, &oldG, &oldB, &oldA);
