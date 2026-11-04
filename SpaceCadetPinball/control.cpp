@@ -689,7 +689,7 @@ namespace
 	const char* const PirateTargets[] = {"a_drop*", "a_spot*", nullptr};
 	const char* const PirateSinks[] = {"a_sink*", nullptr};
 	const char* const ShipTargets[] = {"a_drop5", "a_drop6", "a_drop7", "a_drop8", "a_drop9", nullptr};
-	const char* const Hideaways[] = {"a_sink17", "a_sink15", "a_sink14", nullptr};
+	const char* const Hideaways[] = {"a_sink17", "a_sink15", "a_sink14", "a_sink9", "a_sink12", nullptr};
 	const char* const WindLanes[] = {"a_roll2", "a_roll9", "a_roll8", "a_roll6", nullptr};
 	const char* const TavernParts[] = {"a_drop13", "a_drop14", "a_drop15", "a_sink5", "a_sink6", "a_sink7", nullptr};
 	const char* const ParrotVolcano[] = {"a_drop10", "a_drop11", "a_drop12", "a_spot8", "a_spot9", "a_spot10", "a_spot11", nullptr};
@@ -736,7 +736,7 @@ namespace
 	// Quest and mode lengths in seconds, from the timers the original code sets for each
 	const float DragonSeconds[] = {27.73f, 31.69f, 30.45f, 30.65f, 30.69f};
 	const float PirateSeconds[] = {30.0f, 30.68f, 27.4f, 31.14f, 24.14f, 30.0f, 30.0f};
-	int HoardMask;
+	int HoardMask, TreasureX; // Treasure Hunt: the hideaway where the X is flashing
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
 	unsigned RestartEnd;
@@ -865,12 +865,23 @@ namespace
 			LootActive = true;
 	}
 
+	// Casting a spell pays 120,000 and counts for the 75,000 per spell in the ball bonus (FUN_004236b0 of the original)
+	void cast_spell()
+	{
+		++Spells;
+		pb::MainTable->AddScore(120000);
+		say(pinball::InfoTextBox, "Spell Cast", 3.0f, 2);
+	}
+
 	void start_slay()
 	{
 		SlayActive = true;
 		SlayHits = 0;
-		SlayNeed = 8 - Weapons < 3 ? 3 : 8 - Weapons;
-		SlayEnd = SDL_GetTicks() + 30000 + 5000 * Armor;
+		// Hits needed: eight minus the weapons and offensive spells; time: 30 seconds plus five per armor piece and defensive spell
+		int spells = Spells < 2 ? Spells : 2;
+		SlayNeed = 8 - Weapons - spells < 2 ? 2 : 8 - Weapons - spells;
+		SlayEnd = SDL_GetTicks() + 30000 + 5000 * (Armor + spells);
+		pb::MainTable->AddScore(500000);
 		snprintf(Line, sizeof Line, "Slay Dragon: ball in the dragon's mouth (%d)", SlayNeed);
 		say(pinball::MissTextBox, Line, -1.0f, 1);
 	}
@@ -1135,7 +1146,7 @@ namespace
 						if (i == 1 && Eggs < 8) ++Eggs;
 						else if (i == 2 && Weapons < 4) pb::MainTable->AddScore(25000 + 10000 * Weapons++);
 						else if (i == 3 && Armor < 3) ++Armor;
-						else ++Spells;
+						else cast_spell();
 						static const char* const said[] = {"Skill Shot: Spell", "Skill Shot: Dragon Egg", "Skill Shot: Weapon", "Skill Shot: Armor", "Skill Shot: Spell"};
 						say(pinball::InfoTextBox, said[i], 3.0f, 2);
 					}
@@ -1148,8 +1159,7 @@ namespace
 					if (SpellMask == 31)
 					{
 						SpellMask = 0;
-						++Spells;
-						say(pinball::InfoTextBox, "Spell Cast", 3.0f, 2);
+						cast_spell();
 					}
 				}
 			// The dragon egg kickout (a_kout2) awards an egg, up to the eight egg lights
@@ -1238,6 +1248,7 @@ namespace
 				QuestActive = true;
 				QuestHits = 0;
 				HoardMask = 0;
+				TreasureX = rand() % 5;
 				ParrotMask = VolcanoMask = 0;
 				if (Rules == &Pirates && QuestIndex == 4)
 				{
@@ -1296,6 +1307,27 @@ namespace
 		}
 		if (!match(q.roles, name))
 			return;
+		if (Rules == &Pirates && QuestIndex == 1)
+		{
+			// Treasure Hunt: only the hideaway with the flashing X counts; the X then moves to another hideaway
+			if (strcmp(name, Hideaways[TreasureX]))
+				return;
+			int next = rand() % 4;
+			TreasureX = next >= TreasureX ? next + 1 : next;
+			if (QuestHits < 4)
+				special_treasure();
+			else
+				award(JACKPOT);
+			++QuestHits;
+			Jackpot += q.jackpotAdd;
+			if (QuestHits < q.goal)
+			{
+				show_quest();
+				return;
+			}
+			end_quest();
+			return;
+		}
 		int n = QuestHits++;
 		Jackpot += q.jackpotAdd;
 		if (Rules == &Pirates && QuestIndex == 4)
