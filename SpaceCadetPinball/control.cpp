@@ -732,7 +732,7 @@ namespace
 	int Armor, Mystery, MysteryIdx, Treasures, Eggs, LoopCount, MenuTier;
 	unsigned LoopTime, MenuEnd;
 	bool MenuOpen, ExtraBallLight;
-	int Spells, SpellMask;
+	int Spells, SpellMask, SpellsCast, Offense, Defense;
 	bool FirstHit; // the next component hit after a launch decides the skill shot
 	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
 	// Quest and mode lengths in seconds, from the timers the original code sets for each
@@ -872,9 +872,23 @@ namespace
 	}
 
 	// Casting a spell pays 120,000 and counts for the 75,000 per spell in the ball bonus (FUN_004236b0 of the original)
+	// There are four spells, each cast once: two offensive ones (fewer dragon hits needed) and two defensive ones (more time).
+	// A random one of those not cast yet is chosen; when all are cast nothing happens.
 	void cast_spell()
 	{
+		int open[4], count = 0;
+		for (int i = 0; i < 4; ++i)
+			if (!(SpellsCast & (1 << i)))
+				open[count++] = i;
+		if (!count)
+			return;
+		int spell = open[rand() % count];
+		SpellsCast |= 1 << spell;
 		++Spells;
+		if (spell < 2)
+			++Offense;
+		else
+			++Defense;
 		pb::MainTable->AddScore(120000);
 		say(pinball::InfoTextBox, "Spell Cast", 3.0f, 2);
 	}
@@ -884,9 +898,8 @@ namespace
 		SlayActive = true;
 		SlayHits = 0;
 		// Hits needed: eight minus the weapons and offensive spells; time: 30 seconds plus five per armor piece and defensive spell
-		int spells = Spells < 2 ? Spells : 2;
-		SlayNeed = 8 - Weapons - spells < 2 ? 2 : 8 - Weapons - spells;
-		SlayEnd = SDL_GetTicks() + 30000 + 5000 * (Armor + spells);
+		SlayNeed = 8 - Weapons - Offense < 2 ? 2 : 8 - Weapons - Offense;
+		SlayEnd = SDL_GetTicks() + 30000 + 5000 * (Armor + Defense);
 		pb::MainTable->AddScore(500000);
 		snprintf(Line, sizeof Line, "Slay Dragon: ball in the dragon's mouth (%d)", SlayNeed);
 		say(pinball::MissTextBox, Line, -1.0f, 1);
@@ -897,7 +910,7 @@ namespace
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
 		memset(QuestDone, 0, sizeof QuestDone);
-		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = LoopCount = MenuTier = 0;
+		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = SpellsCast = Offense = Defense = LoopCount = MenuTier = 0;
 		LoopTime = MenuEnd = 0;
 		MenuOpen = ExtraBallLight = false;
 		FirstHit = false;
