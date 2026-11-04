@@ -12,14 +12,13 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <ImageView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:text="@string/app_name"
-            android:textColor="@color/purple_200"
-            android:textSize="32sp"
-            android:textStyle="bold" />
+            android:layout_marginTop="16dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/menu_header" />
 
         <TextView
             android:layout_width="wrap_content"
