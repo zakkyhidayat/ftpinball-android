@@ -1,16 +1,16 @@
 <!-- markdownlint-disable-file MD033 -->
 
-# spacecadetpinball-android
+# Full Tilt! Pinball for Android
 [![Android CI](https://github.com/zakkyhidayat/spacecadetpinball-android/actions/workflows/android.yml/badge.svg)](https://github.com/zakkyhidayat/spacecadetpinball-android/actions/workflows/android.yml)
 ## Summary
 
-Android port of `3D Pinball for Windows – Space Cadet`, a game bundled with Windows.
+Android app for the tables of `Full Tilt! Pinball`, running on the open source engine of `3D Pinball for Windows – Space Cadet`.
 
 This is a fork of [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on-Android) with build updates and bug fixes. Thanks to [k4zmu2a](https://github.com/k4zmu2a) for the original source code, to [iscle](https://github.com/Iscle) for the original Android porting and to [fexed](https://github.com/fexed) for the Android app.
 
 ## Features of this fork
 
-- Main menu with one card per table: the classic Windows 3D Pinball Space Cadet and the three Full Tilt! Pinball tables (Space Cadet, Dragon's Keep, Skulduggery). Dragon's Keep and Skulduggery are listed as "Coming soon": the engine has no rules for them yet.
+- Main menu with one card per Full Tilt! table: Space Cadet, Dragon's Keep and Skulduggery. Space Cadet has full rules. Dragon's Keep and Skulduggery load and play as bare tables: the engine has no scoring, missions or light logic for them yet.
 - No online leaderboard and no in-app volume sliders: use Android's media volume. Sound effects and music keep their on/off toggles.
 - New touch controls, haptic feedback, a restart confirmation and a back-to-menu confirmation
 - Build upgraded to Gradle 8.5 / Android Gradle Plugin 8.2.2 (JDK 17+), targetSdk 34, NDK 26.3, 16 KB page size support
@@ -24,7 +24,7 @@ Full Tilt! Pinball is copyrighted and its data is **not** in this repository. To
 tools/stage_fulltilt.sh /path/to/FULLTILT
 ```
 
-This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds with the classic table only.
+This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds but the menu has no tables. The original Windows 3D Pinball table is no longer bundled.
 
 ## Building
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Пинбол "Звёздный юнга"</string>
+    <string name="app_name">Full Tilt! Pinball</string>
     <string name="left">Левый</string>
     <string name="right">Правый</string>
     <string name="plunger">Рычаг запуска</string>

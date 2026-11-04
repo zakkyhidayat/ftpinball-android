@@ -55,9 +55,8 @@ public class MenuActivity extends AppCompatActivity {
             View card = inflater.inflate(R.layout.item_table, list, false);
             ((TextView) card.findViewById(R.id.tabletitle)).setText(table.title);
 
-            String desc = getString(table.fullTilt ? R.string.table_fulltilt : R.string.table_classic);
-            if (!table.playable) desc = getString(R.string.coming_soon);
-            else if (table == last) desc += " \u00b7 " + getString(R.string.last_played);
+            String desc = getString(table.hasRules ? R.string.table_fulltilt : R.string.table_norules);
+            if (table == last) desc += " \u00b7 " + getString(R.string.last_played);
             ((TextView) card.findViewById(R.id.tabledesc)).setText(desc);
 
             ImageView icon = card.findViewById(R.id.tableicon);
@@ -65,19 +64,14 @@ public class MenuActivity extends AppCompatActivity {
             if (art != null) icon.setImageBitmap(art);
             else icon.setImageResource(R.drawable.star);
 
-            if (table.playable) {
-                card.setOnClickListener(v -> startTable(table));
-            } else {
-                card.setAlpha(0.45f);
-                card.setClickable(false);
-            }
+            card.setOnClickListener(v -> startTable(table));
             list.addView(card);
         }
+        findViewById(R.id.nodata).setVisibility(list.getChildCount() == 0 ? View.VISIBLE : View.GONE);
     }
 
     /** Full Tilt tables ship a 120x120 icon next to their data. */
     private Bitmap loadIcon(Table table) {
-        if (table.assetDir() == null) return null;
         try (InputStream is = getAssets().open(table.assetDir() + "/icon.bmp")) {
             return BitmapFactory.decodeStream(is);
         } catch (IOException e) {
