@@ -157,8 +157,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="72dp"
+            android:background="@drawable/bg_hud_bar"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
             android:text="@string/pause_hint"
-            android:textColor="@color/description_grey"
+            android:textColor="@color/white"
             android:textSize="14sp" />
     </FrameLayout>
 

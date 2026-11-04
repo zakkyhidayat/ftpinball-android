@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="purple_200">#FFE3A820</color>
-    <color name="purple_500">#FFB8860B</color>
+    <color name="purple_500">#FFE3A820</color>
     <color name="purple_700">#FF8A6508</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
@@ -22,7 +22,7 @@
     <color name="ripple_light">#55FFFFFF</color>
     <color name="card_fill">#14808080</color>
     <color name="card_stroke">#33808080</color>
-    <color name="accent_title">#FFB8860B</color>
+    <color name="accent_title">#FFE3A820</color>
     <color name="description_grey">#FF8A8A8A</color>
     <color name="pad_fill">#22E3A820</color>
     <color name="pad_fill_pressed">#77E3A820</color>
