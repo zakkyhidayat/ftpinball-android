@@ -11,6 +11,8 @@
 #include "timer.h"
 #include "TPinballTable.h"
 
+static bool ShotAgainArmed = false;
+
 // Skulduggery's plunger grip is not part of the launcher: its pull back pictures are the four bitmaps of the
 // a_cannon group, which the original shows one after the other as the plunger is pulled
 static void ShowGrip(TPinballTable* table, float power)
@@ -54,6 +56,13 @@ void TPlunger::Collision(TBall* ball, vector2* nextPosition, vector2* direction,
 		Message(1017, 0.0);
 	coef = RandFloat() * Boost * 0.1f + Boost; // it is intended that the passed in coef is never used!
 	maths::basic_collision(ball, nextPosition, direction, Elasticity, Smoothness, Threshold, coef);
+
+	// A shot that was too weak lets the ball roll back to rest on the plunger: it can be shot again
+	if (Boost < 1.0f && ball->Speed < 3.0f && !ShotAgainArmed)
+	{
+		ShotAgainArmed = true;
+		SpaceCadetPinballJNI::setBallInPlunger(true);
+	}
 }
 
 int TPlunger::Message(int code, float value)
@@ -72,6 +81,7 @@ int TPlunger::Message(int code, float value)
 	case 1015:
 		{
 			SpaceCadetPinballJNI::setBallInPlunger(true);
+			ShotAgainArmed = true;
 			if (!ListBitmap)
 				ShowGrip(PinballTable, 0.0f);
 			auto ball = PinballTable->BallList.at(0);
@@ -116,6 +126,7 @@ int TPlunger::Message(int code, float value)
 			{
 				// The plunger was released: the ball is on its way
 				SpaceCadetPinballJNI::setBallInPlunger(false);
+				ShotAgainArmed = false;
 				loader::play_sound(SoundIndexP2);
 				if (loader::Lenient)
 					control::handler(code, this); // starts the shoot again window
