@@ -19,6 +19,7 @@
 #include "TKickback.h"
 #include "TKickout.h"
 #include "TAccelerator.h"
+#include "TMagnet.h"
 #include "TReturnExit.h"
 #include "TLight.h"
 #include "TLightBargraph.h"
@@ -112,6 +113,10 @@ TPinballTable::TPinballTable(): TPinballComponent(nullptr, -1, false)
 			case 1035:
 				if (loader::Lenient)
 					new TReturnExit(this, groupIndex);
+				break;
+			case 1042:
+				if (loader::Lenient)
+					new TMagnet(this, groupIndex);
 				break;
 			case 1036:
 				// Lane accelerator of Dragon's Keep and Skulduggery

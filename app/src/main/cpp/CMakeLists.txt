@@ -81,6 +81,8 @@ set(SOURCE_FILES
         ../../../../SpaceCadetPinball/TAccelerator.h
         ../../../../SpaceCadetPinball/TReturnExit.cpp
         ../../../../SpaceCadetPinball/TReturnExit.h
+        ../../../../SpaceCadetPinball/TMagnet.cpp
+        ../../../../SpaceCadetPinball/TMagnet.h
         ../../../../SpaceCadetPinball/TKickout.cpp
         ../../../../SpaceCadetPinball/TKickout.h
         ../../../../SpaceCadetPinball/TLight.cpp
