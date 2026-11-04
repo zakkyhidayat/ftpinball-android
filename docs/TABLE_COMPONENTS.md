@@ -125,10 +125,12 @@ Rules that are implemented (`control.cpp`):
   Dragon Hoard. Completing a quest raises the table score multiplier.
 * Slay Dragon: starts on the third sword hit or when all five quests are done. Needs eight minus the weapons won hits in the
   dragon's mouth, in 30 seconds plus five per armor piece. The super jackpot grows with every component hit.
-* Ball drain: shoot again in the first 15 seconds, then the bonus (targets, quests, armor, dragon eggs), extra balls, game over.
+* Skill shot: the first spell target the ball hits after the launch gives a spell, dragon egg, weapon or armor (top to bottom: `a_spot22`, `a_spot7`, `a_spot6`, `a_spot5`, `a_spot4`).
+* Spell bank: hitting all five spell targets casts a spell (75,000 each in the ball bonus).
+* Ball drain: shoot again in the first 15 seconds, then the bonus (targets, quests, armor, spells, dragon eggs), extra balls, game over.
 * Lights and sounds as the original per-component code switches them.
 
-Not implemented: the dragon egg purchase menu, the random spells, tower lock and the multiball modes (Gargoyle Gaggle-Ball,
+Not implemented: the dragon egg purchase menu, the effects of spells and the gargoyle gaggle-ball skill shot, tower lock and the multiball modes (Gargoyle Gaggle-Ball,
 Tower Barrage, Dragon Flurry), the gem lights of Dragon Hoard, and light sweeps.
 
 ## 4. Skulduggery
@@ -158,9 +160,10 @@ Implemented:
   hurricane). The level is approximated from the wind lane passes, because the eight wind lights are not tracked.
 * Swordfight: parrot and volcano targets, 30,000 each; completing a bank pays a coin award, special treasure, map piece or extra ball.
 * Coin awards (50,000 doubling to 1,600,000), special treasures (100,000 up to 1,500,000), map pieces (1,000,000 each).
+* Tavern mode: the window sinks (`a_sink5`, `a_sink6`, `a_sink7`) give the random award of the original: map piece, special treasure, coin award or extra ball.
 * Peg Leg's Loot after all modes or all six map pieces: hideaways give special treasures, the ship sink finds the loot.
 
-Not implemented: the skill shot, the shipwreck mystery, buried treasure, wormhole style multiball and light sweeps.
+Not implemented: the Skulduggery skill shot, the shipwreck mystery, buried treasure, wormhole style multiball and light sweeps.
 
 ## 5. Engine classes added for Full Tilt
 
