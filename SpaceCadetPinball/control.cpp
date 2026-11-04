@@ -1410,7 +1410,7 @@ namespace
 			end_quest();
 		if (!table->TiltLockFlag)
 		{
-			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : 0);
+			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : MapPieces * 250000 + Treasures * 100000);
 			if (bonus > 0)
 			{
 				snprintf(Line, sizeof Line, "Total Bonus %d", bonus);
