@@ -472,13 +472,6 @@ static bool PlungerAnchorSet = false;
 static float PlungerAnchorX = 0, PlungerAnchorY = 0;
 
 
-// Some tables (Skulduggery) have no plunger graphic of their own: draw a simple spring and rod below the ball.
-// Coordinates are virtual screen pixels mapped to the screen by the given origin and scale.
-static bool PlungerNeedsShape()
-{
-	return pb::MainTable && pb::MainTable->Plunger && !pb::MainTable->Plunger->RenderSprite && !pb::MainTable->BallList.empty();
-}
-
 static float LaneBallX = 0, LaneBallY = 0;
 static bool LaneBallKnown = false;
 
@@ -492,50 +485,6 @@ static void UpdateLaneBall()
 	LaneBallX = static_cast<float>(xy[0]);
 	LaneBallY = static_cast<float>(xy[1]);
 	LaneBallKnown = true;
-}
-
-static bool PlungerBallPosition(float& x, float& y)
-{
-	if (!PlungerNeedsShape())
-		return false;
-	UpdateLaneBall();
-	if (!LaneBallKnown)
-		return false;
-	x = LaneBallX;
-	y = LaneBallY;
-	return true;
-}
-
-static void DrawPlungerShape(float ballX, float ballY, float originX, float originY, float scale)
-{
-	auto plunger = pb::MainTable->Plunger;
-	float power = plunger->MaxPullback > 0 ? plunger->Boost / plunger->MaxPullback : 0.0f;
-	power = std::max(0.0f, std::min(1.0f, power));
-	auto sx = [&](float vx) { return static_cast<int>(originX + vx * scale); };
-	auto sy = [&](float vy) { return static_cast<int>(originY + vy * scale); };
-
-	Uint8 oldR, oldG, oldB, oldA;
-	SDL_GetRenderDrawColor(winmain::Renderer, &oldR, &oldG, &oldB, &oldA);
-	float headY = ballY + 9.0f + 14.0f * power; // the head is pulled down with the power
-	float springEnd = ballY + 9.0f + 34.0f;
-	// spring: alternating coils from the head down to the fixed end
-	int coils = 8;
-	for (int i = 0; i < coils; ++i)
-	{
-		float y0 = headY + 3.0f + (springEnd - headY - 3.0f) * i / coils;
-		float y1 = headY + 3.0f + (springEnd - headY - 3.0f) * (i + 0.6f) / coils;
-		SDL_SetRenderDrawColor(winmain::Renderer, 190, 190, 200, 255);
-		SDL_Rect coil{ sx(ballX - 3.5f), sy(y0), std::max(1, static_cast<int>(7.0f * scale)), std::max(1, static_cast<int>((y1 - y0) * scale)) };
-		SDL_RenderFillRect(winmain::Renderer, &coil);
-	}
-	// rod and head
-	SDL_SetRenderDrawColor(winmain::Renderer, 120, 120, 130, 255);
-	SDL_Rect rod{ sx(ballX - 1.0f), sy(headY), std::max(1, static_cast<int>(2.0f * scale)), std::max(1, static_cast<int>((springEnd - headY) * scale)) };
-	SDL_RenderFillRect(winmain::Renderer, &rod);
-	SDL_SetRenderDrawColor(winmain::Renderer, 235, 235, 240, 255);
-	SDL_Rect head{ sx(ballX - 5.0f), sy(headY - 1.0f), std::max(2, static_cast<int>(10.0f * scale)), std::max(2, static_cast<int>(3.0f * scale)) };
-	SDL_RenderFillRect(winmain::Renderer, &head);
-	SDL_SetRenderDrawColor(winmain::Renderer, oldR, oldG, oldB, oldA);
 }
 
 void render::DrawPlungerWindow()
@@ -600,18 +549,6 @@ void render::DrawPlungerWindow()
 		src.w -= cut;
 	}
 	SDL_RenderCopy(winmain::Renderer, vScreenTex, &src, &copyDst);
-	if (PlungerNeedsShape())
-	{
-		float bx, by;
-		if (PlungerBallPosition(bx, by))
-		{
-			SDL_Rect clip = copyDst;
-			SDL_RenderSetClipRect(winmain::Renderer, &clip);
-			float k = scaleX * magnification;
-			DrawPlungerShape(bx, by, win.x - src.x * k, win.y - src.y * k, k);
-			SDL_RenderSetClipRect(winmain::Renderer, nullptr);
-		}
-	}
 	SDL_SetRenderDrawColor(winmain::Renderer, 255, 183, 77, 255);
 	for (int i = 0; i < 3; i++)
 	{
@@ -624,15 +561,6 @@ void render::DrawPlungerWindow()
 void render::PresentVScreen()
 {
 	PresentVScreenTable();
-	{
-		float bx, by;
-		if (PlungerBallPosition(bx, by))
-		{
-			auto& d = DestinationRect;
-			float k = static_cast<float>(d.w) / vscreen->Width;
-			DrawPlungerShape(bx, by, static_cast<float>(d.x), static_cast<float>(d.y), k);
-		}
-	}
 	if (PlungerWindow)
 		DrawPlungerWindow();
 	else

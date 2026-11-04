@@ -11,6 +11,21 @@
 #include "timer.h"
 #include "TPinballTable.h"
 
+// Skulduggery's plunger grip is not part of the launcher: its pull back pictures are the four bitmaps of the
+// a_cannon group, which the original shows one after the other as the plunger is pulled
+static void ShowGrip(TPinballTable* table, float power)
+{
+	auto cannon = table->find_component("a_cannon");
+	if (!cannon || !cannon->ListBitmap || !cannon->ListZMap || !cannon->RenderSprite)
+		return;
+	int last = static_cast<int>(cannon->ListBitmap->size()) - 1;
+	int index = static_cast<int>(floor(last * power + 0.5f));
+	index = index < 0 ? 0 : (index > last ? last : index);
+	auto bmp = cannon->ListBitmap->at(index);
+	auto zMap = cannon->ListZMap->at(index);
+	render::sprite_set(cannon->RenderSprite, bmp, zMap, bmp->XPosition - table->XOffset, bmp->YPosition - table->YOffset);
+}
+
 TPlunger::TPlunger(TPinballTable* table, int groupIndex) : TCollisionComponent(table, groupIndex, true)
 {
 	visualStruct visual{};
@@ -58,6 +73,8 @@ int TPlunger::Message(int code, float value)
 		{
 			SpaceCadetPinballJNI::setBallInPlunger(true);
 			render::BallInPlunger = true;
+			if (!ListBitmap)
+				ShowGrip(PinballTable, 0.0f);
 			auto ball = PinballTable->BallList.at(0);
 			ball->Message(1024, 0.0);
 			ball->Position.X = PinballTable->PlungerPositionX;
@@ -105,6 +122,8 @@ int TPlunger::Message(int code, float value)
 				if (loader::Lenient)
 					control::handler(code, this); // starts the shoot again window
 			}
+			if (!ListBitmap)
+				ShowGrip(PinballTable, 0.0f);
 			if (ListBitmap && ListZMap && RenderSprite)
 			{
 				auto bmp = ListBitmap->at(0);
@@ -146,7 +165,12 @@ void TPlunger::PullbackTimer(int timerId, void* caller)
 		plunger->PullbackTimer_ = 0;
 		plunger->Boost = static_cast<float>(plunger->MaxPullback);
 	}
-	if (!plunger->ListBitmap || !plunger->ListZMap || !plunger->RenderSprite)
+	if (!plunger->ListBitmap)
+	{
+		ShowGrip(plunger->PinballTable, plunger->MaxPullback > 0 ? plunger->Boost / plunger->MaxPullback : 0.0f);
+		return;
+	}
+	if (!plunger->ListZMap || !plunger->RenderSprite)
 		return;
 	int index = static_cast<int>(floor(
 		static_cast<float>(plunger->ListBitmap->size() - 1) *
