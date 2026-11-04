@@ -728,6 +728,8 @@ namespace
 	// completing all of them starts the slay dragon quest. Wizard's Fury pays the mystery award the spell targets set.
 	bool QuestDone[8];
 	int Armor, Mystery, MysteryIdx, Treasures, Eggs;
+	int Spells, SpellMask;
+	bool FirstHit; // the next component hit after a launch decides the skill shot
 	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
@@ -858,7 +860,8 @@ namespace
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
 		memset(QuestDone, 0, sizeof QuestDone);
-		Armor = RestartQuest = Treasures = Eggs = 0;
+		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = 0;
+		FirstHit = false;
 		LootActive = false;
 		ModeEnd = 0;
 		WindHits = Coins = MapPieces = 0;
@@ -1016,6 +1019,35 @@ namespace
 
 		if (Rules == &Dragon)
 		{
+			// Skill shot: the first thing the ball hits after the launch, from the spell targets from top to bottom: random
+			// spell, dragon egg, weapon, armor, gargoyle gaggle-ball (not implemented here, so it scores as a spell)
+			if (FirstHit)
+			{
+				FirstHit = false;
+				static const char* const skill[] = {"a_spot22", "a_spot7", "a_spot6", "a_spot5", "a_spot4"};
+				for (int i = 0; i < 5; ++i)
+					if (!strcmp(name, skill[i]))
+					{
+						if (i == 1 && Eggs < 8) ++Eggs;
+						else if (i == 2 && Weapons < 4) pb::MainTable->AddScore(25000 + 10000 * Weapons++);
+						else if (i == 3 && Armor < 3) ++Armor;
+						else ++Spells;
+						static const char* const said[] = {"Skill Shot: Spell", "Skill Shot: Dragon Egg", "Skill Shot: Weapon", "Skill Shot: Armor", "Skill Shot: Spell"};
+						say(pinball::InfoTextBox, said[i], 3.0f, 2);
+					}
+			}
+			// All five spell targets hit cast a spell
+			for (int i = 0; i < 5; ++i)
+				if (!strcmp(name, SpellTargets[i]))
+				{
+					SpellMask |= 1 << i;
+					if (SpellMask == 31)
+					{
+						SpellMask = 0;
+						++Spells;
+						say(pinball::InfoTextBox, "Spell Cast", 3.0f, 2);
+					}
+				}
 			// The dragon egg kickout (a_kout2) awards an egg, up to the eight egg lights
 			if (!strcmp(name, "a_kout2") && !SlayActive && Eggs < 8)
 			{
@@ -1244,7 +1276,7 @@ namespace
 		LaunchTicks = 0;
 		if (!table->TiltLockFlag)
 		{
-			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Eggs * 150000 : 0);
+			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 : 0);
 			if (bonus > 0)
 			{
 				snprintf(Line, sizeof Line, "Total Bonus %d", bonus);
@@ -1287,6 +1319,7 @@ namespace
 		if (code == 1005 && dynamic_cast<TPlunger*>(cmp))
 		{
 			LaunchTicks = SDL_GetTicks();
+			FirstHit = true;
 			return;
 		}
 		if ((code != 63 && code != 57) || !cmp->GroupName)
