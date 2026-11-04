@@ -1317,8 +1317,8 @@ namespace
 		}
 		if (Rules == &Dragon && QuestIndex == 3)
 		{
-			// Dragon Pass: gargoyle targets give 100,000 and add 250,000 to the jackpot, the armor kickout awards the jackpot,
-			// the other kickout a dragon egg
+			// Dragon Pass: gargoyle targets give 100,000 and add 250,000 to the jackpot, the armor kickout awards the jackpot
+			// (the egg of the other kickout is counted with the dragon eggs above)
 			if (!strcmp(name, "a_spot8") || !strcmp(name, "a_spot10") || !strcmp(name, "a_spot12") || !strcmp(name, "a_spot14"))
 			{
 				pb::MainTable->AddScore(100000);
@@ -1326,8 +1326,6 @@ namespace
 			}
 			else if (!strcmp(name, "a_kout1"))
 				award(JACKPOT);
-			else if (!strcmp(name, "a_kout2") && Eggs < 8)
-				++Eggs;
 			return;
 		}
 		if (!match(q.roles, name))
