@@ -7,8 +7,8 @@
     <string name="reset">新遊戲</string>
     <string name="highscore">高分</string>
     <string name="newhighscore">新高分： %d ！恭喜您！</string>
-    <string name="balls">第 %d 顆球</string>
-    <string name="remainingballs">剩下 %d 顆球</string>
+    <string name="balls">%d</string>
+    <string name="remainingballs">%d</string>
     <string name="remainingballssettings">改為剩餘球數指示</string>
     <string name="tiltbuttons">Tilt(搖晃檯面)按鈕</string>
     <string name="credits">立體彈珠台桌是 Maxis 為 Microsoft 建立的。\nCopyright © 1995 Maxis。\n\n逆向工程作者：k4zmu2a\n原始Android移植作者：Iscle\n目前版本移植作者：fexed, th3vanger</string>

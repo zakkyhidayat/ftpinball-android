@@ -8,8 +8,8 @@
     <string name="reset">Новая игра</string>
     <string name="highscore">Рекорд</string>
     <string name="newhighscore">Новый рекорд: %d очков! Поздравляем!</string>
-    <string name="balls">Шар %d</string>
-    <string name="remainingballs">Оставшихся шаров: %d</string>
+    <string name="balls">%d</string>
+    <string name="remainingballs">%d</string>
     <string name="remainingballssettings">Индикатор количества оставшихся шаров</string>
     <string name="tiltbuttons">Кнопки для толкания стола</string>
     <string name="credits">Оригинальная версия игры была разработана MAXIS по заказу Microsoft.\n© 1995 Maxis.\n\nРеверс-инжиниринг: k4zmu2a\nОригинальный порт на Android: Iscle\nДанный порт на Android: fexed, th3vanger\nПеревод на русский язык: HarGabt</string>

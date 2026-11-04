@@ -225,43 +225,80 @@
                 android:contentDescription="@string/settings_title"
                 android:src="@drawable/settings" />
         </LinearLayout>
+        <!-- Score and ball count as the two halves of one bar -->
         <LinearLayout
+            android:id="@+id/hudbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_hud_bar"
             android:baselineAligned="false"
-            android:gravity="bottom"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/txtscore"
-                android:layout_width="190dp"
-                app:autoSizeMaxTextSize="28sp"
-                app:autoSizeMinTextSize="14sp"
-                app:autoSizeTextType="uniform"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_hud_score"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="4dp"
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:maxLines="1"
-                android:textColor="@color/white"
-                android:textSize="28sp"
-                tools:text="10000000" />
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp">
 
-            <Space android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+                <TextView
+                    android:id="@+id/scorelabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.15"
+                    android:text="@string/hud_score"
+                    android:textColor="@color/description_grey"
+                    android:textSize="10sp" />
 
-            <TextView
-                android:id="@+id/ballstxt"
-                android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:background="@drawable/bg_hud_balls"
-                android:paddingHorizontal="14dp"
-                android:paddingVertical="4dp"
+                <TextView
+                    android:id="@+id/txtscore"
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    app:autoSizeMaxTextSize="28sp"
+                    app:autoSizeMinTextSize="14sp"
+                    app:autoSizeTextType="uniform"
+                    tools:text="10000000" />
+            </LinearLayout>
+
+            <View
+                android:id="@+id/hudsplit"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginVertical="10dp"
+                android:background="@color/card_stroke" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:maxLines="1"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                tools:text="Ball 1" />
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp">
+
+                <TextView
+                    android:id="@+id/ballslabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.15"
+                    android:text="@string/hud_ball"
+                    android:textColor="@color/description_grey"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/ballstxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    tools:text="1" />
+            </LinearLayout>
         </LinearLayout>
 
         <TextView

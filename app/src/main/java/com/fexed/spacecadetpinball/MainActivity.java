@@ -556,6 +556,7 @@ public class MainActivity extends SDLActivity {
     }
 
     private void setBallsText() {
+        mBinding.ballslabel.setText(PrefsHelper.getRemainingBalls() ? R.string.hud_balls_left : R.string.hud_ball);
         if (!PrefsHelper.getRemainingBalls()) {
             String str = getString(R.string.balls, ballCount);
             mBinding.ballstxt.setText(str);
@@ -569,15 +570,14 @@ public class MainActivity extends SDLActivity {
         mBinding.tiltrow.setVisibility(PrefsHelper.getTiltButtons() ? View.VISIBLE : View.GONE);
     }
 
-    /** Score and balls shapes take the outline color of the table's own sidebar text. */
+    /** The score and balls bar takes the outline color of the table's own sidebar text. */
     private void tintHud() {
         int stroke = (int) (1.5f * getResources().getDisplayMetrics().density);
-        for (android.widget.TextView v : new android.widget.TextView[]{mBinding.txtscore, mBinding.ballstxt}) {
-            android.graphics.drawable.Drawable bg = v.getBackground().mutate();
-            if (bg instanceof android.graphics.drawable.GradientDrawable) {
-                ((android.graphics.drawable.GradientDrawable) bg).setStroke(stroke, currentTable.accent);
-            }
+        android.graphics.drawable.Drawable bg = mBinding.hudbar.getBackground().mutate();
+        if (bg instanceof android.graphics.drawable.GradientDrawable) {
+            ((android.graphics.drawable.GradientDrawable) bg).setStroke(stroke, currentTable.accent);
         }
+        mBinding.hudsplit.setBackgroundColor((currentTable.accent & 0x00FFFFFF) | 0x55000000);
     }
 
     private void setCustomFonts() {
@@ -631,13 +631,11 @@ public class MainActivity extends SDLActivity {
         if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             mBinding.infotxt.setVisibility(View.GONE);
             mBinding.missiontxt.setVisibility(View.GONE);
-            mBinding.txtscore.setVisibility(View.GONE);
-            mBinding.ballstxt.setVisibility(View.GONE);
+            mBinding.hudbar.setVisibility(View.GONE);
         } else {
             mBinding.infotxt.setVisibility(View.VISIBLE);
             mBinding.missiontxt.setVisibility(View.VISIBLE);
-            mBinding.txtscore.setVisibility(View.VISIBLE);
-            mBinding.ballstxt.setVisibility(View.VISIBLE);
+            mBinding.hudbar.setVisibility(View.VISIBLE);
         }
     }
 

@@ -7,8 +7,8 @@
     <string name="reset">New game</string>
     <string name="highscore">High Score</string>
     <string name="newhighscore">New High Score: %d! Congratulations!</string>
-    <string name="balls">Ball %d</string>
-    <string name="remainingballs">Remaining balls %d</string>
+    <string name="balls">%d</string>
+    <string name="remainingballs">%d</string>
     <string name="remainingballssettings">Remaining balls indicator</string>
     <string name="tiltbuttons">Tilt buttons</string>
     <string name="credits">3D Pinball Table was created for Microsoft by Maxis.\nCopyright © 1995 Maxis.\n\nReverse engineering by: k4zmu2a\nOriginal Android port by: Iscle\nCurrent Android port by: fexed, th3vanger</string>
@@ -99,4 +99,7 @@
     <string name="pause_hint">Tap to resume</string>
     <string name="vol_effects">Effects volume</string>
     <string name="vol_music">Music volume</string>
+    <string name="hud_score">SCORE</string>
+    <string name="hud_ball">BALL</string>
+    <string name="hud_balls_left">BALLS LEFT</string>
 </resources>
