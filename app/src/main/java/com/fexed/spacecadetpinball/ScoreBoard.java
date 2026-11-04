@@ -83,7 +83,14 @@ final class ScoreBoard {
         return entries;
     }
 
+    /** Games played and the sum of their scores, for the average. */
+    static long[] getStats(Context context, String tableId) {
+        return new long[]{prefs(context).getLong(tableId + "_games", 0), prefs(context).getLong(tableId + "_total", 0)};
+    }
+
     private static void addRecent(Context context, String tableId, int score, long date) {
+        long[] stats = getStats(context, tableId);
+        prefs(context).edit().putLong(tableId + "_games", stats[0] + 1).putLong(tableId + "_total", stats[1] + score).apply();
         List<Entry> entries = getRecent(context, tableId);
         entries.add(0, new Entry(score, date));
         while (entries.size() > MAX_RECENT) entries.remove(entries.size() - 1);

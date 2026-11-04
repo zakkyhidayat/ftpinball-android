@@ -92,6 +92,14 @@ public class HighScoresActivity extends AppCompatActivity {
         List<ScoreBoard.Entry> top = ScoreBoard.get(this, table.id);
         List<ScoreBoard.Entry> recent = ScoreBoard.getRecent(this, table.id);
         boolean empty = top.isEmpty() && recent.isEmpty();
+        long[] stats = ScoreBoard.getStats(this, table.id);
+        TextView statsView = findViewById(R.id.hs_stats);
+        statsView.setVisibility(stats[0] > 0 ? View.VISIBLE : View.GONE);
+        if (stats[0] > 0) {
+            int best = top.isEmpty() ? 0 : top.get(0).score;
+            statsView.setText(getString(R.string.hs_stats, String.valueOf(stats[0]), ScoreBoard.format(best),
+                    ScoreBoard.format((int) (stats[1] / stats[0]))));
+        }
         findViewById(R.id.hs_empty).setVisibility(empty ? View.VISIBLE : View.GONE);
         findViewById(R.id.hs_top_header).setVisibility(empty ? View.GONE : View.VISIBLE);
         findViewById(R.id.hs_recent_header).setVisibility(recent.isEmpty() ? View.GONE : View.VISIBLE);

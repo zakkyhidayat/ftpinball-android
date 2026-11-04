@@ -56,6 +56,15 @@
             android:textSize="16sp" />
 
         <TextView
+            android:id="@+id/hs_stats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:textColor="@color/description_grey"
+            android:textSize="13sp" />
+
+        <TextView
             android:id="@+id/hs_empty"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

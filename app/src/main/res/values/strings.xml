@@ -105,4 +105,5 @@
     <string name="hs_top">HIGHEST SCORES</string>
     <string name="hs_recent">RECENT GAMES</string>
     <string name="padsize">Flipper pad size</string>
+    <string name="hs_stats">%1$s games \u00b7 best %2$s \u00b7 average %3$s</string>
 </resources>
