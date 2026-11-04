@@ -11,6 +11,7 @@ This is a fork of [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on
 ## Features of this fork
 
 - Main menu with one card per Full Tilt! table: Space Cadet, Dragon's Keep and Skulduggery. Space Cadet has full rules. Dragon's Keep and Skulduggery load and play as bare tables: the engine has no scoring, missions or light logic for them yet.
+- Local top 10 high scores per table (name and date), shown after each game. Scores of games with cheats are not recorded
 - No online leaderboard and no in-app volume sliders: use Android's media volume. Sound effects and music keep their on/off toggles.
 - New touch controls, haptic feedback, a restart confirmation and a back-to-menu confirmation
 - Build upgraded to Gradle 8.5 / Android Gradle Plugin 8.2.2 (JDK 17+), targetSdk 34, NDK 26.3, 16 KB page size support

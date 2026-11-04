@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="tilt_button_size">96dp</dimen>
-    <dimen name="tilt_side_height">200dp</dimen>
     <dimen name="icon_button_size">64dp</dimen>
-    <dimen name="flipper_text_padding">128dp</dimen>
-    <dimen name="bottomsheet_width">220dp</dimen>
+    <dimen name="pad_height">150dp</dimen>
+    <dimen name="plunger_button_size">120dp</dimen>
+    <dimen name="tilt_height">56dp</dimen>
 </resources>

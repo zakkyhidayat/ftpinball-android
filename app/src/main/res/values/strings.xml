@@ -80,4 +80,25 @@
     <string name="menu_credits">Original source code: k4zmu2a/SpaceCadetPinball\nAndroid port: fexed/Pinball-on-Android\n\nThis fork adds fixes, a new interface and Full Tilt! support. Full Tilt! Pinball belongs to its owners and its data is not distributed with the source code.</string>
     <string name="menutitle">Back to main menu?</string>
     <string name="menumessage">The current game will be lost.</string>
+    <string name="highscores_title">High scores</string>
+    <string name="highscores_empty">No scores yet. Play a game!</string>
+    <string name="gameover_title">Game over</string>
+    <string name="gameover_score">Your score: %1$d</string>
+    <string name="gameover_rank">Your score: %1$d \u2014 rank #%2$d!</string>
+    <string name="play_again">Play again</string>
+    <string name="back_to_menu">Main menu</string>
+    <string name="close">Close</string>
+    <string name="sec_player">Player</string>
+    <string name="sec_controls">Controls</string>
+    <string name="sec_display">Display</string>
+    <string name="sec_sound">Sound</string>
+    <string name="desc_username">Shown on your high scores</string>
+    <string name="desc_tiltbuttons">Show the three tilt buttons under the table</string>
+    <string name="desc_soundfx">Bumpers, flippers and other effects. Volume follows Android\'s media volume</string>
+    <string name="tilt_left">Tilt left</string>
+    <string name="tilt_center">Tilt up</string>
+    <string name="tilt_right">Tilt right</string>
+    <string name="hold_to_shoot">HOLD\nto shoot</string>
+    <string name="pause">PAUSE</string>
+    <string name="pause_hint">Tap to resume</string>
 </resources>

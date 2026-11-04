@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.fexed.spacecadetpinball.databinding.ActivityMainBinding;
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.analytics.FirebaseAnalytics;
 
 public class MainActivity extends SDLActivity {
@@ -42,14 +41,17 @@ public class MainActivity extends SDLActivity {
     public static final String EXTRA_TABLE = "table";
 
     private ActivityMainBinding mBinding;
-    private Handler plungerTimer;
     private boolean leavingToMenu = false;
+    private android.animation.ObjectAnimator plungerPulse;
+    // table height / width as rendered by the engine
+    private static final float TABLE_ASPECT = 825f / 720f;
+    private Table currentTable = Table.CADET;
+    private static final int REQUEST_GAME_OVER = 1;
     private boolean isGameReady = false;
     private boolean isPlaying = true;
 
     private int ballCount = 0;
     private int remainingBalls = 0;
-    private BottomSheetBehavior<ConstraintLayout> bottomSheetBehavior;
 
     private FirebaseAnalytics firebaseAnalytics;
     private int gamesInSession = 0;
@@ -62,6 +64,7 @@ public class MainActivity extends SDLActivity {
         super.onCreate(savedInstanceState);
         setVolumeControlStream(android.media.AudioManager.STREAM_MUSIC);
         Table table = Table.byId(getIntent().getStringExtra(EXTRA_TABLE));
+        currentTable = table;
         File tableDir = prepareTableFiles(table);
         initNative(tableDir.getAbsolutePath() + "/", table.datFile, table.fullTilt);
         PrefsHelper.setPrefs(getSharedPreferences("com.fexed.spacecadetpinball", Context.MODE_PRIVATE));
@@ -87,6 +90,9 @@ public class MainActivity extends SDLActivity {
         mLayout.addView(mBinding.getRoot(), layoutParams);
 
         mBinding.getRoot().bringToFront();
+        mBinding.getRoot().addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            if (r - l != or - ol || b - t != ob - ot) fitPanelsToTable();
+        });
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
             // keep the system back gesture from stealing flipper presses at the screen edges
@@ -101,9 +107,6 @@ public class MainActivity extends SDLActivity {
                 v.setSystemGestureExclusionRects(rects);
             });
         }
-
-        bottomSheetBehavior = BottomSheetBehavior.from(mBinding.bottomsheet);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         mBinding.left.setOnTouchListener((v1, event) -> {
             v1.performClick();
@@ -144,32 +147,9 @@ public class MainActivity extends SDLActivity {
         });
 
 
-        mBinding.bottomPlunger.setOnTouchListener((v1, event) -> {
-            v1.performClick();
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_SPACE);
-                hapticTick();
-            }
-            if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
-                SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_SPACE);
-            }
-            return false;
-        });
-
-        mBinding.playpause.setOnClickListener(view -> {
-            if (isPlaying) {
-                isPlaying = false;
-                pauseNativeThread();
-                if (PrefsHelper.getMusic()) player.pause();
-                mBinding.playpause.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.play, getTheme()));
-            } else {
-                isPlaying = true;
-                resumeNativeThread();
-                if (PrefsHelper.getMusic()) player.start();
-                mBinding.playpause.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.pause, getTheme()));
-
-            }
-        });
+        mBinding.playpause.setOnClickListener(view -> setPaused(isPlaying));
+        mBinding.pauseoverlay.setOnClickListener(view -> setPaused(false));
+        mBinding.exitbtn.setOnClickListener(view -> confirmBackToMenu());
 
         mBinding.replay.setOnClickListener(view -> {
             final boolean wasPlaying = isPlaying;
@@ -246,19 +226,44 @@ public class MainActivity extends SDLActivity {
         confirmBackToMenu();
     }
 
+    private void setPaused(boolean paused) {
+        if (paused == !isPlaying) return;
+        isPlaying = !paused;
+        if (paused) {
+            pauseNativeThread();
+            if (player != null && PrefsHelper.getMusic()) player.pause();
+        } else {
+            resumeNativeThread();
+            if (player != null && PrefsHelper.getMusic()) player.start();
+        }
+        mBinding.pauseoverlay.setVisibility(paused ? View.VISIBLE : View.GONE);
+        mBinding.playpause.setImageDrawable(ResourcesCompat.getDrawable(getResources(),
+                paused ? R.drawable.play : R.drawable.pause, getTheme()));
+    }
+
+    private void goToMenu() {
+        leavingToMenu = true;
+        Intent menu = new Intent(this, MenuActivity.class);
+        menu.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(menu);
+        finish();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQUEST_GAME_OVER) return;
+        if (resultCode == RESULT_OK) restartGame();
+        else goToMenu();
+    }
+
     private void confirmBackToMenu() {
         final boolean wasPlaying = isPlaying;
         if (wasPlaying) pauseNativeThread();
         new android.app.AlertDialog.Builder(this)
                 .setTitle(R.string.menutitle)
                 .setMessage(R.string.menumessage)
-                .setPositiveButton(R.string.yes, (dialog, which) -> {
-                    leavingToMenu = true;
-                    Intent menu = new Intent(this, MenuActivity.class);
-                    menu.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(menu);
-                    finish();
-                })
+                .setPositiveButton(R.string.yes, (dialog, which) -> goToMenu())
                 .setNegativeButton(R.string.no, null)
                 .setOnDismissListener(dialog -> {
                     if (wasPlaying && !leavingToMenu) resumeNativeThread();
@@ -277,7 +282,6 @@ public class MainActivity extends SDLActivity {
         SDLActivity.onNativeKeyDown(KeyEvent.KEYCODE_F2);
         SDLActivity.onNativeKeyUp(KeyEvent.KEYCODE_F2);
         PrefsHelper.setCheatsUsed(false);
-        mBinding.cheatAlert.setVisibility(View.INVISIBLE);
     }
 
     private void hapticTick() {
@@ -367,35 +371,27 @@ public class MainActivity extends SDLActivity {
 
         @Override
         public void onBallInPlungerChanged(boolean isBallInPlunger) {
-            if (PrefsHelper.getFullScreenPlunger()) {
-                runOnUiThread(() -> mBinding.plunger.setVisibility(isBallInPlunger ? View.VISIBLE : View.INVISIBLE));
-                if (isBallInPlunger) {
-                    plungerTimer = new Handler(Looper.getMainLooper());
-                    plungerTimer.postDelayed(() -> runOnUiThread(() -> {
-                        if (PrefsHelper.getPlungerPopup()) {
-                            Toast.makeText(getContext(), R.string.plungerhint, Toast.LENGTH_LONG).show();
-                        }
-                        mBinding.plunger.setVisibility(View.VISIBLE);
-                    }), 3000);
-                } else {
-                    if (plungerTimer != null) {
-                        plungerTimer.removeCallbacksAndMessages(null);
-                        plungerTimer = null;
-                    }
-                }
-            } else {
-                runOnUiThread(() -> bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED));
-            }
+            runOnUiThread(() -> showPlunger(isBallInPlunger));
         }
 
         @Override
         public void onHighScorePresented(int score) {
-            if (HighScoreHandler.postHighScore(score)) {
-                runOnUiThread(() -> Toast.makeText(getContext(), getString(R.string.newhighscore, score), Toast.LENGTH_LONG).show());
-                Bundle bndl = new Bundle();
-                bndl.putInt(FirebaseAnalytics.Param.SCORE, score);
-                runOnUiThread(() -> firebaseAnalytics.logEvent(FirebaseAnalytics.Event.POST_SCORE, bndl));
-            }
+            // Called once when a game ends
+            HighScoreHandler.postHighScore(score);
+            final boolean cheated = PrefsHelper.getCheatsUsed();
+            runOnUiThread(() -> {
+                int rank = 0;
+                if (!cheated && score > 0) {
+                    rank = ScoreBoard.add(MainActivity.this, currentTable.id,
+                            PrefsHelper.getUsername("Player 1"), score, System.currentTimeMillis());
+                }
+                Intent intent = new Intent(MainActivity.this, HighScoresActivity.class);
+                intent.putExtra(HighScoresActivity.EXTRA_TABLE, currentTable.id);
+                intent.putExtra(HighScoresActivity.EXTRA_SCORE, score);
+                intent.putExtra(HighScoresActivity.EXTRA_RANK, rank);
+                intent.putExtra(HighScoresActivity.EXTRA_GAME_OVER, true);
+                startActivityForResult(intent, REQUEST_GAME_OVER);
+            });
         }
 
         @Override
@@ -435,7 +431,6 @@ public class MainActivity extends SDLActivity {
         @Override
         public void onCheatsUsed() {
             PrefsHelper.setCheatsUsed(true);
-            runOnUiThread(() -> mBinding.cheatAlert.setVisibility(View.VISIBLE));
             runOnUiThread(() -> firebaseAnalytics.logEvent("cheat_used", null));
         }
 
@@ -485,7 +480,43 @@ public class MainActivity extends SDLActivity {
         setTiltButtons();
         setCustomFonts();
         setBallsText();
-        configurePlunger();
+    }
+
+    /** The round plunger button appears (and pulses) only while a ball waits to be shot. */
+    private void showPlunger(boolean ballWaiting) {
+        if (plungerPulse != null) {
+            plungerPulse.cancel();
+            plungerPulse = null;
+        }
+        mBinding.plunger.setScaleX(1f);
+        mBinding.plunger.setScaleY(1f);
+        mBinding.plunger.setVisibility(ballWaiting ? View.VISIBLE : View.INVISIBLE);
+        if (ballWaiting) {
+            plungerPulse = android.animation.ObjectAnimator.ofPropertyValuesHolder(mBinding.plunger,
+                    android.animation.PropertyValuesHolder.ofFloat(View.SCALE_X, 1f, 1.1f),
+                    android.animation.PropertyValuesHolder.ofFloat(View.SCALE_Y, 1f, 1.1f));
+            plungerPulse.setDuration(700);
+            plungerPulse.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+            plungerPulse.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+            plungerPulse.start();
+        }
+    }
+
+    /** Fits the control panels into the margins above and below the table, which keeps its aspect ratio. */
+    private void fitPanelsToTable() {
+        View root = mBinding.getRoot();
+        int width = root.getWidth();
+        int height = root.getHeight();
+        if (width == 0 || height == 0) return;
+        int margin = (int) ((height - width * TABLE_ASPECT) / 2);
+        float density = getResources().getDisplayMetrics().density;
+        margin = Math.max(margin, (int) (120 * density));
+        ViewGroup.LayoutParams top = mBinding.toppanel.getLayoutParams();
+        top.height = margin;
+        mBinding.toppanel.setLayoutParams(top);
+        ViewGroup.LayoutParams bottom = mBinding.bottompanel.getLayoutParams();
+        bottom.height = margin;
+        mBinding.bottompanel.setLayoutParams(bottom);
     }
 
     private void setBallsText() {
@@ -498,24 +529,8 @@ public class MainActivity extends SDLActivity {
         }
     }
 
-    private void configurePlunger() {
-        if (PrefsHelper.getShouldShowBottomPlunger()) {
-            PrefsHelper.setShouldShowBottomPlunger(false);
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            mBinding.plunger.setVisibility(View.INVISIBLE);
-        }
-    }
-
     private void setTiltButtons() {
-        if (PrefsHelper.getTiltButtons()) {
-            mBinding.tiltLeft.setVisibility(View.VISIBLE);
-            mBinding.tiltRight.setVisibility(View.VISIBLE);
-            mBinding.tiltBottom.setVisibility(View.VISIBLE);
-        } else {
-            mBinding.tiltLeft.setVisibility(View.GONE);
-            mBinding.tiltRight.setVisibility(View.GONE);
-            mBinding.tiltBottom.setVisibility(View.GONE);
-        }
+        mBinding.tiltrow.setVisibility(PrefsHelper.getTiltButtons() ? View.VISIBLE : View.GONE);
     }
 
     private void setCustomFonts() {
@@ -529,9 +544,6 @@ public class MainActivity extends SDLActivity {
             mBinding.missiontxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
             mBinding.missiontxt.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
             mBinding.plunger.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            // not editing the plunger because it's a button (and using its color as default color)
-            mBinding.bottomPlunger.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.bottomPlunger.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
             mBinding.tiltLeft.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
             mBinding.tiltLeft.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
             mBinding.tiltBottom.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
@@ -562,8 +574,6 @@ public class MainActivity extends SDLActivity {
             mBinding.left.setTextColor(Color.WHITE);
             mBinding.right.setTypeface(Typeface.DEFAULT);
             mBinding.right.setTextColor(Color.WHITE);
-            mBinding.bottomPlunger.setTypeface(Typeface.DEFAULT);
-            mBinding.bottomPlunger.setTextColor(Color.WHITE);
         }
     }
 

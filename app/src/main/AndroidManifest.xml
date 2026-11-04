@@ -23,6 +23,10 @@
         </activity>
         <!-- The game runs in its own process: the native engine can only be initialised once per process -->
         <activity
+            android:name=".HighScoresActivity"
+            android:exported="false"
+            android:process=":game" />
+        <activity
             android:name=".Settings"
             android:exported="false"
             android:process=":game" />

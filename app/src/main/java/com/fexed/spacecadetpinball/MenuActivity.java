@@ -30,6 +30,12 @@ public class MenuActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) getSupportActionBar().hide();
 
         findViewById(R.id.menusettings).setOnClickListener(v -> startActivity(new Intent(this, Settings.class)));
+        findViewById(R.id.menuscores).setOnClickListener(v -> {
+            Intent intent = new Intent(this, HighScoresActivity.class);
+            intent.putExtra(HighScoresActivity.EXTRA_TABLE,
+                    getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_LAST_TABLE, null));
+            startActivity(intent);
+        });
         findViewById(R.id.menuabout).setOnClickListener(v -> new AlertDialog.Builder(this)
                 .setTitle(R.string.about)
                 .setMessage(R.string.menu_credits)
