@@ -3,6 +3,7 @@
 #include "control.h"
 
 #include "pb.h"
+#include "winmain.h"
 #include "pinball.h"
 #include "TBlocker.h"
 #include "TBumper.h"
@@ -628,30 +629,89 @@ namespace
 
 	struct Mission { Kind kind; int goal; int bonus; const char* text; };
 
-	const Mission Missions[] = {
-		{Kind::Target, 5, 25000, "Hit 5 targets"},
-		{Kind::Bumper, 10, 20000, "Hit 10 bumpers"},
-		{Kind::Ramp, 3, 30000, "Shoot 3 ramps"},
-		{Kind::Rollover, 6, 15000, "Roll over 6 lanes"},
-		{Kind::Hole, 3, 40000, "Sink 3 holes"},
+	const Mission DragonMissions[] = {
+		{Kind::Target, 5, 25000, "Slay the dragon: hit 5 targets"},
+		{Kind::Bumper, 10, 20000, "Storm the castle: hit 10 bumpers"},
+		{Kind::Ramp, 3, 30000, "Cross the bridge: shoot 3 ramps"},
+		{Kind::Rollover, 6, 15000, "Light the torches: 6 lanes"},
+		{Kind::Hole, 3, 40000, "Find the treasure: sink 3 holes"},
 	};
-	constexpr int MissionCount = sizeof Missions / sizeof Missions[0];
+	const Mission PirateMissions[] = {
+		{Kind::Target, 5, 25000, "Board the ship: hit 5 targets"},
+		{Kind::Bumper, 10, 20000, "Fire the cannons: hit 10 bumpers"},
+		{Kind::Ramp, 3, 30000, "Sail the seas: shoot 3 ramps"},
+		{Kind::Rollover, 6, 15000, "Climb the rigging: 6 lanes"},
+		{Kind::Hole, 3, 40000, "Dig up the booty: sink 3 holes"},
+	};
+	constexpr int MissionCount = 5;
+	const Mission* Missions = DragonMissions;
 
-	int MissionIndex = 0, MissionProgress = 0, MissionLap = 0;
+	int MissionIndex = 0, MissionProgress = 0, MissionLap = 0, MissionsDone = 0, BallHits = 0;
+	bool LastBallLost = false;
 
 	void show_mission()
 	{
 		static char text[96];
 		const Mission& m = Missions[MissionIndex];
-		snprintf(text, sizeof text, "Mission: %s (%d/%d)", m.text, MissionProgress, m.goal);
+		snprintf(text, sizeof text, "%s (%d/%d)", m.text, MissionProgress, m.goal);
 		if (pinball::MissTextBox)
 			pinball::MissTextBox->Display(text, -1.0f, 1);
+	}
+
+	// Ball lost: ball bonus, shoot again or next ball, and game over after the last one
+	void lenient_drain(int code)
+	{
+		TPinballTable* table = pb::MainTable;
+		if (code == 60)
+		{
+			if (LastBallLost)
+			{
+				table->Message(1022, 0.0f);
+				pb::chk_highscore();
+			}
+			else if (table->Plunger)
+				table->Plunger->Message(1016, 0.0f);
+			return;
+		}
+		static char text[96];
+		if (!table->TiltLockFlag && BallHits > 0)
+		{
+			int bonus = BallHits * 100 * (1 + table->ScoreMultiplier);
+			snprintf(text, sizeof text, "Ball bonus %d", bonus);
+			table->AddScore(bonus);
+			if (pinball::InfoTextBox)
+				pinball::InfoTextBox->Display(text, 2.0f, 2);
+		}
+		BallHits = 0;
+		table->ScoreMultiplier = 0;
+		MissionProgress = 0;
+		if (table->ExtraBalls)
+		{
+			--table->ExtraBalls;
+			if (pinball::InfoTextBox)
+				pinball::InfoTextBox->Display("Shoot again", -1.0f, 2);
+			return;
+		}
+		table->ChangeBallCount(table->BallCount - 1);
+		if (table->CurrentPlayer + 1 != table->PlayerCount || table->BallCount)
+		{
+			table->Message(1021, 0.0f);
+			LastBallLost = false;
+		}
+		else
+			LastBallLost = true;
 	}
 
 	void lenient_rules(int code, TPinballComponent* cmp)
 	{
 		if (!pb::MainTable)
 			return;
+		if (dynamic_cast<TDrain*>(cmp))
+		{
+			if (code == 60 || code == 63)
+				lenient_drain(code);
+			return;
+		}
 		Kind kind = Kind::None;
 		int points = 0;
 		if (code == 63)
@@ -672,8 +732,14 @@ namespace
 			return;
 
 		if (pb::MainTable->CurScore == 0 && pb::MainTable->CurScoreE9 == 0)
-			MissionIndex = MissionProgress = MissionLap = 0; // new game
+		{
+			// new game
+			MissionIndex = MissionProgress = MissionLap = MissionsDone = BallHits = 0;
+			LastBallLost = false;
+			Missions = winmain::DatFileName == "PIRATES.DAT" ? PirateMissions : DragonMissions;
+		}
 		pb::MainTable->AddScore(points);
+		++BallHits;
 
 		const Mission& m = Missions[MissionIndex];
 		if (kind != m.kind)
@@ -695,6 +761,15 @@ namespace
 		if (pinball::InfoTextBox)
 			pinball::InfoTextBox->Display(done, 4.0f, 2);
 		MissionProgress = 0;
+		++MissionsDone;
+		if (pb::MainTable->ScoreMultiplier < 4)
+			++pb::MainTable->ScoreMultiplier;
+		if (MissionsDone % 3 == 0)
+		{
+			++pb::MainTable->ExtraBalls;
+			if (pinball::InfoTextBox)
+				pinball::InfoTextBox->Display("Extra ball earned!", 4.0f, 2);
+		}
 		if (++MissionIndex == MissionCount)
 		{
 			MissionIndex = 0;
