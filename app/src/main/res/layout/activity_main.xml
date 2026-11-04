@@ -11,7 +11,7 @@
         android:id="@+id/backdrop"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:alpha="0.45"
+        android:alpha="0.3"
         android:contentDescription="@null"
         android:scaleType="centerCrop"
         android:visibility="gone"
@@ -232,7 +232,7 @@
             android:gravity="bottom"
             android:orientation="horizontal">
 
-            <TextView
+            <com.fexed.spacecadetpinball.GlyphTextView
                 android:id="@+id/txtscore"
                 android:layout_width="190dp"
                 app:autoSizeMaxTextSize="28sp"
@@ -250,7 +250,7 @@
 
             <Space android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
 
-            <TextView
+            <com.fexed.spacecadetpinball.GlyphTextView
                 android:id="@+id/ballstxt"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
@@ -264,7 +264,7 @@
                 tools:text="Ball 1" />
         </LinearLayout>
 
-        <TextView
+        <com.fexed.spacecadetpinball.GlyphTextView
             android:id="@+id/infotxt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -275,7 +275,7 @@
             android:textSize="15sp"
             tools:text="Awaiting Deployment" />
 
-        <TextView
+        <com.fexed.spacecadetpinball.GlyphTextView
             android:id="@+id/missiontxt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
