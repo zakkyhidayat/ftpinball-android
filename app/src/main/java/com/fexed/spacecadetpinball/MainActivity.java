@@ -495,6 +495,7 @@ public class MainActivity extends SDLActivity {
         PrefsHelper.setCheatsUsed(checkCheatsUsed());
         setFullscreen();
         setTiltButtons();
+        tintHud();
         setCustomFonts();
         setBallsText();
     }
@@ -557,27 +558,38 @@ public class MainActivity extends SDLActivity {
         mBinding.tiltrow.setVisibility(PrefsHelper.getTiltButtons() ? View.VISIBLE : View.GONE);
     }
 
+    /** Score and balls shapes take the outline color of the table's own sidebar text. */
+    private void tintHud() {
+        int stroke = (int) (1.5f * getResources().getDisplayMetrics().density);
+        for (android.widget.TextView v : new android.widget.TextView[]{mBinding.txtscore, mBinding.ballstxt}) {
+            android.graphics.drawable.Drawable bg = v.getBackground().mutate();
+            if (bg instanceof android.graphics.drawable.GradientDrawable) {
+                ((android.graphics.drawable.GradientDrawable) bg).setStroke(stroke, currentTable.accent);
+            }
+        }
+    }
+
     private void setCustomFonts() {
         if (PrefsHelper.getCustomFonts()) {
             mBinding.ballstxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.ballstxt.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.ballstxt.setTextColor(currentTable.accent);
             mBinding.txtscore.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.txtscore.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.txtscore.setTextColor(currentTable.accent);
             mBinding.infotxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.infotxt.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.infotxt.setTextColor(currentTable.accent);
             mBinding.missiontxt.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.missiontxt.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.missiontxt.setTextColor(currentTable.accent);
             mBinding.plunger.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
             mBinding.tiltLeft.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.tiltLeft.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.tiltLeft.setTextColor(currentTable.accent);
             mBinding.tiltBottom.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.tiltBottom.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.tiltBottom.setTextColor(currentTable.accent);
             mBinding.tiltRight.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.tiltRight.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.tiltRight.setTextColor(currentTable.accent);
             mBinding.left.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.left.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.left.setTextColor(currentTable.accent);
             mBinding.right.setTypeface(ResourcesCompat.getFont(getContext(), R.font.bauhauscheavy));
-            mBinding.right.setTextColor(ResourcesCompat.getColor(getResources(), R.color.purple_200, getTheme()));
+            mBinding.right.setTextColor(currentTable.accent);
         } else {
             mBinding.ballstxt.setTypeface(Typeface.DEFAULT);
             mBinding.ballstxt.setTextColor(Color.WHITE);
