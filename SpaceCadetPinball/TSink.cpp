@@ -9,6 +9,8 @@
 #include "TBall.h"
 #include "timer.h"
 
+int TSink::Holding = 0;
+
 TSink::TSink(TPinballTable* table, int groupIndex) : TCollisionComponent(table, groupIndex, true)
 {
 	visualStruct visual{};
@@ -35,6 +37,10 @@ int TSink::Message(int code, float value)
 	case 56:
 		if (value < 0.0f)
 			value = TimerTime;
+		if (Timer)
+			timer::kill(Timer);
+		else if (HeldBall)
+			++Holding;
 		Timer = timer::set(value, this, TimerExpired);
 		break;
 	case 1020:
@@ -44,8 +50,15 @@ int TSink::Message(int code, float value)
 	case 1024:
 		{
 			if (Timer)
+			{
 				timer::kill(Timer);
+				if (HeldBall)
+					--Holding;
+			}
 			Timer = 0;
+			if (HeldBall)
+				HeldBall->InSink = false;
+			HeldBall = nullptr;
 			MessageField = 0;
 
 			auto playerPtr = PlayerMessagefieldBackup;
@@ -85,6 +98,8 @@ void TSink::Collision(TBall* ball, vector2* nextPosition, vector2* direction, fl
 	else
 	{
 		ball->ActiveFlag = 0;
+		HeldBall = ball;
+		ball->InSink = true;
 		render::sprite_set_bitmap(ball->RenderSprite, nullptr);
 		loader::play_sound(SoundIndex4);
 		control::handler(63, this);
@@ -94,7 +109,11 @@ void TSink::Collision(TBall* ball, vector2* nextPosition, vector2* direction, fl
 void TSink::TimerExpired(int timerId, void* caller)
 {
 	auto sink = static_cast<TSink*>(caller);
-	auto ball = sink->PinballTable->BallList.at(0);
+	auto ball = sink->HeldBall ? sink->HeldBall : sink->PinballTable->BallList.at(0);
+	if (sink->HeldBall)
+		--Holding;
+	sink->HeldBall = nullptr;
+	ball->InSink = false;
 	ball->CollisionComp = nullptr;
 	ball->ActiveFlag = 1;
 	ball->Position.X = sink->BallPosition.X;

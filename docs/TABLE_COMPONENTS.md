@@ -129,16 +129,19 @@ Rules that are implemented (`control.cpp`):
 * Fire Lizards: each sink hit is worth 100,000 more than the one before (up to 1,000,000) and every fourth hit awards the jackpot.
 * Slay Dragon: starts on the third sword hit or when all five quests are done. Starting it pays 500,000. Needs eight minus the weapons and offensive spells hits in the
   dragon's mouth, in 30 seconds plus five per armor piece or defensive spell. The super jackpot grows with every component hit.
-* Skill shot: the first spell target the ball hits after the launch gives a spell, dragon egg, weapon or armor (top to bottom: `a_spot22`, `a_spot7`, `a_spot6`, `a_spot5`, `a_spot4`).
+* Skill shot: the first spell target the launched ball hits gives a spell (`a_spot4`), dragon egg (`a_spot5`), weapon (`a_spot6`), armor (`a_spot7`) or Gargoyle Gaggle-Ball (`a_spot22`).
 * Spell bank: hitting all five spell targets casts a spell (75,000 each in the ball bonus).
 * Ball drain: shoot again in the first 15 seconds, then the bonus (targets, quests, armor, spells, dragon eggs), extra balls, game over.
 * Lights and sounds as the original per-component code switches them.
 
 * Dragon eggs: the egg award pays the eggs held times 100,000; the return exits (`s_rexit18`, `s_rexit19`) give two eggs, the kickout `a_kout2` one during Dragon Pass.
-* Egg kickout (`a_kout2`): offers the highest affordable purchase (quest 1 egg, spell 4, weapon 5, armor 6, extra ball light 7, extra ball 8); the left flipper buys, the right declines for 25,000.
+* Multiball: Gargoyle Gaggle-Ball (two balls) from the gargoyle kickout `a_kout2` or the skill shot; Tower Barrage (three balls): the tower bank
+  lights the tower lock, the tower sinks `a_sink18`, `a_sink17`, `a_sink16` lock a ball each and the third lock releases them; Dragon Flurry (five balls)
+  when all six dragon letters are lit (fire lizard sinks, spell bank, dragon loop, gargoyle bank, tower ramp, tower bank).
+* Egg hole (`s_hole118`): offers the highest affordable purchase (quest 1 egg, spell 4, weapon 5, armor 6, extra ball light 7, extra ball 8); the left flipper buys, the right declines for 25,000.
 * Dragon loop (`a_ramp103`): pays and adds to the jackpot (50,000 more for each loop in a row, up to ten); the jackpot is capped at 10,000,000.
 
-Not implemented: the effects of spells, the gargoyle gaggle-ball skill shot (the engine only supports one ball in play), tower lock and the multiball modes (Gargoyle Gaggle-Ball,
+Not implemented: the scoring specials during the multiball modes, tower lock and the multiball modes (Gargoyle Gaggle-Ball,
 Tower Barrage, Dragon Flurry), the gem lights of Dragon Hoard, and light sweeps.
 
 ## 4. Skulduggery

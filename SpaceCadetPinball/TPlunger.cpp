@@ -13,6 +13,23 @@
 
 static bool ShotAgainArmed = false;
 
+// With several balls on the table (multiball, locked balls) the ball to feed is one that is not in play or held
+TBall* TPlunger::FreeBall(TPinballTable* table)
+{
+	for (auto ball : table->BallList)
+		if (!ball->ActiveFlag && !ball->InSink)
+			return ball;
+	// The renderer only has 20 ball bitmaps
+	if (table->BallList.size() < 20)
+	{
+		auto ball = new TBall(table);
+		ball->ActiveFlag = 0;
+		table->BallList.push_back(ball);
+		return ball;
+	}
+	return table->BallList.at(0);
+}
+
 // Skulduggery's plunger grip is not part of the launcher: its pull back pictures are the four bitmaps of the
 // a_cannon group, which the original shows one after the other as the plunger is pulled
 static void ShowGrip(TPinballTable* table, float power)
@@ -85,6 +102,8 @@ int TPlunger::Message(int code, float value)
 			if (!ListBitmap)
 				ShowGrip(PinballTable, 0.0f);
 			auto ball = PinballTable->BallList.at(0);
+			if (loader::Lenient)
+				ball = FreeBall(PinballTable);
 			ball->Message(1024, 0.0);
 			ball->Position.X = PinballTable->PlungerPositionX;
 			ball->Position.Y = PinballTable->PlungerPositionY;

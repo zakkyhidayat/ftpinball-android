@@ -12,6 +12,7 @@ public:
 	int Message(int code, float value) override;
 
 	static void BallFeedTimer(int timerId, void* caller);
+	static TBall* FreeBall(TPinballTable* table);
 	static void PullbackTimer(int timerId, void* caller);
 	static void PlungerReleasedTimer(int timerId, void* caller);
 

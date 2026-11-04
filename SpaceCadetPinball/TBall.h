@@ -33,4 +33,5 @@ public :
 	int CollisionFlag;
 	float Offset;
 	float VisualZArray[50]{};
+	bool InSink = false; // held in a sink: not free for the next ball feed
 };

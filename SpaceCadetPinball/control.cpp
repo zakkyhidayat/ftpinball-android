@@ -23,6 +23,8 @@
 #include "TSound.h"
 #include "TTripwire.h"
 #include "TDrain.h"
+#include "TBall.h"
+#include "timer.h"
 #include "TFlipper.h"
 #include "TGate.h"
 #include "THole.h"
@@ -731,6 +733,10 @@ namespace
 	bool QuestDone[8];
 	int Armor, Mystery, MysteryIdx, Treasures, Eggs, LoopCount, MenuTier;
 	unsigned LoopTime, MenuEnd;
+	// Multiball (Dragon's Keep): balls on the table, the running mode, the dragon letters and the tower lock
+	int BallsInPlay, MultiMode, LetterMask, Locked, FireMask, TowerMask, GargoyleMask;
+	bool LockLit;
+	enum { MULTI_NONE, MULTI_GAGGLE, MULTI_BARRAGE, MULTI_FLURRY };
 	bool MenuOpen, ExtraBallLight;
 	int Spells, SpellMask, SpellsCast, Offense, Defense;
 	bool FirstHit; // the next component hit after a launch decides the skill shot
@@ -893,6 +899,85 @@ namespace
 		say(pinball::InfoTextBox, "Spell Cast", 3.0f, 2);
 	}
 
+	// A new ball is put on the plunger and fired up the launch lane
+	void FeedTimer(int, void*)
+	{
+		TPinballTable* table = pb::MainTable;
+		if (!table || !table->Plunger)
+			return;
+		TBall* ball = TPlunger::FreeBall(table);
+		ball->Message(1024, 0.0f);
+		ball->Position.X = table->PlungerPositionX;
+		ball->Position.Y = table->PlungerPositionY;
+		ball->Position.Z = ball->Offset;
+		ball->ActiveFlag = 1;
+		table->Plunger->Message(1017, 0.0f);
+	}
+
+	void feed_balls(int count)
+	{
+		for (int i = 0; i < count; ++i)
+			timer::set(1.0f + 1.5f * i, nullptr, FeedTimer);
+		BallsInPlay += count;
+	}
+
+	// Gargoyle Gaggle-Ball (two balls), Tower Barrage (three, the locked balls) and Dragon Flurry (five)
+	void start_multiball(int mode, int extraBalls, const char* text)
+	{
+		MultiMode = mode;
+		pb::MainTable->AddScore(100000);
+		say(pinball::InfoTextBox, text, 3.0f, 2);
+		feed_balls(extraBalls);
+	}
+
+	// A ball drained while others are still on the table; the mode ends with one ball left
+	void extra_ball_lost()
+	{
+		if (BallsInPlay > 1)
+			--BallsInPlay;
+		if (BallsInPlay <= 1 && MultiMode)
+		{
+			MultiMode = MULTI_NONE;
+			show_quest();
+		}
+	}
+
+	// The six dragon letter lights; all lit start Dragon Flurry
+	void dragon_letter(int bit)
+	{
+		LetterMask |= 1 << bit;
+		if (LetterMask == 63)
+		{
+			LetterMask = 0;
+			start_multiball(MULTI_FLURRY, 4, "Dragon Flurry");
+		}
+	}
+
+	// Tower lock: after the tower targets, the tower sinks a_sink18, a_sink17 and a_sink16 lock a ball each (a new one is
+	// fed); the third lock starts Tower Barrage with the three locked balls. Returns true when the ball stays locked.
+	bool lock_ball(TPinballComponent* cmp)
+	{
+		static const char* const locks[] = {"a_sink18", "a_sink17", "a_sink16"};
+		if (Rules != &Dragon || !LockLit || MultiMode || Locked >= 3 || strcmp(cmp->GroupName, locks[Locked]))
+			return false;
+		static TPinballComponent* held[3];
+		held[Locked++] = cmp;
+		if (Locked < 3)
+		{
+			say(pinball::InfoTextBox, "Ball Locked", 2.0f, 2);
+			feed_balls(1);
+			return true;
+		}
+		// Tower Barrage: the towers kick their balls out one after the other
+		Locked = 0;
+		LockLit = false;
+		MultiMode = MULTI_BARRAGE;
+		say(pinball::InfoTextBox, "Tower Barrage", 3.0f, 2);
+		for (int i = 0; i < 3; ++i)
+			held[i]->Message(56, 1.0f + i);
+		return true;
+	}
+
 	void start_slay()
 	{
 		SlayActive = true;
@@ -913,6 +998,9 @@ namespace
 		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = SpellsCast = Offense = Defense = LoopCount = MenuTier = 0;
 		LoopTime = MenuEnd = 0;
 		MenuOpen = ExtraBallLight = false;
+		BallsInPlay = 1;
+		MultiMode = LetterMask = Locked = FireMask = TowerMask = GargoyleMask = 0;
+		LockLit = false;
 		FirstHit = false;
 		LootActive = false;
 		ModeEnd = 0;
@@ -1264,20 +1352,21 @@ namespace
 
 		if (Rules == &Dragon)
 		{
-			// Skill shot: the first thing the ball hits after the launch, from the spell targets from top to bottom: random
-			// spell, dragon egg, weapon, armor, gargoyle gaggle-ball (not implemented here, so it scores as a spell)
+			// Skill shot (state 10 of the original): the first spell target the launched ball hits gives a spell (a_spot4), a dragon
+			// egg (a_spot5), a weapon (a_spot6), armor (a_spot7) or Gargoyle Gaggle-Ball (a_spot22)
 			if (FirstHit)
 			{
 				FirstHit = false;
-				static const char* const skill[] = {"a_spot22", "a_spot7", "a_spot5", "a_spot6", "a_spot4"};
+				static const char* const skill[] = {"a_spot4", "a_spot5", "a_spot6", "a_spot7", "a_spot22"};
 				for (int i = 0; i < 5; ++i)
 					if (!strcmp(name, skill[i]))
 					{
 						if (i == 1) egg_award(1);
 						else if (i == 2 && Weapons < 4) pb::MainTable->AddScore(25000 + 10000 * Weapons++);
 						else if (i == 3 && Armor < 3) ++Armor;
-						else cast_spell();
-						static const char* const said[] = {"Skill Shot: Spell", "Skill Shot: Dragon Egg", "Skill Shot: Weapon", "Skill Shot: Armor", "Skill Shot: Spell"};
+						else if (i == 4 && !MultiMode) start_multiball(MULTI_GAGGLE, 1, "Gargoyle Gaggle-Ball");
+						else if (i == 0) cast_spell();
+						static const char* const said[] = {"Skill Shot: Spell", "Skill Shot: Dragon Egg", "Skill Shot: Weapon", "Skill Shot: Armor", "Skill Shot: Gaggle-Ball"};
 						say(pinball::InfoTextBox, said[i], 3.0f, 2);
 					}
 			}
@@ -1289,17 +1378,55 @@ namespace
 					if (SpellMask == 31)
 					{
 						SpellMask = 0;
+						dragon_letter(1);
 						cast_spell();
 					}
 				}
 			// The dragon egg kickout (a_kout2) offers a purchase for the eggs held; during Dragon Pass it awards an egg.
 			// The return exits give two eggs and the dragon ramp loop adds to the jackpot.
+			// The gargoyle kickout (a_kout2) starts Gargoyle Gaggle-Ball, during Dragon Pass it awards an egg; the dragon egg
+			// hole (s_hole118) opens the egg purchase
 			if (!strcmp(name, "a_kout2"))
 			{
 				if (QuestActive && QuestIndex == 3)
 					egg_award(1);
-				else if (!QuestActive && !SlayActive)
-					open_egg_menu();
+				else if (!QuestActive && !SlayActive && !MultiMode)
+					start_multiball(MULTI_GAGGLE, 1, "Gargoyle Gaggle-Ball");
+			}
+			if (!strcmp(name, "s_hole118") && !QuestActive && !SlayActive)
+				open_egg_menu();
+			// Dragon letters: both fire lizard sinks, the spell bank, the dragon loop, the gargoyle bank, the tower ramp and the
+			// tower bank (which also lights the tower lock)
+			if (!strcmp(name, "a_sink1") || !strcmp(name, "a_sink2"))
+				if ((FireMask |= name[6] == '1' ? 1 : 2) == 3)
+				{
+					FireMask = 0;
+					dragon_letter(0);
+				}
+			if (!strcmp(name, "a_ramp103"))
+				dragon_letter(2);
+			if (!strcmp(name, "a_ramp6"))
+				dragon_letter(4);
+			{
+				static const char* const gargoyle[] = {"a_spot8", "a_spot10", "a_spot12", "a_spot14"};
+				for (int i = 0; i < 4; ++i)
+					if (!strcmp(name, gargoyle[i]) && (GargoyleMask |= 1 << i) == 15)
+					{
+						GargoyleMask = 0;
+						dragon_letter(3);
+					}
+				static const char* const tower[] = {"a_spot1", "a_spot2", "a_spot3"};
+				for (int i = 0; i < 3; ++i)
+					if (!strcmp(name, tower[i]) && (TowerMask |= 1 << i) == 7)
+					{
+						TowerMask = 0;
+						dragon_letter(5);
+						if (!LockLit && !MultiMode)
+						{
+							LockLit = true;
+							say(pinball::InfoTextBox, "Tower Lock Enabled", 2.0f, 2);
+						}
+					}
 			}
 			if (!strcmp(name, "s_rexit18") || !strcmp(name, "s_rexit19"))
 				egg_award(2);
@@ -1566,6 +1693,8 @@ namespace
 		memset(Hits, 0, sizeof Hits);
 		memset(BankPaid, 0, sizeof BankPaid);
 		table->ScoreMultiplier = 0;
+		BallsInPlay = 1;
+		MultiMode = MULTI_NONE;
 		if (table->ExtraBalls)
 		{
 			--table->ExtraBalls;
@@ -1588,6 +1717,11 @@ namespace
 			return;
 		if (dynamic_cast<TDrain*>(cmp))
 		{
+			if (code == 2000)
+			{
+				extra_ball_lost();
+				return;
+			}
 			if (code == 60 || code == 63)
 				drain(code);
 			return;
@@ -1611,6 +1745,9 @@ namespace
 		if (pb::MainTable->CurScore == 0 && pb::MainTable->CurScoreE9 == 0)
 			new_game();
 		hit(cmp->GroupName);
+		// The sinks of the other tables kick the ball out again after their own time, unless it stays locked
+		if (code == 63 && dynamic_cast<TSink*>(cmp) && !lock_ball(cmp))
+			cmp->Message(56, -1.0f);
 	}
 }
 
