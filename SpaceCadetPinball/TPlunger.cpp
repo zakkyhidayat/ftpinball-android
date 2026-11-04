@@ -26,7 +26,7 @@ TPlunger::TPlunger(TPinballTable* table, int groupIndex) : TCollisionComponent(t
 	MaxPullback = 100;
 	Elasticity = 0.5f;
 	Smoothness = 0.5f;
-	PullbackIncrement = static_cast<int>(100.0 / (ListBitmap->size() * 8.0));
+	PullbackIncrement = static_cast<int>(100.0 / ((ListBitmap ? ListBitmap->size() : 8) * 8.0));
 	Unknown4F = 0.025f;
 	float* floatArr = loader::query_float_attribute(groupIndex, 0, 601);
 	table->PlungerPositionX = floatArr[0];
@@ -103,14 +103,17 @@ int TPlunger::Message(int code, float value)
 				if (loader::Lenient)
 					control::handler(code, this); // starts the shoot again window
 			}
-			auto bmp = ListBitmap->at(0);
-			auto zMap = ListZMap->at(0);
-			render::sprite_set(
-				RenderSprite,
-				bmp,
-				zMap,
-				bmp->XPosition - PinballTable->XOffset,
-				bmp->YPosition - PinballTable->YOffset);
+			if (ListBitmap && ListZMap && RenderSprite)
+			{
+				auto bmp = ListBitmap->at(0);
+				auto zMap = ListZMap->at(0);
+				render::sprite_set(
+					RenderSprite,
+					bmp,
+					zMap,
+					bmp->XPosition - PinballTable->XOffset,
+					bmp->YPosition - PinballTable->YOffset);
+			}
 
 			timer::set(Unknown4F, this, PlungerReleasedTimer);
 			break;
@@ -141,6 +144,8 @@ void TPlunger::PullbackTimer(int timerId, void* caller)
 		plunger->PullbackTimer_ = 0;
 		plunger->Boost = static_cast<float>(plunger->MaxPullback);
 	}
+	if (!plunger->ListBitmap || !plunger->ListZMap || !plunger->RenderSprite)
+		return;
 	int index = static_cast<int>(floor(
 		static_cast<float>(plunger->ListBitmap->size() - 1) *
 		(plunger->Boost / static_cast<float>(plunger->MaxPullback))));

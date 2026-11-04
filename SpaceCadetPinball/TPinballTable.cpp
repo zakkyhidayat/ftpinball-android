@@ -102,6 +102,11 @@ TPinballTable::TPinballTable(): TPinballComponent(nullptr, -1, false)
 			case 1001:
 				Plunger = new TPlunger(this, groupIndex);
 				break;
+			case 1034:
+				// Skulduggery's launcher
+				if (loader::Lenient && !Plunger)
+					Plunger = new TPlunger(this, groupIndex);
+				break;
 			case 1002:
 				LightGroup->List.push_back(new TLight(this, groupIndex));
 				break;
