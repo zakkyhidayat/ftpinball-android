@@ -745,8 +745,6 @@ public class MainActivity extends SDLActivity {
         if (!file.exists()) return;
         Bitmap art = android.graphics.BitmapFactory.decodeFile(file.getAbsolutePath());
         if (art == null) return;
-        mBinding.backdrop.setImageBitmap(art);
-        mBinding.backdrop.setVisibility(View.VISIBLE);
         mBinding.pauseart.setImageBitmap(art);
     }
 

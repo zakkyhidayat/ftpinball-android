@@ -64,6 +64,7 @@ private:
 	static SDL_Texture* vScreenTex;
 
 	static void PresentVScreenTable();
+	static void DrawWallpaper();
 	static void repaint(struct render_sprite_type_struct* sprite);
 	static void paint_balls();
 	static void unpaint_balls();
