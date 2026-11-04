@@ -560,6 +560,12 @@ void render::DrawPlungerWindow()
 
 void render::PresentVScreen()
 {
+	static bool fitted = false;
+	if (!fitted && pb::MainTable)
+	{
+		fitted = true;
+		fullscrn::window_size_changed(); // centers tables narrower than Space Cadet
+	}
 	PresentVScreenTable();
 	if (PlungerWindow)
 		DrawPlungerWindow();
