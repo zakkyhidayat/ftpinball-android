@@ -623,43 +623,184 @@ TPinballComponent* control::make_component_link(component_tag_base* tag)
 
 namespace
 {
-	// Generic rules for Full Tilt tables whose original rules are unknown:
-	// flat points per hit plus a cycle of simple missions
-	enum class Kind { None, Bumper, Target, Rollover, Ramp, Hole };
+	// Rules for the Full Tilt tables other than Space Cadet. The point values, jackpot growth, bonuses and the
+	// quest / mode awards come from the table rules in the original game's help file. Which table component
+	// plays which role is not stored in the data files, so components are grouped by kind: a quest asks for
+	// hits on one kind of component (sinks, kickouts, ramps, targets, bumpers or lanes).
+	enum Kind { KBumper, KTarget, KLane, KRamp, KSink, KKickout, KRebound, KSpinner, KindCount, KNone };
+	enum { JACKPOT = -1, EXTRA_BALL = -2 };
 
-	struct Mission { Kind kind; int goal; int bonus; const char* text; };
-
-	const Mission DragonMissions[] = {
-		{Kind::Target, 5, 25000, "Slay the dragon: hit 5 targets"},
-		{Kind::Bumper, 10, 20000, "Storm the castle: hit 10 bumpers"},
-		{Kind::Ramp, 3, 30000, "Cross the bridge: shoot 3 ramps"},
-		{Kind::Rollover, 6, 15000, "Light the torches: 6 lanes"},
-		{Kind::Hole, 3, 40000, "Find the treasure: sink 3 holes"},
-	};
-	const Mission PirateMissions[] = {
-		{Kind::Target, 5, 25000, "Board the ship: hit 5 targets"},
-		{Kind::Bumper, 10, 20000, "Fire the cannons: hit 10 bumpers"},
-		{Kind::Ramp, 3, 30000, "Sail the seas: shoot 3 ramps"},
-		{Kind::Rollover, 6, 15000, "Climb the rigging: 6 lanes"},
-		{Kind::Hole, 3, 40000, "Dig up the booty: sink 3 holes"},
-	};
-	constexpr int MissionCount = 5;
-	const Mission* Missions = DragonMissions;
-
-	int MissionIndex = 0, MissionProgress = 0, MissionLap = 0, MissionsDone = 0, BallHits = 0;
-	bool LastBallLost = false;
-
-	void show_mission()
+	struct Quest
 	{
-		static char text[96];
-		const Mission& m = Missions[MissionIndex];
-		snprintf(text, sizeof text, "%s (%d/%d)", m.text, MissionProgress, m.goal);
-		if (pinball::MissTextBox)
-			pinball::MissTextBox->Display(text, -1.0f, 1);
+		const char* name;
+		Kind kind;
+		int goal;
+		int awards[6];     // award for the 1st, 2nd... hit (last one repeats): points, JACKPOT or EXTRA_BALL
+		int jackpotEvery;  // also award the jackpot on every nth hit (0 = never)
+		int jackpotAdd;    // added to the jackpot on every hit
+	};
+
+	struct Profile
+	{
+		int points[KindCount];
+		int jackpotStart;
+		int jackpotAdd[KindCount];
+		int questJackpotAdd;
+		int startPoints;
+		Kind startKind;
+		int startHits;
+		const char* startText;
+		int bonusPerTarget, bonusPerQuest;
+		const char* questWord;
+		int questCount;
+		Quest quests[6];
+	};
+
+	// Dragon's Keep: quests are started by two hits on the fire lizard sinks
+	const Profile Dragon = {
+		{1500, 2500, 500, 25000, 5000, 25000, 1000, 100},
+		1000000, {0, 50000, 0, 0, 75000, 0, 0, 0}, 500000, 0, KSink, 2, "Hit fire lizard sinks to begin quest",
+		2000, 100000, "Quest", 5,
+		{
+			{"Fire Lizard Attack: hit sinks", KSink, 8, {100000, 200000, 300000, 400000, 500000, 600000}, 4, 0},
+			{"Rescue Maiden: hit kickouts", KKickout, 4, {250000, 500000, JACKPOT, EXTRA_BALL, 0, 0}, 0, 0},
+			{"Dragon Pass: hit ramps", KRamp, 5, {100000, 100000, 100000, 100000, 100000, 100000}, 0, 250000},
+			{"Wizard's Fury: hit targets", KTarget, 5, {1000000, JACKPOT, 1000000, JACKPOT, EXTRA_BALL, 0}, 0, 0},
+			{"Dragon Hoard: steal the gems", KBumper, 8, {10000, 10000, 10000, 10000, 10000, JACKPOT}, 0, 0},
+		}
+	};
+
+	// Skulduggery: modes are started by spelling SKULDUGGERY, one letter per target hit
+	const Profile Pirates = {
+		{1500, 4000, 500, 100000, 40000, 75000, 350, 100},
+		1000000, {0, 20000, 0, 0, 40000, 0, 0, 0}, 750000, 200000, KTarget, 10, "Hit targets to spell SKULDUGGERY",
+		10000, 200000, "Mode", 5,
+		{
+			{"Attack Ship: hit the ship", KTarget, 5, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000},
+			{"Treasure Hunt: find the hideaway", KSink, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0},
+			{"Bermuda Triangle: take the lanes", KLane, 5, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
+			{"Storm: bail the water", KTarget, 8, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
+			{"Mutiny: hit the bumpers", KBumper, 10, {25000, 25000, 25000, 25000, 25000, 25000}, 10, 0},
+		}
+	};
+
+	const Profile* Rules = &Dragon;
+	int Jackpot, QuestIndex, QuestHits, QuestsDone, StartHits, TargetsHit, BallHits, ExtraLightHits;
+	bool QuestActive, LastBallLost, ShootAgain;
+	unsigned LaunchTicks;
+	char Line[96];
+
+	void say(TTextBox* box, const char* text, float time, int type)
+	{
+		if (box)
+			box->Display(text, time, type);
 	}
 
-	// Ball lost: ball bonus, shoot again or next ball, and game over after the last one
-	void lenient_drain(int code)
+	void show_quest()
+	{
+		const Quest& q = Rules->quests[QuestIndex];
+		if (QuestActive)
+			snprintf(Line, sizeof Line, "%s (%d/%d)", q.name, QuestHits, q.goal);
+		else
+			snprintf(Line, sizeof Line, "%s", Rules->startText);
+		say(pinball::MissTextBox, Line, -1.0f, 1);
+	}
+
+	void award(int value)
+	{
+		if (value == JACKPOT)
+		{
+			pb::MainTable->AddScore(Jackpot);
+			snprintf(Line, sizeof Line, "Jackpot %d", Jackpot);
+			say(pinball::InfoTextBox, Line, 3.0f, 2);
+		}
+		else if (value == EXTRA_BALL)
+		{
+			++pb::MainTable->ExtraBalls;
+			say(pinball::InfoTextBox, "Extra Ball", 3.0f, 2);
+		}
+		else if (value > 0)
+			pb::MainTable->AddScore(value);
+	}
+
+	Kind classify(int code, TPinballComponent* cmp)
+	{
+		if (code == 57 && dynamic_cast<THole*>(cmp)) return KSink;
+		if (code != 63) return KNone;
+		if (dynamic_cast<TBumper*>(cmp)) return KBumper;
+		if (dynamic_cast<TPopupTarget*>(cmp) || dynamic_cast<TSoloTarget*>(cmp)) return KTarget;
+		if (dynamic_cast<TLightRollover*>(cmp) || dynamic_cast<TRollover*>(cmp)) return KLane;
+		if (dynamic_cast<TRamp*>(cmp)) return KRamp;
+		if (dynamic_cast<TSink*>(cmp)) return KSink;
+		if (dynamic_cast<TKickout*>(cmp)) return KKickout;
+		if (dynamic_cast<TFlagSpinner*>(cmp)) return KSpinner;
+		if (dynamic_cast<TWall*>(cmp) && cmp->GroupName && !strncmp(cmp->GroupName, "a_rebo", 6)) return KRebound;
+		return KNone;
+	}
+
+	void new_game()
+	{
+		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
+		Jackpot = Rules->jackpotStart;
+		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BallHits = 0;
+		QuestActive = LastBallLost = ShootAgain = false;
+		LaunchTicks = 0;
+	}
+
+	void hit(Kind kind)
+	{
+		if (kind == KNone)
+			return;
+		pb::MainTable->AddScore(Rules->points[kind]);
+		Jackpot += Rules->jackpotAdd[kind];
+		++BallHits;
+		if (kind == KTarget)
+			++TargetsHit;
+
+		if (!QuestActive)
+		{
+			if (kind == Rules->startKind && ++StartHits >= Rules->startHits)
+			{
+				StartHits = 0;
+				QuestActive = true;
+				QuestHits = 0;
+				pb::MainTable->AddScore(Rules->startPoints);
+				snprintf(Line, sizeof Line, "%s started", Rules->questWord);
+				say(pinball::InfoTextBox, Line, 3.0f, 2);
+			}
+			show_quest();
+			return;
+		}
+
+		const Quest& q = Rules->quests[QuestIndex];
+		if (kind != q.kind)
+			return;
+		int n = QuestHits++;
+		Jackpot += q.jackpotAdd;
+		award(q.awards[n < 5 ? n : 5]);
+		if (q.jackpotEvery && QuestHits % q.jackpotEvery == 0)
+			award(JACKPOT);
+		if (QuestHits < q.goal)
+		{
+			show_quest();
+			return;
+		}
+
+		// Quest complete
+		QuestActive = false;
+		QuestHits = 0;
+		++QuestsDone;
+		Jackpot += Rules->questJackpotAdd;
+		snprintf(Line, sizeof Line, "%s complete!", Rules->questWord);
+		say(pinball::InfoTextBox, Line, 4.0f, 2);
+		QuestIndex = (QuestIndex + 1) % Rules->questCount;
+		if (pb::MainTable->ScoreMultiplier < 4)
+			++pb::MainTable->ScoreMultiplier;
+		show_quest();
+	}
+
+	// Ball lost: shoot again if it drains in the first 15 seconds, else the bonus, next ball or game over
+	void drain(int code)
 	{
 		TPinballTable* table = pb::MainTable;
 		if (code == 60)
@@ -673,23 +814,29 @@ namespace
 				table->Plunger->Message(1016, 0.0f);
 			return;
 		}
-		static char text[96];
-		if (!table->TiltLockFlag && BallHits > 0)
+		if (LaunchTicks && SDL_GetTicks() - LaunchTicks < 15000 && !table->TiltLockFlag)
 		{
-			int bonus = BallHits * 100 * (1 + table->ScoreMultiplier);
-			snprintf(text, sizeof text, "Ball bonus %d", bonus);
-			table->AddScore(bonus);
-			if (pinball::InfoTextBox)
-				pinball::InfoTextBox->Display(text, 2.0f, 2);
+			say(pinball::InfoTextBox, "Shoot Again", 3.0f, 2);
+			LaunchTicks = 0;
+			return;
 		}
-		BallHits = 0;
+		LaunchTicks = 0;
+		if (!table->TiltLockFlag)
+		{
+			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest;
+			if (bonus > 0)
+			{
+				snprintf(Line, sizeof Line, "Total Bonus %d", bonus);
+				table->AddScore(bonus);
+				say(pinball::InfoTextBox, Line, 3.0f, 2);
+			}
+		}
+		TargetsHit = BallHits = 0;
 		table->ScoreMultiplier = 0;
-		MissionProgress = 0;
 		if (table->ExtraBalls)
 		{
 			--table->ExtraBalls;
-			if (pinball::InfoTextBox)
-				pinball::InfoTextBox->Display("Shoot again", -1.0f, 2);
+			say(pinball::InfoTextBox, "Shoot Again", -1.0f, 2);
 			return;
 		}
 		table->ChangeBallCount(table->BallCount - 1);
@@ -709,73 +856,20 @@ namespace
 		if (dynamic_cast<TDrain*>(cmp))
 		{
 			if (code == 60 || code == 63)
-				lenient_drain(code);
+				drain(code);
 			return;
 		}
-		Kind kind = Kind::None;
-		int points = 0;
-		if (code == 63)
+		if (code == 1005 && dynamic_cast<TPlunger*>(cmp))
 		{
-			if (dynamic_cast<TBumper*>(cmp)) { kind = Kind::Bumper; points = 500; }
-			else if (dynamic_cast<TPopupTarget*>(cmp) || dynamic_cast<TSoloTarget*>(cmp)) { kind = Kind::Target; points = 1000; }
-			else if (dynamic_cast<TLightRollover*>(cmp)) { kind = Kind::Rollover; points = 250; }
-			else if (dynamic_cast<TKickout*>(cmp) || dynamic_cast<TSink*>(cmp)) { kind = Kind::Hole; points = 2500; }
-			else if (dynamic_cast<TRamp*>(cmp)) { kind = Kind::Ramp; points = 2000; }
-			else if (dynamic_cast<TFlagSpinner*>(cmp)) points = 100;
-		}
-		else if (code == 57 && dynamic_cast<THole*>(cmp))
-		{
-			kind = Kind::Hole;
-			points = 2500;
-		}
-		if (!points)
+			LaunchTicks = SDL_GetTicks();
 			return;
-
+		}
+		Kind kind = classify(code, cmp);
+		if (kind == KNone)
+			return;
 		if (pb::MainTable->CurScore == 0 && pb::MainTable->CurScoreE9 == 0)
-		{
-			// new game
-			MissionIndex = MissionProgress = MissionLap = MissionsDone = BallHits = 0;
-			LastBallLost = false;
-			Missions = winmain::DatFileName == "PIRATES.DAT" ? PirateMissions : DragonMissions;
-		}
-		pb::MainTable->AddScore(points);
-		++BallHits;
-
-		const Mission& m = Missions[MissionIndex];
-		if (kind != m.kind)
-		{
-			if (MissionProgress == 0)
-				show_mission();
-			return;
-		}
-		if (++MissionProgress < m.goal)
-		{
-			show_mission();
-			return;
-		}
-
-		static char done[96];
-		int bonus = m.bonus * (1 + MissionLap);
-		snprintf(done, sizeof done, "Mission complete! %d", bonus);
-		pb::MainTable->AddScore(bonus);
-		if (pinball::InfoTextBox)
-			pinball::InfoTextBox->Display(done, 4.0f, 2);
-		MissionProgress = 0;
-		++MissionsDone;
-		if (pb::MainTable->ScoreMultiplier < 4)
-			++pb::MainTable->ScoreMultiplier;
-		if (MissionsDone % 3 == 0)
-		{
-			++pb::MainTable->ExtraBalls;
-			if (pinball::InfoTextBox)
-				pinball::InfoTextBox->Display("Extra ball earned!", 4.0f, 2);
-		}
-		if (++MissionIndex == MissionCount)
-		{
-			MissionIndex = 0;
-			++MissionLap;
-		}
-		show_mission();
+			new_game();
+		hit(kind);
 	}
 }
 

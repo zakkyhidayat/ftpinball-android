@@ -100,6 +100,8 @@ int TPlunger::Message(int code, float value)
 				// The plunger was released: the ball is on its way
 				SpaceCadetPinballJNI::setBallInPlunger(false);
 				loader::play_sound(SoundIndexP2);
+				if (loader::Lenient)
+					control::handler(code, this); // starts the shoot again window
 			}
 			auto bmp = ListBitmap->at(0);
 			auto zMap = ListZMap->at(0);

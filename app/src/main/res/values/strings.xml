@@ -72,7 +72,7 @@
     <string name="desc_music">Background music while playing</string>
     <string name="desc_hapticfeedback">Short vibration when pressing buttons</string>
     <string name="table_fulltilt">Full Tilt! Pinball</string>
-    <string name="table_norules">Experimental: my own missions, not the original rules</string>
+    <string name="table_norules">Experimental: rules from the manual, approximate</string>
     <string name="no_tables">No tables found. Build the app with your own Full Tilt! Pinball data (see the README).</string>
     <string name="last_played">Last played</string>
     <string name="about">About</string>

@@ -49,6 +49,10 @@ TPinballTable::TPinballTable(): TPinballComponent(nullptr, -1, false)
 	CurScoreStruct = nullptr;
 	ScoreBallcount = nullptr;
 	ScorePlayerNumber1 = nullptr;
+	Demo = nullptr;
+	Plunger = nullptr;
+	FlipperL = nullptr;
+	FlipperR = nullptr;
 	BallInSink = 0;
 	ActiveFlag = 1;
 	TiltLockFlag = 0;

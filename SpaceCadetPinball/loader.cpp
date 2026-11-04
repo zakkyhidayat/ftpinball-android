@@ -227,7 +227,7 @@ int16_t* loader::query_iattribute(int groupIndex, int firstValue, int* arraySize
 			break;
 		if (*shortArr == firstValue)
 		{
-			*arraySize = loader_table->field_size(groupIndex, FieldTypes::ShortArray) / 2 - 1;
+			*arraySize = loader_table->field_size_nth(groupIndex, FieldTypes::ShortArray, skipIndex) / 2 - 1;
 			return shortArr + 1;
 		}
 	}
