@@ -845,6 +845,20 @@ namespace
 		say(pinball::InfoTextBox, Line, 3.0f, 2);
 	}
 
+	// The random award of the original (FUN_00424fb0): map piece, special treasure, coin award or extra ball, equally likely
+	void random_award()
+	{
+		switch (rand() % 4)
+		{
+		case 0: coin_award(); break;
+		case 1: special_treasure(); break;
+		case 2: map_piece(); break;
+		default: award(EXTRA_BALL); break;
+		}
+		if (MapPieces >= 6 && !LootActive)
+			LootActive = true;
+	}
+
 	void start_slay()
 	{
 		SlayActive = true;
@@ -1161,6 +1175,10 @@ namespace
 			return;
 		}
 
+		// In Tavern mode the window sinks give the random award
+		if (Rules == &Pirates && QuestIndex == 2 && (!strcmp(name, "a_sink5") || !strcmp(name, "a_sink6") || !strcmp(name, "a_sink7")))
+			random_award();
+
 		if (Rules == &Pirates && QuestIndex == 6)
 		{
 			// Swordfight: finishing the parrot bank or the volcano bank gives a coin award, special treasure, map piece or extra ball
@@ -1175,13 +1193,7 @@ namespace
 					full = (VolcanoMask |= 1 << i) == 15 && ((VolcanoMask = 0), true);
 			if (full)
 			{
-				switch (rand() % 4)
-				{
-				case 0: coin_award(); break;
-				case 1: special_treasure(); break;
-				case 2: map_piece(); break;
-				default: award(EXTRA_BALL); break;
-				}
+				random_award();
 				if (MapPieces >= 6 && !LootActive)
 				{
 					LootActive = true;
