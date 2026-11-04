@@ -475,39 +475,9 @@ void render::PresentVScreen()
 	PresentVScreenTable();
 }
 
-// The table's own sidebar painting as a dim wallpaper behind the table: at the top of the screen and again at the
-// bottom, as wide as the visible screen. The sidebar itself is off screen, so this is the only place it shows.
-void render::DrawWallpaper()
-{
-	if (!pb::MainTable || !render::vscreen || pb::MainTable->Width >= render::vscreen->Width)
-		return;
-	int outW, outH;
-	SDL_GetRendererOutputSize(winmain::Renderer, &outW, &outH);
-	int sideX = static_cast<int>(pb::MainTable->Width);
-	int sideW = render::vscreen->Width - sideX;
-	SDL_Rect src
-	{
-		sideX + sideW * 6 / 100, render::vscreen->Height * 3 / 100,
-		sideW * 88 / 100, render::vscreen->Height / 2 - render::vscreen->Height * 3 / 100
-	};
-	float visibleW = render::DestinationRect.w * 583.0f / render::vscreen->Width;
-	if (visibleW > outW)
-		visibleW = static_cast<float>(outW);
-	int dstH = static_cast<int>(visibleW * src.h / src.w);
-	SDL_Rect top{ 0, 0, static_cast<int>(visibleW), dstH };
-	SDL_Rect bottom{ 0, outH - dstH, static_cast<int>(visibleW), dstH };
-	SDL_SetTextureBlendMode(vScreenTex, SDL_BLENDMODE_BLEND);
-	SDL_SetTextureAlphaMod(vScreenTex, 85);
-	SDL_RenderCopy(winmain::Renderer, vScreenTex, &src, &top);
-	SDL_RenderCopy(winmain::Renderer, vScreenTex, &src, &bottom);
-	SDL_SetTextureAlphaMod(vScreenTex, 255);
-	SDL_SetTextureBlendMode(vScreenTex, SDL_BLENDMODE_NONE);
-}
-
 void render::PresentVScreenTable()
 {
 	BlitVScreen();
-	DrawWallpaper();
 
 	if (offset_x == 0 && offset_y == 0)
 	{
