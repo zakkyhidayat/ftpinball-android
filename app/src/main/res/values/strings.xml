@@ -94,7 +94,7 @@
     <string name="sec_sound">Sound</string>
     <string name="desc_username">Shown on your high scores</string>
     <string name="desc_tiltbuttons">Show the three tilt buttons under the table</string>
-    <string name="desc_soundfx">Bumpers, flippers and other effects. Volume follows Android\'s media volume</string>
+    <string name="desc_soundfx">Bumpers, flippers and other effects.</string>
     <string name="tilt_left">Tilt left</string>
     <string name="tilt_center">Tilt up</string>
     <string name="tilt_right">Tilt right</string>
@@ -103,4 +103,6 @@
     <string name="pause_hint">Tap to resume</string>
     <string name="plungerzoom">Plunger window</string>
     <string name="desc_plungerzoom">Show a magnified window of the plunger lane while a ball waits</string>
+    <string name="vol_effects">Effects volume</string>
+    <string name="vol_music">Music volume</string>
 </resources>

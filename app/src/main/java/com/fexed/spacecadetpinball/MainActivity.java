@@ -76,7 +76,7 @@ public class MainActivity extends SDLActivity {
                 player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                 player.prepare();
                 player.setLooping(true);
-                player.setVolume(1f, 1f);
+                player.setVolume(musicVolume(), musicVolume());
                 player.start();
             }
         } catch (IOException ignored) {
@@ -357,8 +357,7 @@ public class MainActivity extends SDLActivity {
     private final StateHelper.IStateListener mStateListener = new StateHelper.IStateListener() {
         @Override
         public void onStateChanged(int state) {
-            setSoundEnabled(PrefsHelper.getSoundFx());
-            if (player != null) player.setVolume(1f, 1f);
+            applyAudio();
             putTranslations();
             putString(26, " ");  // no player name on screen //TODO abstract ids
 
@@ -467,7 +466,7 @@ public class MainActivity extends SDLActivity {
                     player.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
                     player.prepare();
                     player.setLooping(true);
-                    player.setVolume(1f, 1f);
+                    player.setVolume(musicVolume(), musicVolume());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -478,8 +477,7 @@ public class MainActivity extends SDLActivity {
 
         if (!isPlaying) pauseNativeThread();
         if (isGameReady) {
-            setSoundEnabled(PrefsHelper.getSoundFx());
-            if (player != null) player.setVolume(1f, 1f);
+            applyAudio();
         }
         PrefsHelper.setCheatsUsed(checkCheatsUsed());
         setFullscreen();
@@ -646,6 +644,18 @@ public class MainActivity extends SDLActivity {
     private native void initNative(String dataPath, String datFile, boolean fullTilt);
 
     private native void setSoundEnabled(boolean enabled);
+
+    private native void setSoundVolume(int volume);
+
+    private float musicVolume() {
+        return PrefsHelper.getMusicVolume() / 100f;
+    }
+
+    private void applyAudio() {
+        setSoundEnabled(PrefsHelper.getSoundFx());
+        setSoundVolume(PrefsHelper.getSoundVolume() * 128 / 100);
+        if (player != null) player.setVolume(musicVolume(), musicVolume());
+    }
     private native void setPlungerWindow(boolean enabled);
 
     private native void putString(int id, String str);

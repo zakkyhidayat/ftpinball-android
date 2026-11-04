@@ -10,18 +10,6 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <TextView style="@style/SettingsSection" android:text="@string/sec_player" />
-    <LinearLayout style="@style/SettingsCard">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp" android:text="@string/username"
-            android:textColor="@color/white" android:textSize="16sp" />
-        <EditText android:id="@+id/inpttxtusername" android:layout_width="match_parent"
-            android:layout_height="48dp" android:hint="@string/username" android:inputType="textPersonName"
-            android:maxLength="16" android:textColor="@color/white" android:textColorHint="@color/description_grey" />
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-            android:text="@string/desc_username" android:textColor="@color/description_grey" android:textSize="13sp" />
-    </LinearLayout>
-
     <TextView style="@style/SettingsSection" android:text="@string/sec_controls" />
     <LinearLayout style="@style/SettingsCard">
         <LinearLayout style="@style/SettingsRow">
@@ -119,6 +107,18 @@
             </LinearLayout>
             <androidx.appcompat.widget.SwitchCompat android:id="@+id/music"
                 android:layout_width="wrap_content" android:layout_height="48dp" />
+        </LinearLayout>
+        <LinearLayout style="@style/SettingsRow" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/vol_effects" android:textColor="@color/white" android:textSize="16sp" />
+            <SeekBar android:id="@+id/soundvol" android:layout_width="match_parent"
+                android:layout_height="40dp" android:max="100" />
+        </LinearLayout>
+        <LinearLayout style="@style/SettingsRow" android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="@string/vol_music" android:textColor="@color/white" android:textSize="16sp" />
+            <SeekBar android:id="@+id/musicvol" android:layout_width="match_parent"
+                android:layout_height="40dp" android:max="100" />
         </LinearLayout>
     </LinearLayout>
 

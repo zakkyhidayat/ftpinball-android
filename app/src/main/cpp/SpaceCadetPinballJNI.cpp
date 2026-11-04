@@ -141,6 +141,12 @@ Java_com_fexed_spacecadetpinball_MainActivity_setSoundEnabled(JNIEnv *env, jobje
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_com_fexed_spacecadetpinball_MainActivity_setSoundVolume(JNIEnv *env, jobject thiz, jint volume) {
+    Sound::SetVolume(volume);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_com_fexed_spacecadetpinball_MainActivity_putString(JNIEnv *env, jobject thiz, jint id, jstring str) {
     LPCSTR mstr = (*env).GetStringUTFChars(str, nullptr);
     pinball::set_rc_string(id, mstr);

@@ -2,8 +2,7 @@ package com.fexed.spacecadetpinball;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
+import android.widget.SeekBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,23 +22,6 @@ public class Settings extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        mBinding.inpttxtusername.setText(PrefsHelper.getUsername("Player 1"));
-        mBinding.inpttxtusername.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                String name = s.toString().trim();
-                PrefsHelper.setUsername(name.isEmpty() ? "Player 1" : name);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
         mBinding.tiltbtns.setChecked(PrefsHelper.getTiltButtons());
         mBinding.tiltbtns.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setTiltButtons(checked));
         mBinding.hapticfeedback.setChecked(PrefsHelper.getHapticFeedback());
@@ -57,7 +39,34 @@ public class Settings extends AppCompatActivity {
         mBinding.music.setChecked(PrefsHelper.getMusic());
         mBinding.music.setOnCheckedChangeListener((b, checked) -> PrefsHelper.setMusic(checked));
 
+        mBinding.soundvol.setProgress(PrefsHelper.getSoundVolume());
+        mBinding.soundvol.setOnSeekBarChangeListener(new VolumeListener(true));
+        mBinding.musicvol.setProgress(PrefsHelper.getMusicVolume());
+        mBinding.musicvol.setOnSeekBarChangeListener(new VolumeListener(false));
+
         mBinding.verstxtv.setText(getString(R.string.current_ver) + " " + BuildConfig.VERSION_NAME + " (" + BuildConfig.VERSION_CODE + ")");
+    }
+
+    private static class VolumeListener implements SeekBar.OnSeekBarChangeListener {
+        private final boolean effects;
+
+        VolumeListener(boolean effects) {
+            this.effects = effects;
+        }
+
+        @Override
+        public void onProgressChanged(SeekBar bar, int progress, boolean fromUser) {
+            if (effects) PrefsHelper.setSoundVolume(progress);
+            else PrefsHelper.setMusicVolume(progress);
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar bar) {
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar bar) {
+        }
     }
 
     @Override

@@ -149,4 +149,20 @@ public class PrefsHelper {
     public static boolean getMusic() {
         return prefs.getBoolean(KEY_MUSIC, true);
     }
+
+    public static int getSoundVolume() {
+        return prefs.getInt("soundvolume", 100);
+    }
+
+    public static void setSoundVolume(int value) {
+        prefs.edit().putInt("soundvolume", value).apply();
+    }
+
+    public static int getMusicVolume() {
+        return prefs.getInt("musicvolume", 100);
+    }
+
+    public static void setMusicVolume(int value) {
+        prefs.edit().putInt("musicvolume", value).apply();
+    }
 }
