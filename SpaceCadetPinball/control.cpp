@@ -885,13 +885,19 @@ namespace
 			second->Message(position == 1 ? 63 : 62, 0.0f);
 	}
 
+	// Info states 6 (the Rescue Maiden quest, "Put ball in Prison Tower") and 0xd (Tower Barrage) of the original: the
+	// diverter handlers leave pairs A and D as they are
+	bool tower_busy()
+	{
+		return (Rules == &Dragon && QuestActive && QuestIndex == 2) || MultiMode == MULTI_BARRAGE;
+	}
+
 	// The diverters at the start of a ball (original 0x4245b0)
 	void reset_diverters()
 	{
 		if (Rules != &Dragon)
 			return;
-		// A and D are left alone during a multiball (info states 6 and 0xd of the original)
-		if (!MultiMode)
+		if (!tower_busy())
 		{
 			diverter(0, 2);
 			diverter(3, 2);
@@ -1673,14 +1679,14 @@ namespace
 				bool idle = !QuestActive && !SlayActive && !MultiMode;
 				if (!strcmp(name, "a_roll7"))
 					diverter(0, 1);
-				else if ((!strcmp(name, "a_sink9") || !strcmp(name, "a_sink10")) && !MultiMode)
+				else if ((!strcmp(name, "a_sink9") || !strcmp(name, "a_sink10")) && !tower_busy())
 				{
 					diverter(0, 2);
 					diverter(3, 2);
 				}
 				else if (!strcmp(name, "s_oneway5") && idle)
 					diverter(3, 1);
-				else if (!strcmp(name, "a_ramp103") && !MultiMode)
+				else if (!strcmp(name, "a_ramp103") && !tower_busy())
 					diverter(3, 2);
 				else if (!strcmp(name, "s_rexit18") && idle)
 					diverter(1, 2);
