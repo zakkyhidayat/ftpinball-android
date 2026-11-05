@@ -27,7 +27,7 @@ TBall* TPlunger::FreeBall(TPinballTable* table)
 		table->BallList.push_back(ball);
 		return ball;
 	}
-	return table->BallList.at(0);
+	return nullptr;
 }
 
 // Skulduggery's plunger grip is not part of the launcher: its pull back pictures are the four bitmaps of the
@@ -103,7 +103,11 @@ int TPlunger::Message(int code, float value)
 				ShowGrip(PinballTable, 0.0f);
 			auto ball = PinballTable->BallList.at(0);
 			if (loader::Lenient)
-				ball = FreeBall(PinballTable);
+			{
+				auto free = FreeBall(PinballTable);
+				if (free)
+					ball = free;
+			}
 			ball->Message(1024, 0.0);
 			ball->Position.X = PinballTable->PlungerPositionX;
 			ball->Position.Y = PinballTable->PlungerPositionY;

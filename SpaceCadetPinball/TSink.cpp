@@ -38,10 +38,13 @@ int TSink::Message(int code, float value)
 	case 56:
 		if (value < 0.0f)
 			value = TimerTime;
-		if (Timer)
-			timer::kill(Timer);
-		else if (HeldBall || SpawnBall)
-			++Holding;
+		if (loader::Lenient)
+		{
+			if (Timer)
+				timer::kill(Timer);
+			else if (HeldBall || SpawnBall)
+				++Holding;
+		}
 		Timer = timer::set(value, this, TimerExpired);
 		break;
 	case 1020:
@@ -92,6 +95,15 @@ int TSink::get_scoring(int index)
 
 void TSink::Collision(TBall* ball, vector2* nextPosition, vector2* direction, float coef, TEdgeSegment* edge)
 {
+	if (Timer && loader::Lenient)
+	{
+		// a release is still pending: cancel it, but let a waiting new ball out first
+		timer::kill(Timer);
+		if (SpawnBall)
+			TimerExpired(Timer, this);
+		else if (HeldBall)
+			--Holding;
+	}
 	Timer = 0;
 	if (PinballTable->TiltLockFlag)
 	{
@@ -119,12 +131,20 @@ void TSink::TimerExpired(int timerId, void* caller)
 		--Holding;
 		// multiball: the sink releases a new ball
 		ball = TPlunger::FreeBall(sink->PinballTable);
-		ball->Message(1024, 0.0f);
-		ball->Position.Z = ball->Offset;
+		if (ball)
+		{
+			ball->Message(1024, 0.0f);
+			ball->Position.Z = ball->Offset;
+		}
 	}
-	else
+	else if (!loader::Lenient)
 		ball = sink->PinballTable->BallList.at(0);
 	sink->SpawnBall = false;
+	if (!ball)
+	{
+		sink->Timer = 0;
+		return;
+	}
 	sink->HeldBall = nullptr;
 	ball->InSink = false;
 	ball->CollisionComp = nullptr;

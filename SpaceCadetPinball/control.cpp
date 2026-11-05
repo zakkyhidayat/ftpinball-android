@@ -734,7 +734,7 @@ namespace
 	int Armor, Mystery, MysteryIdx, Treasures, Eggs, LoopCount, MenuTier;
 	unsigned LoopTime, MenuEnd;
 	// Multiball (Dragon's Keep): balls on the table, the running mode, the dragon letters and the tower lock
-	int BallsInPlay, MultiMode, LetterMask, Locked, FireMask, TowerMask, GargoyleMask;
+	int BallsInPlay, MultiMode, LetterMask, FireMask, TowerMask, GargoyleMask;
 	bool LockLit;
 	enum { MULTI_NONE, MULTI_GAGGLE, MULTI_BARRAGE, MULTI_FLURRY };
 	bool MenuOpen, ExtraBallLight;
@@ -900,12 +900,24 @@ namespace
 	}
 
 	// A new ball is put on the plunger and fired up the launch lane
-	void FeedTimer(int, void*)
+	std::vector<int> PendingFeeds;
+	TPinballComponent* LockedSinks[3];
+	int Locked;
+
+	void FeedTimer(int id, void*)
 	{
 		TPinballTable* table = pb::MainTable;
 		if (!table || !table->Plunger)
 			return;
+		for (auto it = PendingFeeds.begin(); it != PendingFeeds.end(); ++it)
+			if (*it == id)
+			{
+				PendingFeeds.erase(it);
+				break;
+			}
 		TBall* ball = TPlunger::FreeBall(table);
+		if (!ball)
+			return;
 		ball->Message(1024, 0.0f);
 		ball->Position.X = table->PlungerPositionX;
 		ball->Position.Y = table->PlungerPositionY;
@@ -914,10 +926,21 @@ namespace
 		table->Plunger->Message(1017, 0.0f);
 	}
 
+	// Ball over: cancel the feeds still queued and let the balls locked in the tower sinks out
+	void end_multiball_state()
+	{
+		for (int id : PendingFeeds)
+			timer::kill(id);
+		PendingFeeds.clear();
+		for (int i = 0; i < Locked; ++i)
+			LockedSinks[i]->Message(1024, 0.0f);
+		Locked = 0;
+	}
+
 	void feed_balls(int count)
 	{
 		for (int i = 0; i < count; ++i)
-			timer::set(1.0f + 1.5f * i, nullptr, FeedTimer);
+			PendingFeeds.push_back(timer::set(1.0f + 1.5f * i, nullptr, FeedTimer));
 		BallsInPlay += count;
 	}
 
@@ -933,10 +956,10 @@ namespace
 		{
 			sink->SpawnBall = true;
 			sink->Message(56, -1.0f);
-			BallsInPlay += extraBalls;
+			--extraBalls;
+			++BallsInPlay;
 		}
-		else
-			feed_balls(extraBalls);
+		feed_balls(extraBalls);
 	}
 
 	// A ball drained while others are still on the table; the mode ends with one ball left
@@ -969,8 +992,7 @@ namespace
 		static const char* const locks[] = {"a_sink18", "a_sink17", "a_sink16"};
 		if (Rules != &Dragon || !LockLit || MultiMode || Locked >= 3 || strcmp(cmp->GroupName, locks[Locked]))
 			return false;
-		static TPinballComponent* held[3];
-		held[Locked++] = cmp;
+		LockedSinks[Locked++] = cmp;
 		if (Locked < 3)
 		{
 			// original 0xbc2 "Ball Trapped\n%ld" shows the sink's score
@@ -986,7 +1008,7 @@ namespace
 		MultiMode = MULTI_BARRAGE;
 		say(pinball::InfoTextBox, "Tower Barrage", 3.0f, 2);
 		for (int i = 0; i < 3; ++i)
-			held[i]->Message(56, 1.0f + i);
+			LockedSinks[i]->Message(56, 1.0f + i);
 		return true;
 	}
 
@@ -1010,8 +1032,9 @@ namespace
 		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = SpellsCast = Offense = Defense = LoopCount = MenuTier = 0;
 		LoopTime = MenuEnd = 0;
 		MenuOpen = ExtraBallLight = false;
+		end_multiball_state();
 		BallsInPlay = 1;
-		MultiMode = LetterMask = Locked = FireMask = TowerMask = GargoyleMask = 0;
+		MultiMode = LetterMask = FireMask = TowerMask = GargoyleMask = 0;
 		LockLit = false;
 		FirstHit = false;
 		LootActive = false;
@@ -1705,6 +1728,7 @@ namespace
 		memset(Hits, 0, sizeof Hits);
 		memset(BankPaid, 0, sizeof BankPaid);
 		table->ScoreMultiplier = 0;
+		end_multiball_state();
 		BallsInPlay = 1;
 		MultiMode = MULTI_NONE;
 		if (table->ExtraBalls)
