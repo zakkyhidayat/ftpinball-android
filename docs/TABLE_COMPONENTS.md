@@ -109,7 +109,7 @@ Key components (names are the group names in the data):
 * `a_spot1`, `a_spot2`, `a_spot3`: **tower targets**, 2,000 each, 10,000 for the bank.
 * `a_spot8`, `a_spot10`, `a_spot12`, `a_spot14`: **gargoyle targets**, 3,000 each, 15,000 for the bank.
 * `a_spot27`: the **quest selection target**, 5,000. Draws another quest that is not completed.
-* `a_spot19`, `a_spot26`: the **sword target**. Third hit starts the Slay Dragon quest.
+* `a_spot19`, `a_spot26`, `a_spot28`: the **sword targets**. In the idle state they must be hit in that order (original `0x425750`, `0x4257c0`, `0x425830`); the third starts the Slay Dragon quest. The order restarts on each ball.
 * `a_sink4`: the **well**. Pays the mystery award during Wizard's Fury. In the idle state a quarter of the balls start the drawn quest and the rest cast a spell (original 0x426140).
 * `a_sink19`: the **dragon's mouth**. Counts the hits for Slay Dragon.
 * `a_kout1`: **armor kickout**. Awards the next piece of armor.
@@ -127,7 +127,7 @@ Rules that are implemented (`control.cpp`):
 * Dragon Hoard: each gem has its own value (gold 10,000 bumpers, diamond 50,000 spell targets, pearl 60,000 tower targets, sapphire 70,000 gargoyle targets,
   ruby 100,000 fire lizard sinks, opal 100,000 accelerator, emerald 200,000 and amethyst 250,000 ramps); all nine give the extra ball.
 * Fire Lizards: each sink hit is worth 100,000 more than the one before (up to 1,000,000) and every fourth hit awards the jackpot.
-* Slay Dragon: starts on the third sword hit or when all five quests are done. Starting it pays 500,000. Needs eight minus the weapons and offensive spells hits in the
+* Slay Dragon: starts when the sword targets are hit in order or when all five quests are done. Starting it pays 500,000. Needs eight minus the weapons and offensive spells hits in the
   dragon's mouth, in 30 seconds plus five per armor piece or defensive spell. The super jackpot (cap 20,000,000) grows with bumpers (50,000), targets (100,000), the sinks `a_sink1`/`a_sink2` (500,000) and kickouts (750,000); slaying the dragon pays it plus 1,500,000 and the jackpot. Each ball in the dragon's mouth pays by the lit lights of the sweeping dragon fire: 100,000, 1,000,000 with two lit, a one in five jackpot with three, a one in ten extra ball light or extra ball with more. Each ball in the mouth that does not finish the quest adds 15 seconds.
 * Skill shot: the first spell target the launched ball hits gives a spell (`a_spot4`), dragon egg (`a_spot5`), weapon (`a_spot6`), armor (`a_spot7`) or Gargoyle Gaggle-Ball (`a_spot22`).
 * Spell bank: hitting all five spell targets casts a spell (75,000 each in the ball bonus).

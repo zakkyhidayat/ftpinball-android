@@ -1135,7 +1135,7 @@ namespace
 		MenuOpen = ExtraBallLight = false;
 		end_multiball_state();
 		BallsInPlay = 1;
-		MultiMode = LetterMask = FireMask = TowerMask = GargoyleMask = 0;
+		MultiMode = LetterMask = FireMask = TowerMask = GargoyleMask = SwordHits = 0;
 		LockLit = false;
 		FirstHit = false;
 		LootActive = false;
@@ -1215,7 +1215,10 @@ namespace
 
 		if (!SlayActive)
 		{
-			if ((!strcmp(name, "a_spot19") || !strcmp(name, "a_spot26")) && ++SwordHits >= 3)
+			// original 0x425750/0x4257c0/0x425830, idle state only: the sword targets must be hit in order, a_spot19, a_spot26,
+			// then a_spot28, which starts the slay
+			static const char* const sword[] = {"a_spot19", "a_spot26", "a_spot28"};
+			if (!QuestActive && !MultiMode && !strcmp(name, sword[SwordHits]) && ++SwordHits == 3)
 			{
 				SwordHits = 0;
 				start_slay();
@@ -2062,7 +2065,7 @@ namespace
 			end_quest();
 		Fathom = 1; // the launcher of the original (0x425e70) clears the fathom lights for each ball
 		LavaMask = 0; // the volcano lights start again on each ball
-		ForestHits = 0;
+		ForestHits = SwordHits = 0;
 		reset_diverters();
 		if (!table->TiltLockFlag)
 		{
