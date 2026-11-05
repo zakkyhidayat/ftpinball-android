@@ -723,8 +723,7 @@ namespace
 	bool QuestActive, LastBallLost;
 	unsigned LaunchTicks;
 	int Hits[128];       // hits per score entry this ball
-	// Skulduggery routes (ramps, orbit sensors and wind lanes): lights lit for two seconds by each hit give the score step
-	Uint32 RouteComboEnd[128], RouteLightEnd[128];
+	// Skulduggery routes (ramps, orbit sensors and wind lanes): lights lit by each hit give the score step
 	int RouteCombo[128], RouteLights[128], LastRoute = -1;
 	bool BankPaid[128];  // bank bonus already awarded this ball
 	int ForestHits; // Dragon's Keep: forest bumper hits this ball; every tenth gives a weapon (a_bump1 field of the original)
@@ -1172,12 +1171,10 @@ namespace
 		int hits = Hits[index]++;
 		if (Rules == &Pirates && (s.count == 12 || (s.count == 3 && !strncmp(s.name, "a_roll", 6))))
 		{
-			// original 0x428b70 and its siblings: a hit lights the next light of the group for two seconds (the lit count is
-			// the score step), and the ramps and orbit sensors also light a combo group; another route scoring first puts the
-			// combo of the previous one out (0x4232c0). The route lights only light in the idle state.
-			Uint32 now = SDL_GetTicks();
-			if (now >= RouteComboEnd[index]) RouteCombo[index] = 0;
-			if (now >= RouteLightEnd[index]) RouteLights[index] = 0;
+			// original 0x428b70 and its siblings: a hit lights the next light of the route's group (the light stays on, only
+			// its flashing lasts two seconds), and the lit count before the hit is the score step. The ramps and orbit
+			// sensors also light a combo group, which another route scoring puts out (0x4232c0). The route lights light only
+			// in the idle state and start again with each ball and each ended mode (0x42c070, cases 0x4f and 0x52).
 			if (LastRoute >= 0 && LastRoute != index) RouteCombo[LastRoute] = 0;
 			LastRoute = index;
 			int step = RouteLights[index] < 2 ? RouteLights[index] : 2;
@@ -1185,13 +1182,9 @@ namespace
 			{
 				step += (RouteCombo[index] < 3 ? RouteCombo[index] : 3) * 3;
 				++RouteCombo[index];
-				RouteComboEnd[index] = now + 2000;
 			}
 			if (!QuestActive && !LootActive)
-			{
 				++RouteLights[index];
-				RouteLightEnd[index] = now + 2000;
-			}
 			return s.values[step];
 		}
 		if (s.count == 1)
@@ -1368,6 +1361,12 @@ namespace
 	// grows, the quest light stays lit and the next quest is drawn.
 	void end_quest()
 	{
+		if (Rules == &Pirates)
+		{
+			// the route lights start again when a mode ends (0x42c070 case 0x52)
+			memset(RouteCombo, 0, sizeof RouteCombo);
+			memset(RouteLights, 0, sizeof RouteLights);
+		}
 		if (Rules == &Pirates && QuestIndex == 1)
 		{
 			// original 0x425ab0: pay what was buried
