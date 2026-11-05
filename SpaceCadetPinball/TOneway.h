@@ -10,6 +10,7 @@ public:
 	~TOneway() override = default;
 	void Collision(TBall* ball, vector2* nextPosition, vector2* direction, float coef,
 	               TEdgeSegment* edge) override;
+	int Message(int code, float value) override;
 	void put_scoring(int index, int score) override;
 	int get_scoring(int index) override;
 

@@ -144,7 +144,7 @@ Rules that are implemented (`control.cpp`):
 Bonus hold: slaying the dragon lights `v_lite31`; the end-of-ball bonus is then kept and added to the next ball's bonus. Only Gaggle pays 100,000 at the start (decoded). Each multiball mode ends when one ball is left (the original has no extra scoring inside the Gaggle and Barrage states).
 
 Not implemented: the random ball transfer from the tower sinks to
-`a_sink1`/`a_sink2`, the tower diverters (`a_dvtraa`, `a_dvtrab`), the gem lights of Dragon Hoard, and light sweeps.
+`a_sink1`/`a_sink2`, the tower diverter switching (`a_dvtraa`, `a_dvtrab` and the other six: the engine's one-way gates now take the messages 62 (on) and 63 (off), but the Dragon's Keep rules do not yet send them at the original moments), the gem lights of Dragon Hoard, and light sweeps.
 
 ## 4. Skulduggery
 
