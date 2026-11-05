@@ -723,7 +723,8 @@ namespace
 	unsigned LaunchTicks;
 	int Hits[128];       // hits per score entry this ball
 	bool BankPaid[128];  // bank bonus already awarded this ball
-	int BumperHits, Weapons, SwordHits, SlayHits, SlayNeed, SuperJackpot;
+	int BumperHits, Weapons, SwordHits, SlayHits, SlayNeed, SuperJackpot, BonusHold;
+	bool BonusHoldLit;
 	bool SlayActive;
 	unsigned SlayEnd;
 	char Line[96];
@@ -1046,6 +1047,8 @@ namespace
 		MysteryIdx = 4;
 		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = Weapons = SwordHits = SlayHits = SlayNeed = 0;
 		SuperJackpot = 2500000;
+		BonusHold = 0;
+		BonusHoldLit = false;
 		SlayActive = false;
 		QuestActive = LastBallLost = false;
 		LaunchTicks = 0;
@@ -1136,6 +1139,7 @@ namespace
 			return;
 		}
 		SlayActive = false;
+		BonusHoldLit = true; // slaying the dragon lights the bonus hold (v_lite31)
 		++QuestsDone;
 		// original 0x42a150: the super jackpot, then 1,500,000 and the jackpot (0x424490)
 		pb::MainTable->AddScore(SuperJackpot);
@@ -1720,6 +1724,13 @@ namespace
 		if (!table->TiltLockFlag)
 		{
 			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : MapPieces * 250000 + Treasures * 100000);
+			if (Rules == &Dragon)
+			{
+				// original 0x42b7c0: the held bonus is added, and the total is held for the next ball when the hold light is on
+				bonus += BonusHold;
+				BonusHold = BonusHoldLit ? bonus : 0;
+				BonusHoldLit = false;
+			}
 			if (bonus > 0)
 			{
 				snprintf(Line, sizeof Line, "Total Bonus %d", bonus);

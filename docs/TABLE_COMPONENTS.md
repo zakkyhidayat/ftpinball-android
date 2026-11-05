@@ -141,7 +141,7 @@ Rules that are implemented (`control.cpp`):
 * Egg hole (`s_hole118`): offers the highest affordable purchase (quest 1 egg, spell 4, weapon 5, armor 6, extra ball light 7, extra ball 8); the left flipper buys, the right declines for 25,000.
 * Dragon loop (`a_ramp103`): pays and adds to the jackpot (50,000 more for each loop in a row, up to ten); the jackpot is capped at 10,000,000.
 
-Only Gaggle pays 100,000 at the start (decoded). Each multiball mode ends when one ball is left (the original has no extra scoring inside the Gaggle and Barrage states).
+Bonus hold: slaying the dragon lights `v_lite31`; the end-of-ball bonus is then kept and added to the next ball's bonus. Only Gaggle pays 100,000 at the start (decoded). Each multiball mode ends when one ball is left (the original has no extra scoring inside the Gaggle and Barrage states).
 
 Not implemented: the random ball transfer from the tower sinks to
 `a_sink1`/`a_sink2`, the tower diverters (`a_dvtraa`, `a_dvtrab`), the gem lights of Dragon Hoard, and light sweeps.
