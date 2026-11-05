@@ -1586,7 +1586,10 @@ namespace
 			if (!strcmp(Rules->scores[i].name, name))
 				index = i;
 		// Components without a score of their own (sinks, kickouts, ramps, return exits) still take part in the quests
-		if (index >= 0)
+		// Bermuda Triangle: the wind lanes pay only their mode award (the state 5 branch of 0x4298f0 returns before the ladder)
+		bool bermudaLane = Rules == &Pirates && QuestActive && QuestIndex == 3 && !strncmp(name, "a_roll", 6) &&
+			(!strcmp(name, "a_roll2") || !strcmp(name, "a_roll9") || !strcmp(name, "a_roll8") || !strcmp(name, "a_roll6"));
+		if (index >= 0 && !bermudaLane)
 			pb::MainTable->AddScore(component_score(index));
 		apply_lights(name);
 		play_sounds(name);
