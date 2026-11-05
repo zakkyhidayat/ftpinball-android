@@ -1722,6 +1722,17 @@ namespace
 			say(pinball::InfoTextBox, "Shipwreck Mystery\nAvailable", 3.0f, 2);
 			return;
 		}
+		if (Rules == &Pirates && QuestIndex == 0 && !strcmp(name, "s_rexit8"))
+		{
+			// original 0x429140: during Attack Ship the wire ramp captures the ship: the ship targets come back up and the
+			// fathom level goes up
+			say(pinball::InfoTextBox, "Ship Captured", 2.0f, 2);
+			for (int i = 0; ShipTargets[i]; ++i)
+				if (auto drop = pb::MainTable->find_component(ShipTargets[i]))
+					drop->Message(50, 0.0f);
+			fathom_up();
+			return;
+		}
 		if (!match(q.roles, name))
 			return;
 		if (Rules == &Pirates && QuestIndex == 1)
