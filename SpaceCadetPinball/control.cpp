@@ -724,6 +724,7 @@ namespace
 	int Jackpot, QuestIndex, QuestHits, QuestsDone, StartHits, TargetsHit;
 	bool QuestActive, LastBallLost;
 	unsigned LaunchTicks;
+	bool ShootAgainUsed; // the ball saver works once for each ball, not again for the ball that replaces it
 	int Hits[128];       // hits per score entry this ball
 	// Skulduggery routes (ramps, orbit sensors and wind lanes): lights lit by each hit give the score step
 	int RouteCombo[128], RouteLights[128], LastRoute = -1;
@@ -1165,6 +1166,7 @@ namespace
 		SlayActive = false;
 		QuestActive = LastBallLost = false;
 		LaunchTicks = 0;
+		ShootAgainUsed = false;
 		QuestIndex = draw_quest(-1);
 		memset(Hits, 0, sizeof Hits);
 		memset(RouteCombo, 0, sizeof RouteCombo);
@@ -2119,13 +2121,15 @@ namespace
 				table->Plunger->Message(1016, 0.0f);
 			return;
 		}
-		if (LaunchTicks && SDL_GetTicks() - LaunchTicks < 15000 && !table->TiltLockFlag)
+		if (LaunchTicks && !ShootAgainUsed && SDL_GetTicks() - LaunchTicks < 15000 && !table->TiltLockFlag)
 		{
 			say(pinball::InfoTextBox, "Shoot Again", 3.0f, 2);
 			LaunchTicks = 0;
+			ShootAgainUsed = true;
 			return;
 		}
 		LaunchTicks = 0;
+		ShootAgainUsed = false;
 		if (QuestActive)
 			end_quest();
 		Fathom = 1; // the launcher of the original (0x425e70) clears the fathom lights for each ball
