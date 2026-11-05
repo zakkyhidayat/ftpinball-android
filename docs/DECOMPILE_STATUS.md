@@ -47,10 +47,10 @@ Helper routines of the original game code that write game state or scores and th
 | `0x429ef0` | cited | - | - |
 | `0x42a830` | cited | - | - |
 | `0x42aad0` | cited | - | - |
-| `0x42ab90` | open | - | - |
-| `0x42abf0` | open | - | - |
-| `0x42ad70` | open | 200000 | - |
-| `0x42b090` | open | 20000, 300000 | - |
+| `0x42ab90` | cited | - | - |
+| `0x42abf0` | cited | - | - |
+| `0x42ad70` | cited | 200000 | - |
+| `0x42b090` | cited | 20000, 300000 | - |
 | `0x42b420` | open | 200000 | - |
 | `0x42b820` | open | 10000, 100000, 200000, 250000 | 1, 3 |
 | `0x42c070` | cited | 200000 | - |

@@ -1656,6 +1656,10 @@ namespace
 					map_piece();
 				}
 		}
+		// Treasure Hunt (original 0x42b090, message 0x4a from a component of type 1020, the lit rollover lights): each such hit adds
+		// 20,000 to the jackpot
+		if (Rules == &Pirates && QuestActive && QuestIndex == 1 && !strncmp(name, "v_mlite", 7))
+			Jackpot += 20000;
 		if (Rules == &Pirates && ShipMystery && !strcmp(name, "a_roll3"))
 			shipwreck_mystery(); // original 0x4296d0
 		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && ++ForestHits == 10)
