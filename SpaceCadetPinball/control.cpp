@@ -1735,7 +1735,9 @@ namespace
 					if (!strcmp(name, tower[i]) && (TowerMask |= 1 << i) == 7)
 					{
 						TowerMask = 0;
-						if (!QuestActive && !SlayActive && !MultiMode)
+						// original 0x4250e0: in the idle state the gates move only when the sixth letter does not complete the six
+						// (0x4244e0 starts Dragon Flurry instead, and the gates stay)
+						if (!QuestActive && !SlayActive && !MultiMode && (LetterMask | 1 << 5) != 63)
 						{
 							diverter(0, 1);
 							diverter(3, 1);
