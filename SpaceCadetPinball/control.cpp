@@ -1638,6 +1638,15 @@ namespace
 				else if (!QuestActive && !SlayActive && !MultiMode)
 					start_multiball(MULTI_GAGGLE, 1, "Gargoyle Gaggle-Ball");
 			}
+			if (!strcmp(name, "a_sink4") && !QuestActive && !SlayActive && !MultiMode)
+			{
+				// original 0x426140 in the idle state: a quarter of the balls in the well start the drawn quest, the rest
+				// cast a spell
+				if (rand() % 4 != 1)
+					cast_spell();
+				else if (QuestIndex >= 0)
+					begin_quest(false);
+			}
 			if (!strcmp(name, "s_hole118") && !QuestActive && !SlayActive)
 				open_egg_menu();
 			// Dragon letters: both fire lizard sinks, the spell bank, the dragon loop, the gargoyle bank, the tower ramp and the

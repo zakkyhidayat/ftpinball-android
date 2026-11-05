@@ -110,7 +110,7 @@ Key components (names are the group names in the data):
 * `a_spot8`, `a_spot10`, `a_spot12`, `a_spot14`: **gargoyle targets**, 3,000 each, 15,000 for the bank.
 * `a_spot27`: the **quest selection target**, 5,000. Draws another quest that is not completed.
 * `a_spot19`, `a_spot26`: the **sword target**. Third hit starts the Slay Dragon quest.
-* `a_sink4`: the **well**. Pays the mystery award during Wizard's Fury.
+* `a_sink4`: the **well**. Pays the mystery award during Wizard's Fury. In the idle state a quarter of the balls start the drawn quest and the rest cast a spell (original 0x426140).
 * `a_sink19`: the **dragon's mouth**. Counts the hits for Slay Dragon.
 * `a_kout1`: **armor kickout**. Awards the next piece of armor.
 * `a_kout2`: **dragon egg kickout**. Each hit adds a dragon egg.
