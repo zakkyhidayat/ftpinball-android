@@ -221,3 +221,5 @@ this repository was copied from the original program's code; the rules are a re-
 Ball bonus hold (0x42b820 steps 4 and 5, 0x4283f0): in Mutiny a ball in the ship's sink (`a_sink4`) lights Ship's Hold. When the ball is lost with the light on, the whole bonus is held and added to the next ball's bonus. The bonus pays without the score multiplier (0x423350).
 
 Fire lizard sinks (0x425c30): in the idle state the second hit of the two sinks together, in either of them, lights the first dragon letter (a counter in `v_lite63`); it is not one hit in each sink.
+
+Armor (0x4234b0, 0x423240; not ported): each armor piece is one of three awards chosen at random among those not yet won, with the matching light `v_lite37`, `v_lite38` or `v_lite39`. The kickback (`a_kick1` made active, the outlane kicker light, 25,000), the center post (`a_center_post` raised, 50,000) or the blocker (`a_bloce` raised, 100,000). The three gates are put down again at the start of each ball (0x4245b0). The port only counts the armor pieces for the bonus and the Slay time; the gates and the award points are not ported because the blocker timeout (field `+0x86` of the blocker) is not decoded.
