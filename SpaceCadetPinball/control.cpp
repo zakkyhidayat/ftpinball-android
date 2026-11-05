@@ -1722,9 +1722,9 @@ namespace
 		if (Rules == &Pirates && QuestIndex == 3)
 		{
 			// Bermuda Triangle: the indicated wind lane pays 125,000 / 250,000 / 500,000 / 1,000,000 / jackpot, the others 50,000.
-			// The indicator moves on every two seconds (the speed of the original light cycle is approximated).
+			// The indicator moves on every 0.1 seconds (the light group timer of the original, handler 0x47).
 			static const char* const lanes[] = {"a_roll2", "a_roll9", "a_roll8", "a_roll6"};
-			if (strcmp(name, lanes[((SDL_GetTicks() - ModeStart) / 2000) % 4]))
+			if (strcmp(name, lanes[((SDL_GetTicks() - ModeStart) / 100) % 4]))
 				pb::MainTable->AddScore(50000);
 			else
 			{
