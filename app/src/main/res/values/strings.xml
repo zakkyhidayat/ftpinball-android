@@ -11,7 +11,7 @@
     <string name="remainingballs">%d</string>
     <string name="remainingballssettings">Remaining balls indicator</string>
     <string name="tiltbuttons">Tilt buttons</string>
-    <string name="credits">3D Pinball Table was created for Microsoft by Maxis.\nCopyright © 1995 Maxis.\n\nReverse engineering by: k4zmu2a\nOriginal Android port by: Iscle\nCurrent Android port by: fexed, th3vanger</string>
+    <string name="credits">Full Tilt! Pinball was created by Cinematronics and Maxis.\nCopyright © 1995 Maxis.\n\nReverse engineering by: k4zmu2a\nOriginal Android port by: Iscle\nCurrent Android port by: fexed, th3vanger</string>
     <string name="restartprompt">Long tap to restart the game</string>
     <string name="soundfx">Sound effects</string>
     <string name="customfonts">Custom fonts</string>

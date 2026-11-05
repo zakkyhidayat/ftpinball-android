@@ -1,4 +1,4 @@
-Full Tilt! Pinball for Android runs the tables of the Full Tilt! Pinball game on the open source engine of 3D Pinball for Windows – Space Cadet.
+Full Tilt! Pinball for Android runs the tables of the Full Tilt! Pinball game on the open source SpaceCadetPinball engine.
 
 Tables:
 - Space Cadet: the full original rules.

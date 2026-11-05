@@ -1,10 +1,10 @@
 <!-- markdownlint-disable-file MD033 -->
 
 # Full Tilt! Pinball for Android
-[![Android CI](https://github.com/zakkyhidayat/spacecadetpinball-android/actions/workflows/android.yml/badge.svg)](https://github.com/zakkyhidayat/spacecadetpinball-android/actions/workflows/android.yml)
+[![Android CI](https://github.com/zakkyhidayat/ftpinball-android/actions/workflows/android.yml/badge.svg)](https://github.com/zakkyhidayat/ftpinball-android/actions/workflows/android.yml)
 ## Summary
 
-Android app for the tables of `Full Tilt! Pinball`, running on the open source engine of `3D Pinball for Windows – Space Cadet`.
+Android app for the tables of `Full Tilt! Pinball`: Space Cadet, Dragon's Keep and Skulduggery. It runs on the open source [SpaceCadetPinball](https://github.com/k4zmu2a/SpaceCadetPinball) engine.
 
 This is a fork of [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on-Android) with build updates and bug fixes. Thanks to [k4zmu2a](https://github.com/k4zmu2a) for the original source code, to [iscle](https://github.com/Iscle) for the original Android porting and to [fexed](https://github.com/fexed) for the Android app.
 
@@ -37,7 +37,7 @@ Full Tilt! Pinball is copyrighted and its data is **not** in this repository. To
 tools/stage_fulltilt.sh /path/to/FULLTILT
 ```
 
-This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds, and the tables come from the files added in the app. The original Windows 3D Pinball table is no longer bundled.
+This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds, and the tables come from the files added in the app.
 
 ## Documentation
 
@@ -59,8 +59,8 @@ This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share a
 Requirements: JDK 17 or newer, Android SDK (platform 34, build-tools 34.0.0, NDK 26.3.11579264, CMake 3.22.1).
 
 ```bash
-git clone --recursive https://github.com/zakkyhidayat/spacecadetpinball-android
-cd spacecadetpinball-android
+git clone --recursive https://github.com/zakkyhidayat/ftpinball-android
+cd ftpinball-android
 echo "sdk.dir=$HOME/Android/Sdk" > local.properties
 ./gradlew installDebug   # with a phone connected over adb
 ```

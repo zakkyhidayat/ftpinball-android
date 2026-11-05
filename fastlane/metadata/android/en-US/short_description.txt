@@ -1,1 +1,1 @@
-Android app for the Space Cadet table of Full Tilt! Pinball, on the open source 3D Pinball engine
+Space Cadet, Dragon's Keep and Skulduggery from Full Tilt! Pinball, on an open source engine
