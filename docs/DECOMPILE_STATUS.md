@@ -61,9 +61,9 @@ Helper routines of the original game code that write game state or scores and th
 | `0x42d480` | cited | - | 2 |
 | `0x42d590` | cited | 100000 | 2, 2 |
 | `0x42d730` | cited | - | - |
-| `0x42d830` | open | - | 2 |
+| `0x42d830` | cited | - | 2 |
 | `0x42d850` | cited | 20000, 40000 | 2 |
-| `0x42d900` | open | 750000 | - |
+| `0x42d900` | cited | 750000 | - |
 | `0x42db30` | cited | - | - |
 
 ## Dragon: 9 cited, 17 open
@@ -71,9 +71,9 @@ Helper routines of the original game code that write game state or scores and th
 | Address | Status | Score-like values | State set |
 | --- | --- | --- | --- |
 | `0x423be0` | cited | - | 0xd |
-| `0x423e90` | open | 65526 | 9 |
+| `0x423e90` | cited | 65526 | 9 |
 | `0x424210` | cited | - | - |
-| `0x424260` | open | 1000000, 2500000 | 1 |
+| `0x424260` | cited | 1000000, 2500000 | 1 |
 | `0x4244e0` | cited | - | 0xf |
 | `0x424d20` | cited | - | - |
 | `0x4250e0` | cited | - | - |
