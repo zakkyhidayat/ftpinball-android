@@ -26,12 +26,12 @@ Helper routines of the original game code that write game state or scores and th
 | `0x4236a0` | cited | - | - |
 | `0x423720` | cited | - | - |
 | `0x423aa0` | cited | 1000000 | - |
-| `0x424580` | open | - | - |
-| `0x424700` | open | - | - |
-| `0x424780` | open | 100000, 1000000, 1500000, 250000 | - |
+| `0x424580` | cited | - | - |
+| `0x424700` | cited | - | - |
+| `0x424780` | cited | 100000, 1000000, 1500000, 250000 | - |
 | `0x424b00` | cited | - | - |
-| `0x425080` | open | - | - |
-| `0x425110` | open | - | - |
+| `0x425080` | cited | - | - |
+| `0x425110` | cited | - | - |
 | `0x425230` | open | - | - |
 | `0x425440` | open | - | - |
 | `0x425490` | open | 30000 | - |
