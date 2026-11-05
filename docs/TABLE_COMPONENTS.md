@@ -169,6 +169,7 @@ Implemented:
 
 * Per component scores and banks from the game data, jackpot, ball bonus, shoot again, lights, sounds.
 * Seven modes drawn at random from those not completed, each timed (24 to 31 seconds where the original timers were read).
+* Mode start payouts (the start case of each mode's handler): Attack 200,000, Treasure Hunt 300,000, Tavern 200,000, Bermuda 200,000, Storm 300,000, Mutiny 100,000, Swordfight 250,000.
 * Attack Ship: each ship target pays 10,000; all five sink the ship ("Ship Sunk": the jackpot and 25,000, the targets come back up) and the mode goes on until its timer ends; during the mode the wire ramp exit `s_rexit8` gives "Ship Captured", raises the ship targets again and the fathom level.
 * Fathom level: 1 at the start of each ball, up to 7. It goes up when all six island lane lights are lit (each of `a_roll12`, `a_roll11`, `a_roll10` lights twice), with Peg Leg's Loot, with the Fathoms Up mystery and when the ship is captured. It multiplies the buried bonus.
 * Treasure Hunt: only the hideaway with the flashing X counts; the X then moves. The finds are buried and paid when the mode ends (decoded from 0x424b00 and 0x425ab0): three coin awards, two special treasures, a bonus (((special treasures x 2 + map pieces) x 25 + modes x 20 + targets) x 10,000, times the fathom level), the jackpot and an extra ball, then coin awards again.

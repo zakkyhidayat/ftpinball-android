@@ -643,6 +643,7 @@ namespace
 		int awards[6];     // award for the 1st, 2nd... hit (last one repeats): points, JACKPOT or EXTRA_BALL
 		int jackpotEvery;  // also award the jackpot on every nth hit (0 = never)
 		int jackpotAdd;    // added to the jackpot on every hit
+		int startPoints;   // paid when the mode starts (0 = the profile's start points)
 	};
 
 	struct Profile
@@ -705,14 +706,14 @@ namespace
 		10000, 200000, "Mode", PirateTargets, PirateSinks, 7,
 		{
 			// The order of the original: its mode messages are Attack, Treasure Hunt, Tavern, Bermuda, Storm, Mutiny, Swordfight
-			{"Attack Ship: hit the ship targets", ShipTargets, 9999, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000},
-			{"Treasure Hunt: find the hideaways", Hideaways, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0},
-			{"Tavern: hit targets and sinks", TavernParts, 6, {25000, 25000, 25000, 25000, 25000, JACKPOT}, 0, 50000},
-			{"Bermuda Triangle: take the wind lanes", WindLanes, 9999, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
+			{"Attack Ship: hit the ship targets", ShipTargets, 9999, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000, 200000},
+			{"Treasure Hunt: find the hideaways", Hideaways, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0, 300000},
+			{"Tavern: hit targets and sinks", TavernParts, 6, {25000, 25000, 25000, 25000, 25000, JACKPOT}, 0, 50000, 200000},
+			{"Bermuda Triangle: take the wind lanes", WindLanes, 9999, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0, 200000},
 			// Storm: any drop target bails water (type 1006 events in the original); value and jackpot interval follow the storm level
-			{"Storm: bail the water", DropTargets, 9999, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0},
-			{"Mutiny: hit the bumpers", Bumpers, 10, {25000, 25000, 25000, 25000, 25000, 25000}, 10, 0},
-			{"Swordfight: parrot and volcano targets", ParrotVolcano, 7, {30000, 30000, 30000, 30000, 30000, 30000}, 0, 0},
+			{"Storm: bail the water", DropTargets, 9999, {25000, 25000, 25000, 25000, 25000, 25000}, 7, 0, 300000},
+			{"Mutiny: hit the bumpers", Bumpers, 10, {25000, 25000, 25000, 25000, 25000, 25000}, 10, 0, 100000},
+			{"Swordfight: parrot and volcano targets", ParrotVolcano, 7, {30000, 30000, 30000, 30000, 30000, 30000}, 0, 0, 250000},
 		},
 		"a_spot102"
 	};
@@ -1331,7 +1332,8 @@ namespace
 			StormEvery = level <= 5 ? 8 : level <= 10 ? 7 : level <= 15 ? 6 : 5;
 		}
 		ModeEnd = SDL_GetTicks() + (unsigned)(1000 * (Rules == &Dragon ? DragonSeconds : PirateSeconds)[QuestIndex]);
-		pb::MainTable->AddScore(Rules->startPoints);
+		// the mode's start payout (the 0x4f handler of each mode; Dragon's Keep uses the profile's)
+		pb::MainTable->AddScore(Rules->quests[QuestIndex].startPoints ? Rules->quests[QuestIndex].startPoints : Rules->startPoints);
 		snprintf(Line, sizeof Line, "%s started", Rules->questWord);
 		say(pinball::InfoTextBox, Line, 3.0f, 2);
 	}
