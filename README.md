@@ -6,11 +6,11 @@
 
 Play the three tables of **Full Tilt! Pinball** on your Android phone:
 
-| Table | Rules |
-| --- | --- |
-| **Space Cadet** | Complete, as in the original game |
-| **Dragon's Keep** | Re-implemented from the original game's code and help file |
-| **Skulduggery** | Re-implemented from the original game's code and help file |
+| | Table | Rules |
+| --- | --- | --- |
+| <img src="docs/images/space-cadet.png" width="96" alt="Space Cadet"> | **Space Cadet** | Complete, as in the original game |
+| <img src="docs/images/dragons-keep.png" width="96" alt="Dragon's Keep"> | **Dragon's Keep** | Re-implemented from the original game's code and help file |
+| <img src="docs/images/skulduggery.png" width="96" alt="Skulduggery"> | **Skulduggery** | Re-implemented from the original game's code and help file |
 
 The app does not include the game's data, because it is copyrighted. You add it from your own copy of the game (see below).
 
