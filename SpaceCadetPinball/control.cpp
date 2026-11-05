@@ -705,7 +705,7 @@ namespace
 		10000, 200000, "Mode", PirateTargets, PirateSinks, 7,
 		{
 			// The order of the original: its mode messages are Attack, Treasure Hunt, Tavern, Bermuda, Storm, Mutiny, Swordfight
-			{"Attack Ship: hit the ship targets", ShipTargets, 5, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000},
+			{"Attack Ship: hit the ship targets", ShipTargets, 9999, {10000, 10000, 10000, 10000, JACKPOT, 0}, 0, 25000},
 			{"Treasure Hunt: find the hideaways", Hideaways, 5, {100000, 250000, 500000, 750000, JACKPOT, 0}, 0, 0},
 			{"Tavern: hit targets and sinks", TavernParts, 6, {25000, 25000, 25000, 25000, 25000, JACKPOT}, 0, 50000},
 			{"Bermuda Triangle: take the wind lanes", WindLanes, 9999, {125000, 250000, 500000, 1000000, JACKPOT, 0}, 0, 0},
@@ -1761,6 +1761,23 @@ namespace
 				return;
 			}
 			end_quest();
+			return;
+		}
+		if (Rules == &Pirates && QuestIndex == 0)
+		{
+			// original 0x4264f0 (state 4): a ship target pays 10,000; all five sink the ship: the jackpot and 25,000, the targets
+			// come back up and the mode goes on until its timer ends
+			if (++QuestHits % 5)
+				pb::MainTable->AddScore(10000);
+			else
+			{
+				award(JACKPOT);
+				pb::MainTable->AddScore(25000);
+				say(pinball::InfoTextBox, "Ship Sunk", 2.0f, 2);
+				for (int i = 0; ShipTargets[i]; ++i)
+					if (auto drop = pb::MainTable->find_component(ShipTargets[i]))
+						drop->Message(50, 0.0f);
+			}
 			return;
 		}
 		if (Rules == &Pirates && QuestIndex == 3)
