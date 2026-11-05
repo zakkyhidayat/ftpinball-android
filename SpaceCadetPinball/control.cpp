@@ -748,7 +748,7 @@ namespace
 	unsigned ModeStart;
 	int BermudaCount;
 	int BuriedCoins, BuriedSpecial, BuriedBonus, BuriedJackpot; // Treasure Hunt: finds that are paid when the mode ends
-	bool BuriedExtra;
+	bool BuriedExtra, ShipMystery; // ShipMystery: the shipwreck mystery waits on the rollover a_roll3
 	int HoardMask, TreasureX; // Treasure Hunt: the hideaway where the X is flashing
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
@@ -864,6 +864,21 @@ namespace
 			++MapPieces;
 		snprintf(Line, sizeof Line, "Map Piece %d", MapPieces);
 		say(pinball::InfoTextBox, Line, 3.0f, 2);
+	}
+
+	// original 0x425c50: the shipwreck mystery is one of six awards
+	void shipwreck_mystery()
+	{
+		ShipMystery = false;
+		switch (rand() % 6)
+		{
+		case 0: special_treasure(); break;
+		case 1: award(EXTRA_BALL); break;
+		case 2: say(pinball::InfoTextBox, "Bumpers Level 6", 3.0f, 2); break;
+		case 3: say(pinball::InfoTextBox, "Fathoms Up", 3.0f, 2); break;
+		case 4: map_piece(); break;
+		default: coin_award();
+		}
 	}
 
 	// The random award of the original (FUN_00424fb0): map piece, special treasure, coin award or extra ball, equally likely
@@ -1051,6 +1066,7 @@ namespace
 		SuperJackpot = 2500000;
 		BonusHold = 0;
 		BonusHoldLit = false;
+		ShipMystery = false;
 		SlayActive = false;
 		QuestActive = LastBallLost = false;
 		LaunchTicks = 0;
@@ -1431,6 +1447,8 @@ namespace
 			pb::MainTable->AddScore(component_score(index));
 		apply_lights(name);
 		play_sounds(name);
+		if (Rules == &Pirates && ShipMystery && !strcmp(name, "a_roll3"))
+			shipwreck_mystery(); // original 0x4296d0
 		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && BumperHits % 8 == 0 && Weapons < 4)
 		{
 			// Every eighth forest bumper hit awards the next weapon (25,000 more each time, from the original code)
@@ -1660,6 +1678,15 @@ namespace
 			}
 			else if (!strcmp(name, "a_kout1"))
 				award(JACKPOT);
+			return;
+		}
+		if (Rules == &Pirates && QuestIndex == 4 && (!strcmp(name, "a_sink17") || !strcmp(name, "a_sink15") || !strcmp(name, "a_sink14")))
+		{
+			// original 0x42c430: a ball in a hideaway wrecks the ship and ends the storm with the mystery available
+			say(pinball::InfoTextBox, "Shipwrecked", 2.0f, 2);
+			ShipMystery = true;
+			end_quest();
+			say(pinball::InfoTextBox, "Shipwreck Mystery\nAvailable", 3.0f, 2);
 			return;
 		}
 		if (!match(q.roles, name))

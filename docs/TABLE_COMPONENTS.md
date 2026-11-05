@@ -170,6 +170,7 @@ Implemented:
 * Per component scores and banks from the game data, jackpot, ball bonus, shoot again, lights, sounds.
 * Seven modes drawn at random from those not completed, each timed (24 to 31 seconds where the original timers were read).
 * Treasure Hunt: only the hideaway with the flashing X counts; the X then moves. The finds are buried and paid when the mode ends (decoded from 0x424b00 and 0x425ab0): three coin awards, two special treasures, a bonus (estimated from treasures and modes), the jackpot and an extra ball, then coin awards again.
+* Storm: a ball in a hideaway (`a_sink17`, `a_sink15`, `a_sink14`) wrecks the ship ("Shipwrecked") and ends the storm; the shipwreck mystery is then paid by the next hit on the rollover `a_roll3`: a special treasure, extra ball, map piece, coin award (bumper level and fathom effects are text only).
 * Bermuda Triangle: the indicated wind lane pays 125,000 / 250,000 / 500,000 / 1,000,000 / jackpot, other lanes 50,000 (the indicator speed is approximated).
 * Storm: any drop target bails water; value and jackpot interval follow the storm level (squall, tropical storm, monsoon,
   hurricane). The level is approximated from the wind lane passes, because the eight wind lights are not tracked.
