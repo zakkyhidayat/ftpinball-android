@@ -1171,6 +1171,7 @@ namespace
 			award(100000);
 		if (SlayHits < SlayNeed)
 		{
+			SlayEnd += 15000; // original 0x427f10: every ball in the mouth adds 15 seconds
 			snprintf(Line, sizeof Line, "Slay Dragon: %d hits left", SlayNeed - SlayHits);
 			say(pinball::MissTextBox, Line, -1.0f, 1);
 			return;
