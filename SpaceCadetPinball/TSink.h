@@ -17,6 +17,7 @@ public:
 
 	int Timer;
 	TBall* HeldBall = nullptr; // the ball in the sink, so that several balls can be in play
+	bool SpawnBall = false; // release a new ball on the next timer (multiball)
 	static int Holding;        // balls held in sinks waiting to be kicked out (a locked ball does not count)
 	float TimerTime;
 	vector2 BallPosition{};

@@ -8,6 +8,7 @@
 #include "TPinballTable.h"
 #include "TBall.h"
 #include "timer.h"
+#include "TPlunger.h"
 
 int TSink::Holding = 0;
 
@@ -39,7 +40,7 @@ int TSink::Message(int code, float value)
 			value = TimerTime;
 		if (Timer)
 			timer::kill(Timer);
-		else if (HeldBall)
+		else if (HeldBall || SpawnBall)
 			++Holding;
 		Timer = timer::set(value, this, TimerExpired);
 		break;
@@ -52,13 +53,14 @@ int TSink::Message(int code, float value)
 			if (Timer)
 			{
 				timer::kill(Timer);
-				if (HeldBall)
+				if (HeldBall || SpawnBall)
 					--Holding;
 			}
 			Timer = 0;
 			if (HeldBall)
 				HeldBall->InSink = false;
 			HeldBall = nullptr;
+			SpawnBall = false;
 			MessageField = 0;
 
 			auto playerPtr = PlayerMessagefieldBackup;
@@ -109,9 +111,20 @@ void TSink::Collision(TBall* ball, vector2* nextPosition, vector2* direction, fl
 void TSink::TimerExpired(int timerId, void* caller)
 {
 	auto sink = static_cast<TSink*>(caller);
-	auto ball = sink->HeldBall ? sink->HeldBall : sink->PinballTable->BallList.at(0);
-	if (sink->HeldBall)
+	auto ball = sink->HeldBall;
+	if (ball)
 		--Holding;
+	else if (sink->SpawnBall)
+	{
+		--Holding;
+		// multiball: the sink releases a new ball
+		ball = TPlunger::FreeBall(sink->PinballTable);
+		ball->Message(1024, 0.0f);
+		ball->Position.Z = ball->Offset;
+	}
+	else
+		ball = sink->PinballTable->BallList.at(0);
+	sink->SpawnBall = false;
 	sink->HeldBall = nullptr;
 	ball->InSink = false;
 	ball->CollisionComp = nullptr;

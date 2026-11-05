@@ -927,7 +927,16 @@ namespace
 		MultiMode = mode;
 		pb::MainTable->AddScore(100000);
 		say(pinball::InfoTextBox, text, 3.0f, 2);
-		feed_balls(extraBalls);
+		// original 0x42b3c0: the Gaggle ball comes out of the sink a_sink1
+		auto sink = mode == MULTI_GAGGLE ? dynamic_cast<TSink*>(pb::MainTable->find_component("a_sink1")) : nullptr;
+		if (sink && !sink->HeldBall && !sink->SpawnBall)
+		{
+			sink->SpawnBall = true;
+			sink->Message(56, -1.0f);
+			BallsInPlay += extraBalls;
+		}
+		else
+			feed_balls(extraBalls);
 	}
 
 	// A ball drained while others are still on the table; the mode ends with one ball left
