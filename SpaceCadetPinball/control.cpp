@@ -917,6 +917,36 @@ namespace
 		diverter(2, 1);
 	}
 
+	// Skulduggery keg magnets (original 0x424c70 and 0x424d30): they are off until a Tavern drop target is hit outside the idle
+	// state, which turns one random magnet that is off on; a magnet that is hit pays and turns itself off again
+	void set_magnet(int index, bool on)
+	{
+		char name[16];
+		snprintf(name, sizeof name, "s_magnet%d", index + 1);
+		if (auto magnet = pb::MainTable->find_component(name))
+			magnet->ActiveFlag = on ? 1 : 0;
+	}
+
+	void magnets_off()
+	{
+		for (int i = 0; i < 6; ++i)
+			set_magnet(i, false);
+	}
+
+	void magnet_on()
+	{
+		int off[6], count = 0;
+		for (int i = 0; i < 6; ++i)
+		{
+			char name[16];
+			snprintf(name, sizeof name, "s_magnet%d", i + 1);
+			auto magnet = pb::MainTable->find_component(name);
+			if (magnet && !magnet->ActiveFlag)
+				off[count++] = i;
+		}
+		set_magnet(count ? off[rand() % count] : rand() % 6, true);
+	}
+
 	// The idle state of Skulduggery (info state 2): no mode, no loot and no extra balls from Lava-Ball or Jail Break
 	bool pirate_idle()
 	{
@@ -1403,6 +1433,7 @@ namespace
 			// the route lights start again when a mode ends (0x42c070 case 0x52)
 			memset(RouteCombo, 0, sizeof RouteCombo);
 			memset(RouteLights, 0, sizeof RouteLights);
+			magnets_off(); // 0x42b420: the magnets go off when the Tavern ends
 		}
 		if (Rules == &Pirates && QuestIndex == 1)
 		{
@@ -1659,6 +1690,10 @@ namespace
 		// Mutiny (original 0x4283f0, state 9): a ball in the ship's sink lights Ship's Hold, which carries the ball bonus over
 		if (Rules == &Pirates && QuestActive && QuestIndex == 5 && !strcmp(name, "a_sink4"))
 			BonusHoldLit = true;
+		if (Rules == &Pirates && !pirate_idle() && (!strcmp(name, "a_drop13") || !strcmp(name, "a_drop14") || !strcmp(name, "a_drop15")))
+			magnet_on();
+		if (Rules == &Pirates && !strncmp(name, "s_magnet", 8) && name[8] >= '1' && name[8] <= '6')
+			set_magnet(name[8] - '1', false);
 		// Treasure Hunt (original 0x42b090, message 0x4a from a component of type 1020, the lit rollover lights): each such hit adds
 		// 20,000 to the jackpot
 		if (Rules == &Pirates && QuestActive && QuestIndex == 1 && !strncmp(name, "v_mlite", 7))
@@ -2247,6 +2282,8 @@ namespace
 		if (code == 1005 && dynamic_cast<TPlunger*>(cmp))
 		{
 			LaunchTicks = SDL_GetTicks();
+			if (Rules == &Pirates)
+				magnets_off(); // original 0x425e70: the magnets are off when the ball is launched
 			FirstHit = true;
 			return;
 		}
