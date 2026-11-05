@@ -22,7 +22,7 @@ import java.util.Map;
  * imported from a copy of the original game (the data is copyrighted and is not part of the released app).
  */
 final class TableFiles {
-    private static final int SEARCH_DEPTH = 2;
+    private static final int SEARCH_DEPTH = 4; // the disc root holds WIN95/FULLTILT/CADET
 
     private TableFiles() {
     }
