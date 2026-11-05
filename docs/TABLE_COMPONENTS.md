@@ -145,6 +145,8 @@ Bonus hold: slaying the dragon lights `v_lite31`; the end-of-ball bonus is then 
 
 Tower diverters: four pairs of one-way gates (`a_dvtraa`/`ab`, `ba`/`bb`, `ca`/`cb`, `da`/`db`) take the messages 62 (on) and 63 (off). Position 1 turns the first gate of a pair on and the second off, position 2 the opposite. At the start of a ball: A and D position 2, B and C position 1 (0x4245b0). Moves: tower bank complete (idle) A and D to 1; gargoyle bank complete B and C to 1; `a_roll7` A to 1; `a_sink9`/`a_sink10` A and D to 2; `s_oneway5` (idle) D to 1; `a_ramp103` D to 2; `s_rexit18` (idle) B to 2; `s_rexit19` (idle) C to 2; Dragon Hoard start B and C to 2; Rescue Maiden start A 1, B 2, C 1, D 1. The meaning of 62 and 63 as on and off is inferred from the pairs always being opposite.
 
+Slay Dragon mouth, extra: each ball in the mouth that does not finish the quest tells one of `a_sink4`, `a_sink1`, `a_sink2`, `a_sink18`, `a_sink17`, `a_sink16`, chosen at random, to release its ball after 3 seconds (original 0x427f10). A ball held by a tower lock is left locked.
+
 Not implemented: the random ball transfer from the tower sinks to
 `a_sink1`/`a_sink2`, the gem lights of Dragon Hoard, and light sweeps.
 

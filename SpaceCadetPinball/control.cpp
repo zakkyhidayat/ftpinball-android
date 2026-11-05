@@ -1257,6 +1257,17 @@ namespace
 		if (SlayHits < SlayNeed)
 		{
 			SlayEnd += 15000; // original 0x427f10: every ball in the mouth adds 15 seconds
+			// original 0x427f10: one of six sinks, chosen at random, is told to release its ball after three seconds; a ball
+			// held by a tower lock stays locked here, so the lock order of the port is kept
+			static const char* const sinks[] = {"a_sink4", "a_sink1", "a_sink2", "a_sink18", "a_sink17", "a_sink16"};
+			const char* pick = sinks[rand() % 6];
+			bool locked = false;
+			for (int i = 0; i < Locked; ++i)
+				if (LockedSinks[i] && LockedSinks[i]->GroupName && !strcmp(LockedSinks[i]->GroupName, pick))
+					locked = true;
+			if (!locked)
+				if (auto sink = pb::MainTable->find_component(pick))
+					sink->Message(56, 3.0f);
 			snprintf(Line, sizeof Line, "Slay Dragon: %d hits left", SlayNeed - SlayHits);
 			say(pinball::MissTextBox, Line, -1.0f, 1);
 			return;
