@@ -1,62 +1,42 @@
 <!-- markdownlint-disable-file MD033 -->
 
 # Full Tilt! Pinball for Android
+
 [![Android CI](https://github.com/zakkyhidayat/ftpinball-android/actions/workflows/android.yml/badge.svg)](https://github.com/zakkyhidayat/ftpinball-android/actions/workflows/android.yml)
-## Summary
 
-Android app for the tables of `Full Tilt! Pinball`: Space Cadet, Dragon's Keep and Skulduggery. It runs on the open source [SpaceCadetPinball](https://github.com/k4zmu2a/SpaceCadetPinball) engine.
+Play the three tables of **Full Tilt! Pinball** on your Android phone:
 
-This is a fork of [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on-Android) with build updates and bug fixes. Thanks to [k4zmu2a](https://github.com/k4zmu2a) for the original source code, to [iscle](https://github.com/Iscle) for the original Android porting and to [fexed](https://github.com/fexed) for the Android app.
-
-## Features of this fork
-
-- Main menu with one card per Full Tilt! table: Space Cadet, Dragon's Keep and Skulduggery.
-  - **Space Cadet**: the full original rules.
-  - **Dragon's Keep** and **Skulduggery**: rules re-implemented from the original executables (scores, lights, sounds, quests or modes, jackpot, bonus, shoot again) plus the help file. They do not yet cover every part of the originals, see [the component guide](docs/TABLE_COMPONENTS.md) for what is and is not done.
-- Table parts new to Full Tilt in the engine: accelerators, return exits, magnets and multi-gate one-way gates
-- Dragon's Keep: random quest draw with the quest selection target, ten second quest restart, Slay Dragon, Wizard's Fury mystery award, armor and dragon eggs, tower locks and multiballs, and the tower diverters
-- Skulduggery: the eleven letter drop targets start a mode, seven timed modes drawn at random (captive ball changes or extends them), Storm levels and the shipwreck mystery, Swordfight, Treasure Hunt with buried finds, fathom level, coin awards, special treasures, map pieces, Lava-Ball, the brig with Jail Break and Peg Leg's Loot
-- Bauhaus table font and per-table accent colours, always on
-- Local top 10 high scores per table (name and date), shown after each game. Scores of games with cheats are not recorded
-- No online leaderboard. Sound effects and music have on/off toggles and volume sliders.
-- New touch controls, haptic feedback, a restart confirmation and a back-to-menu confirmation
-- Build upgraded to Gradle 8.5 / Android Gradle Plugin 8.2.2 (JDK 17+), targetSdk 34, NDK 26.3, 16 KB page size support
-- Bug fixes: sticking flippers ([fexed#82](https://github.com/fexed/Pinball-on-Android/issues/82)), garbage text after the top rank ([fexed#53](https://github.com/fexed/Pinball-on-Android/issues/53)), graphics corruption when typing `gmax` ([fexed#93](https://github.com/fexed/Pinball-on-Android/issues/93)), message typos ([fexed#95](https://github.com/fexed/Pinball-on-Android/issues/95)), a crash with more than 20 balls ([k4zmu2a#209](https://github.com/k4zmu2a/SpaceCadetPinball/issues/209)) and high scores after cheats ([k4zmu2a#228](https://github.com/k4zmu2a/SpaceCadetPinball/issues/228))
-
-## Full Tilt! data (optional)
-
-### Playing with a released APK
-
-The released APK has no game data. Copy your own copy of Full Tilt! Pinball to your phone: the installed game folder (the one holding CADET, DRAGON and PIRATE, `WIN95/FULLTILT` on the original CD) or the whole disc contents, open the app and tap **Add Full Tilt! files**, then choose that folder. The app copies the data it needs (the `.DAT` files, sounds, music and icons) into its own storage and unlocks the tables it finds; the original folder can then be removed.
-
-### Building your own APK with the data
-
-Full Tilt! Pinball is copyrighted and its data is **not** in this repository. To build an APK with the Full Tilt tables for your own use, stage your own copy of the game (the folder holding CADET, DRAGON and PIRATE) before building:
-
-```bash
-tools/stage_fulltilt.sh /path/to/FULLTILT
-```
-
-This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds, and the tables come from the files added in the app.
-
-## Documentation
-
-* [Pinball table components](docs/TABLE_COMPONENTS.md): what each part of a table is, how the game data names them, which engine class implements them, and which rules are implemented for each table.
-* [CONTRIBUTING.md](CONTRIBUTING.md)
-
-## Project layout
-
-| Path | Contents |
+| Table | Rules |
 | --- | --- |
-| `app/` | Android app (Java): menu, settings, high scores, touch controls |
-| `app/src/main/cpp/` | JNI bridge and CMake build of the engine and SDL |
-| `SpaceCadetPinball/` | The pinball engine (C++), table components and `control.cpp` rules |
-| `tools/` | Helper scripts, e.g. `stage_fulltilt.sh` |
-| `docs/` | Documentation |
+| **Space Cadet** | Complete, as in the original game |
+| **Dragon's Keep** | Re-implemented from the original game's code and help file |
+| **Skulduggery** | Re-implemented from the original game's code and help file |
 
-## Building
+The app does not include the game's data, because it is copyrighted. You add it from your own copy of the game (see below).
 
-Requirements: JDK 17 or newer, Android SDK (platform 34, build-tools 34.0.0, NDK 26.3.11579264, CMake 3.22.1).
+## Install
+
+1. Download the latest APK from the [Releases page](https://github.com/zakkyhidayat/ftpinball-android/releases) and install it. Android will ask you to allow installs from your browser or file manager.
+2. Put your copy of Full Tilt! Pinball on the phone. You need the folder that holds the `CADET`, `DRAGON` and `PIRATE` folders (on the original CD it is `WIN95/FULLTILT`). Copying the whole disc also works. It is about 19 MB.
+3. Open the app and tap **Add Full Tilt! files**. Choose that folder.
+4. The app copies what it needs and lists the tables it found. You can delete the copy you made in step 2 afterwards.
+
+If a table is missing from the menu, the app could not find its `.DAT` file in the folder you chose. Choose the folder one level up, or the folder of that table.
+
+## Playing
+
+- Touch controls with haptic feedback; hold the shoot button to charge the plunger.
+- A top 10 high score list for each table, with name and date. Scores of games that used cheats are not recorded.
+- Sound effects and music each have an on/off switch and a volume slider.
+- Confirmation before you restart a game or go back to the menu.
+
+## How complete are the rules?
+
+Space Cadet follows the original rules fully. For Dragon's Keep and Skulduggery the scoring, quests and modes, multiballs, bonus and sounds are rebuilt from the original game's code. They do not cover every part yet, mainly light shows and some light-based effects. [The component guide](docs/TABLE_COMPONENTS.md) lists what each table part does and what is and is not done.
+
+## Build it yourself
+
+You need JDK 17 or newer and the Android SDK (platform 34, build-tools 34.0.0, NDK 26.3.11579264, CMake 3.22.1).
 
 ```bash
 git clone --recursive https://github.com/zakkyhidayat/ftpinball-android
@@ -65,7 +45,26 @@ echo "sdk.dir=$HOME/Android/Sdk" > local.properties
 ./gradlew installDebug   # with a phone connected over adb
 ```
 
-## Credits
+To build an APK that already contains your own game data, stage it first. Never share an APK built this way.
 
-- Original source: [k4zmu2a/SpaceCadetPinball](https://github.com/k4zmu2a/SpaceCadetPinball) by k4zmu2a
-- Forked from: [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on-Android) by fexed
+```bash
+tools/stage_fulltilt.sh /path/to/FULLTILT   # the folder holding CADET, DRAGON and PIRATE
+```
+
+This copies the data into the git-ignored `app/fulltilt-assets/`.
+
+## Project layout
+
+| Path | Contents |
+| --- | --- |
+| `app/` | The Android app (Java): menu, settings, high scores, touch controls |
+| `app/src/main/cpp/` | JNI bridge and the CMake build of the engine and SDL |
+| `SpaceCadetPinball/` | The pinball engine (C++), table components and the table rules in `control.cpp` |
+| `tools/` | Helper scripts |
+| `docs/` | Documentation |
+
+More: [table component guide](docs/TABLE_COMPONENTS.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Licence
+
+MIT, see [LICENSE](LICENSE). Full Tilt! Pinball and its data belong to their owners and are not part of this project.
