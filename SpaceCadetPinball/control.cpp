@@ -874,7 +874,10 @@ namespace
 		{
 		case 0: special_treasure(); break;
 		case 1: award(EXTRA_BALL); break;
-		case 2: say(pinball::InfoTextBox, "Bumpers Level 6", 3.0f, 2); break;
+		case 2:
+			if (BumperHits < 60) BumperHits = 60; // the sixth bumper level
+			say(pinball::InfoTextBox, "Bumpers Level 6", 3.0f, 2);
+			break;
 		case 3: say(pinball::InfoTextBox, "Fathoms Up", 3.0f, 2); break;
 		case 4: map_piece(); break;
 		default: coin_award();
