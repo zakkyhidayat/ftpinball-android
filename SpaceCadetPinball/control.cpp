@@ -693,6 +693,8 @@ namespace
 	const char* const PirateSinks[] = {"a_sink*", nullptr};
 	const char* const ShipTargets[] = {"a_drop5", "a_drop6", "a_drop7", "a_drop8", "a_drop9", nullptr};
 	const char* const Hideaways[] = {"a_sink17", "a_sink15", "a_sink14", "a_sink9", "a_sink12", nullptr};
+	// The routes with a combo of their own: the island ramps and the orbit sensors (0x428b70, 0x428d80, 0x429210, 0x429400)
+	const char* const IslandRoutes[] = {"a_ramp8", "a_ramp5", "s_trip3", "s_trip8", nullptr};
 	const char* const WindLanes[] = {"a_roll2", "a_roll9", "a_roll8", "a_roll6", nullptr};
 	const char* const TavernParts[] = {"a_drop13", "a_drop14", "a_drop15", "a_sink5", "a_sink6", "a_sink7", nullptr};
 	const char* const ParrotVolcano[] = {"a_drop10", "a_drop11", "a_drop12", "a_spot8", "a_spot9", "a_spot10", "a_spot11", nullptr};
@@ -907,6 +909,12 @@ namespace
 		}
 		diverter(1, 1);
 		diverter(2, 1);
+	}
+
+	// The idle state of Skulduggery (info state 2): no mode, no loot and no extra balls from Lava-Ball or Jail Break
+	bool pirate_idle()
+	{
+		return !QuestActive && !LootActive && BallsInPlay <= 1;
 	}
 
 	// Peg Leg's Loot starts from every path that sets it, and pays its start amount (0x42cfc0, 0x4f)
@@ -1169,7 +1177,7 @@ namespace
 	{
 		const ComponentScore& s = Rules->scores[index];
 		int hits = Hits[index]++;
-		if (Rules == &Pirates && (s.count == 12 || (s.count == 3 && !strncmp(s.name, "a_roll", 6))))
+		if (Rules == &Pirates && (match(WindLanes, s.name) || match(IslandRoutes, s.name)))
 		{
 			// original 0x428b70 and its siblings: a hit lights the next light of the route's group (the light stays on, only
 			// its flashing lasts two seconds), and the lit count before the hit is the score step. The ramps and orbit
@@ -1178,12 +1186,12 @@ namespace
 			if (LastRoute >= 0 && LastRoute != index) RouteCombo[LastRoute] = 0;
 			LastRoute = index;
 			int step = RouteLights[index] < 2 ? RouteLights[index] : 2;
-			if (s.count == 12)
+			if (match(IslandRoutes, s.name))
 			{
 				step += (RouteCombo[index] < 3 ? RouteCombo[index] : 3) * 3;
 				++RouteCombo[index];
 			}
-			if (!QuestActive && !LootActive)
+			if (pirate_idle())
 				++RouteLights[index];
 			return s.values[step];
 		}
@@ -1586,8 +1594,7 @@ namespace
 				index = i;
 		// Components without a score of their own (sinks, kickouts, ramps, return exits) still take part in the quests
 		// Bermuda Triangle: the wind lanes pay only their mode award (the state 5 branch of 0x4298f0 returns before the ladder)
-		bool bermudaLane = Rules == &Pirates && QuestActive && QuestIndex == 3 && !strncmp(name, "a_roll", 6) &&
-			(!strcmp(name, "a_roll2") || !strcmp(name, "a_roll9") || !strcmp(name, "a_roll8") || !strcmp(name, "a_roll6"));
+		bool bermudaLane = Rules == &Pirates && QuestActive && QuestIndex == 3 && match(WindLanes, name);
 		if (index >= 0 && !bermudaLane)
 			pb::MainTable->AddScore(component_score(index));
 		apply_lights(name);
@@ -1608,7 +1615,7 @@ namespace
 					}
 				}
 		}
-		if (Rules == &Pirates && !QuestActive && !LootActive)
+		if (Rules == &Pirates && pirate_idle())
 		{
 			// Lane lights (original 0x429630, 0x429790, 0x429840, 0x4298f0, 0x4296d0 and the check at 0x424290): in the idle state
 			// each of five lanes lights its light; when all five are lit the lights start again and 0x423aa0 lights a map piece
@@ -1693,7 +1700,10 @@ namespace
 				if (rand() % 4 != 1)
 					cast_spell();
 				else if (QuestIndex >= 0)
+				{
 					begin_quest(false);
+					return; // the ball that starts the quest does not count as its first hit
+				}
 			}
 			if (!strcmp(name, "s_hole118") && !QuestActive && !SlayActive)
 				open_egg_menu();
@@ -1807,7 +1817,7 @@ namespace
 			}
 		}
 
-		if (Rules == &Pirates && (!strcmp(name, "a_roll2") || !strcmp(name, "a_roll9") || !strcmp(name, "a_roll8") || !strcmp(name, "a_roll6")) && WindHits < 12)
+		if (Rules == &Pirates && match(WindLanes, name) && WindHits < 12)
 			++WindHits;
 
 		if (QuestActive && SDL_GetTicks() > ModeEnd)
@@ -1877,9 +1887,9 @@ namespace
 				Spot6Hits = 0;
 				if (HeldBalls)
 				{
+					// the brig hole gave those balls back itself (see s_hole19), so no ball is fed here
 					pb::MainTable->AddScore(100000);
 					say(pinball::InfoTextBox, "Jail Break!", 3.0f, 2);
-					feed_balls(HeldBalls);
 					HeldBalls = 0;
 				}
 			}
@@ -2031,8 +2041,7 @@ namespace
 		{
 			// Bermuda Triangle: the indicated wind lane pays 125,000 / 250,000 / 500,000 / 1,000,000 / jackpot, the others 50,000.
 			// The indicator moves on every 0.1 seconds (the light group timer of the original, handler 0x47).
-			static const char* const lanes[] = {"a_roll2", "a_roll9", "a_roll8", "a_roll6"};
-			if (strcmp(name, lanes[((SDL_GetTicks() - ModeStart) / 100) % 4]))
+			if (strcmp(name, WindLanes[((SDL_GetTicks() - ModeStart) / 100) % 4]))
 				pb::MainTable->AddScore(50000);
 			else
 			{
@@ -2119,7 +2128,6 @@ namespace
 		Fathom = 1; // the launcher of the original (0x425e70) clears the fathom lights for each ball
 		LavaMask = LaneMask = 0; // the volcano and lane lights start again on each ball
 		ForestHits = SwordHits = 0;
-		reset_diverters();
 		if (!table->TiltLockFlag)
 		{
 			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : MapPieces * 250000 + Treasures * 100000);
@@ -2149,6 +2157,7 @@ namespace
 		end_multiball_state();
 		BallsInPlay = 1;
 		MultiMode = MULTI_NONE;
+		reset_diverters(); // after the multiball state, so that the tower gates are not skipped
 		if (table->ExtraBalls)
 		{
 			--table->ExtraBalls;

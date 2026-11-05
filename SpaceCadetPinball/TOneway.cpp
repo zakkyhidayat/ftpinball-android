@@ -100,7 +100,7 @@ int TOneway::Message(int code, float value)
 		ActiveFlag = 0;
 		break;
 	default:
-		break;
+		return TPinballComponent::Message(code, value);
 	}
 	return 0;
 }
