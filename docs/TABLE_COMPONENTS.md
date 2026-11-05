@@ -183,7 +183,7 @@ Implemented:
 * Bermuda Triangle: the indicated wind lane pays 125,000 / 250,000 / 500,000 / 1,000,000 / jackpot, other lanes 50,000 (the indicator moves every 0.1 s, decoded from the original light timer). In this mode the lanes pay only that award, not their normal 25,000 to 75,000.
 * Storm: any drop target bails water; value and jackpot interval follow the storm level (squall, tropical storm, monsoon,
   hurricane). The level is approximated from the wind lane passes, because the eight wind lights are not tracked.
-* Swordfight: parrot and volcano targets, 30,000 each; completing a bank pays a coin award, special treasure, map piece or extra ball.
+* Swordfight: parrot and volcano targets, 30,000 each; completing a bank gives the next award in order: special treasure, coin award, map piece (One Million), then extra balls (0x425550, 0x425440).
 * Coin awards (50,000 doubling to 1,600,000), special treasures (100,000 up to 1,500,000), map pieces (1,000,000 each).
 * Tavern mode: the window sinks (`a_sink5`, `a_sink6`, `a_sink7`) give the random award of the original: map piece, special treasure, coin award or extra ball.
 * Peg Leg's Loot after all modes or all six map pieces: hideaways give special treasures, the ship sink finds the loot.

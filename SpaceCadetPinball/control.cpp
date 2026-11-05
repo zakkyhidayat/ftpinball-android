@@ -750,6 +750,7 @@ namespace
 	bool MenuOpen, ExtraBallLight;
 	int Spells, SpellMask, SpellsCast, Offense, Defense;
 	bool FirstHit; // the next component hit after a launch decides the skill shot
+	int SwordAwards; // Swordfight: the awards given so far this mode (original DAT_00435d04)
 	int LaneMask, WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
 	int LavaMask; // idle state: the volcano lights that start Lava-Ball when all four are lit
 	int Spot6Hits; // Skulduggery idle state: the hits on a_spot6 (original 0x4279b0); the third starts Jail Break
@@ -1468,7 +1469,7 @@ namespace
 		TreasureX = rand() % 5;
 		BuriedCoins = BuriedSpecial = BuriedBonus = BuriedJackpot = 0;
 		BuriedExtra = false;
-		ParrotMask = VolcanoMask = 0;
+		ParrotMask = VolcanoMask = SwordAwards = 0;
 		if (Rules == &Pirates && QuestIndex == 4)
 		{
 			// The storm level comes from the wind lights: squall, tropical storm, monsoon or hurricane. The lights are
@@ -1951,7 +1952,7 @@ namespace
 
 		if (Rules == &Pirates && QuestIndex == 6)
 		{
-			// Swordfight: finishing the parrot bank or the volcano bank gives a coin award, special treasure, map piece or extra ball
+			// Swordfight: finishing the parrot bank or the volcano bank gives the next award
 			static const char* const parrot[] = {"a_drop10", "a_drop11", "a_drop12"};
 			static const char* const volcano[] = {"a_spot8", "a_spot9", "a_spot10", "a_spot11"};
 			bool full = false;
@@ -1963,7 +1964,15 @@ namespace
 					full = (VolcanoMask |= 1 << i) == 15 && ((VolcanoMask = 0), true);
 			if (full)
 			{
-				random_award();
+				// original 0x425550 and 0x425440: the awards come in order, special treasure, coin award, map piece, then
+				// extra balls
+				switch (SwordAwards++)
+				{
+				case 0: special_treasure(); break;
+				case 1: coin_award(); break;
+				case 2: map_piece(); break;
+				default: award(EXTRA_BALL); break;
+				}
 				if (MapPieces >= 6 && !LootActive)
 				{
 					start_loot();
