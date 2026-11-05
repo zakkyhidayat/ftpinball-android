@@ -89,14 +89,14 @@ void TOneway::Collision(TBall* ball, vector2* nextPosition, vector2* direction, 
 
 int TOneway::Message(int code, float value)
 {
-	// Full Tilt diverters: the original switches a gate on (62) or off (63); the Dragon's Keep diverters come in pairs,
-	// one on and one off (original 0x423d50)
+	// Full Tilt diverters (original message handler at 0x415410 in DRAGON.EXE): 63 (0x3f) makes the gate active, 62 (0x3e)
+	// inactive; the Dragon's Keep diverters come in pairs, one on and one off (original 0x423d50)
 	switch (code)
 	{
-	case 62:
+	case 63:
 		ActiveFlag = 1;
 		break;
-	case 63:
+	case 62:
 		ActiveFlag = 0;
 		break;
 	default:

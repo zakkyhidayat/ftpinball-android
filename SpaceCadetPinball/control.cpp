@@ -878,7 +878,8 @@ namespace
 	}
 
 	// Dragon's Keep tower diverters: four pairs of one-way gates (original: messages 0x3e and 0x3f to a_dvtraa/b, ba/bb, ca/cb,
-	// da/db). Position 1 switches the first gate of a pair on and the second off, position 2 does the opposite
+	// da/db). Message 0x3f makes a gate active and 0x3e inactive (the gate class of the original, 0x415410): position 1 sends
+	// 0x3e to the first gate and 0x3f to the second, position 2 the opposite
 	void diverter(int pair, int position)
 	{
 		static const char* const gates[4][2] = {{"a_dvtraa", "a_dvtrab"}, {"a_dvtrba", "a_dvtrbb"}, {"a_dvtrca", "a_dvtrcb"}, {"a_dvtrda", "a_dvtrdb"}};
