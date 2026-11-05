@@ -179,7 +179,7 @@ Implemented:
 * Tavern mode: the window sinks (`a_sink5`, `a_sink6`, `a_sink7`) give the random award of the original: map piece, special treasure, coin award or extra ball.
 * Peg Leg's Loot after all modes or all six map pieces: hideaways give special treasures, the ship sink finds the loot.
 
-Not implemented: the Skulduggery skill shot, the shipwreck mystery, buried treasure, wormhole style multiball and light sweeps.
+Skulduggery has no skill shot: its executable has no skill-shot message or state (the launcher handler `s_launcher1` only drives the cannon and the launch lights). Not implemented: wormhole style multiball and light sweeps.
 
 ## 5. Engine classes added for Full Tilt
 
