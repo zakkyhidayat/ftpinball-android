@@ -1064,6 +1064,9 @@ namespace
 	// The six dragon letter lights; all lit start Dragon Flurry
 	void dragon_letter(int bit)
 	{
+		// the handlers of the original (0x4265e0, 0x426740, 0x424d20 and the others) light a letter only in the idle state
+		if (QuestActive || SlayActive || MultiMode)
+			return;
 		LetterMask |= 1 << bit;
 		if (LetterMask == 63)
 		{
@@ -1656,7 +1659,7 @@ namespace
 							diverter(3, 1);
 						}
 						dragon_letter(5);
-						if (!LockLit && !MultiMode)
+						if (!LockLit && !MultiMode && !QuestActive && !SlayActive)
 						{
 							LockLit = true;
 							say(pinball::InfoTextBox, "Tower Lock Enabled", 2.0f, 2);

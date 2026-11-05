@@ -137,7 +137,7 @@ Rules that are implemented (`control.cpp`):
 * Dragon eggs: the egg award pays the eggs held times 100,000; the return exits (`s_rexit18`, `s_rexit19`) give two eggs, the kickout `a_kout2` one during Dragon Pass.
 * Multiball: Gargoyle Gaggle-Ball (two balls, the new ball comes out of `a_sink1`) from the gargoyle kickout `a_kout2` or the skill shot; Tower Barrage (three balls): the tower bank
   lights the tower lock, the tower sinks `a_sink18`, `a_sink17`, `a_sink16` lock a ball each, in that order (lock lights `v_lite48`, `v_lite49`, `v_lite50`; "Ball Trapped" shows the sink score), and the third lock releases them; Dragon Flurry (five balls)
-  when all six dragon letters are lit (fire lizard sinks, spell bank, dragon loop, gargoyle bank, tower ramp, tower bank).
+  when all six dragon letters are lit (fire lizard sinks, spell bank, dragon loop, gargoyle bank, tower ramp, tower bank). The letters, and the tower lock light, count only in the idle state (no quest, Slay or multiball), as in the original.
 * Egg hole (`s_hole118`): offers the highest affordable purchase (quest 1 egg, spell 4, weapon 5, armor 6, extra ball light 7, extra ball 8); the left flipper buys, the right declines for 25,000.
 * Dragon loop (`a_ramp103`): pays and adds to the jackpot (50,000 more for each loop in a row, up to ten); the jackpot is capped at 10,000,000.
 
