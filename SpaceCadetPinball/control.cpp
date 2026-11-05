@@ -1129,9 +1129,46 @@ namespace
 		}
 		if (strcmp(name, "a_sink19"))
 			return;
-		static const int fire[] = {100000, 1000000, JACKPOT, EXTRA_BALL, EXTRA_BALL};
-		int n = SlayHits++;
-		award(fire[n < 4 ? n : 4]);
+		// original 0x427f10: the award depends on how many lights of the sweeping dragon fire are lit
+		// (it climbs 9 lights, quickly over the last three, and goes down again)
+		static const double step[9] = {0.123, 0.123, 0.123, 0.123, 0.123, 0.123, 0.012, 0.012, 0.012};
+		double t = fmod(SDL_GetTicks() / 1000.0, 2 * (6 * 0.123 + 3 * 0.012));
+		int lit = 9;
+		bool up = true;
+		for (int pass = 0; pass < 2; ++pass, up = false)
+		{
+			bool found = false;
+			for (int i = 0; i < 9 && !found; ++i)
+			{
+				double d = step[up ? i : 8 - i];
+				if (t < d)
+				{
+					lit = up ? i + 1 : 8 - i;
+					found = true;
+				}
+				else
+					t -= d;
+			}
+			if (found)
+				break;
+		}
+		SlayHits++;
+		if (lit == 2)
+			award(1000000);
+		else if (lit == 3 && rand() % 5 == 0)
+			award(JACKPOT);
+		else if (lit >= 4 && rand() % 10 == 0)
+		{
+			if (lit == 4)
+			{
+				ExtraBallLight = true;
+				say(pinball::InfoTextBox, "Extra Ball Light", 2.0f, 2);
+			}
+			else
+				award(EXTRA_BALL);
+		}
+		else
+			award(100000);
 		if (SlayHits < SlayNeed)
 		{
 			snprintf(Line, sizeof Line, "Slay Dragon: %d hits left", SlayNeed - SlayHits);
