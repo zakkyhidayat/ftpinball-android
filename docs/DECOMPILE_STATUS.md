@@ -6,19 +6,19 @@ Helper routines of the original game code that write game state or scores and th
 
 | Address | Status | Score-like values | State set |
 | --- | --- | --- | --- |
-| `0x4230c0` | open | 1000000 | 0x11, 0 |
+| `0x4230c0` | cited | 1000000 | 0x11, 0 |
 | `0x4232c0` | cited | - | - |
-| `0x423310` | open | - | - |
-| `0x423350` | open | - | - |
-| `0x423440` | open | - | 3 |
-| `0x423460` | open | - | 2 |
-| `0x423480` | open | - | 4 |
-| `0x4234c0` | open | - | 5 |
-| `0x423500` | open | - | 6 |
-| `0x423520` | open | - | 7 |
-| `0x423560` | open | - | 8 |
-| `0x4235a0` | open | - | 9 |
-| `0x4235c0` | open | - | 10 |
+| `0x423310` | cited | - | - |
+| `0x423350` | cited | - | - |
+| `0x423440` | cited | - | 3 |
+| `0x423460` | cited | - | 2 |
+| `0x423480` | cited | - | 4 |
+| `0x4234c0` | cited | - | 5 |
+| `0x423500` | cited | - | 6 |
+| `0x423520` | cited | - | 7 |
+| `0x423560` | cited | - | 8 |
+| `0x4235a0` | cited | - | 9 |
+| `0x4235c0` | cited | - | 10 |
 | `0x4235f0` | open | - | 0xb |
 | `0x423610` | open | - | 0xc |
 | `0x423630` | cited | - | 0xd |
