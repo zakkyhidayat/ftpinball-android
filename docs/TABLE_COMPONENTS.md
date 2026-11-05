@@ -184,6 +184,8 @@ Implemented:
 
 Skulduggery has no skill shot: its executable has no skill-shot message or state (the launcher handler `s_launcher1` only drives the cannon and the launch lights). Not implemented: wormhole style multiball and light sweeps.
 
+Skulduggery start: the eleven drop targets `a_drop5` to `a_drop15` each light one letter of SKULDUGGERY (bits 0x1 to 0x400 of `v_lite1`, set by the handlers 0x4268b0 and the others). When all eleven are lit the mode is chosen (original 0x425de0). The old rule of ten hits on any start target is replaced by this.
+
 Skulduggery idle state: with all four volcano lights `a_spot8` to `a_spot11` lit, Lava-Ball starts and two balls are queued for the plunger (original 0x427540; the `0x192` queue is the same feed as `feed_balls`). Jail (the brig, `s_hole19`, decoded from 0x429040 and the routine at 0x424210, whose only caller is the brig handler at 0x4290a6): the hole gives a trapped ball back itself, so the first two traps change nothing. The third trap is held and starts Jail Break: 100,000, and two more balls are fed (the held ball is the third). Approximation: the original's queue counter (`0x192`) is not tracked, so the release feeds new balls rather than queued ones. The brig's flag on the second trap (a light) is not ported.
 
 ## 5. Engine classes added for Full Tilt

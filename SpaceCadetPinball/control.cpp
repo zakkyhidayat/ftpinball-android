@@ -744,6 +744,7 @@ namespace
 	bool FirstHit; // the next component hit after a launch decides the skill shot
 	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
 	int LavaMask; // idle state: the volcano lights that start Lava-Ball when all four are lit
+	int PirateLetters; // SKULDUGGERY: the letters lit so far in the idle state
 	int HeldBalls; // Jail: balls held in the brig (original DAT_00435d3c); the third trap starts Jail Break
 	// Quest and mode lengths in seconds, from the timers the original code sets for each
 	const float DragonSeconds[] = {27.73f, 31.69f, 30.45f, 30.65f, 30.69f};
@@ -1082,7 +1083,7 @@ namespace
 		FirstHit = false;
 		LootActive = false;
 		ModeEnd = 0;
-		WindHits = Coins = MapPieces = LavaMask = HeldBalls = 0;
+		WindHits = Coins = MapPieces = LavaMask = HeldBalls = PirateLetters = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
@@ -1696,6 +1697,22 @@ namespace
 			}
 		}
 
+		if (!QuestActive && Rules == &Pirates)
+		{
+			// SKULDUGGERY: one light per letter, lit by eleven drop targets (original 0x4268b0 and the others, which set
+			// bits 0x1 to 0x400 of v_lite1). When all eleven are lit the mode is chosen (original 0x425de0)
+			static const char* const letters[] = {"a_drop5", "a_drop6", "a_drop7", "a_drop8", "a_drop9", "a_drop10", "a_drop11", "a_drop12", "a_drop13", "a_drop14", "a_drop15"};
+			for (int i = 0; i < 11; ++i)
+				if (!strcmp(name, letters[i]))
+					PirateLetters |= 1 << i;
+			if (PirateLetters == 0x7ff)
+			{
+				PirateLetters = 0;
+				begin_quest(false);
+			}
+			show_quest();
+			return;
+		}
 		if (!QuestActive)
 		{
 			bool restart = Rules == &Dragon && RestartEnd && SDL_GetTicks() < RestartEnd && match(Rules->startRoles, name);
