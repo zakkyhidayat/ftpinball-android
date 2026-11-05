@@ -219,3 +219,5 @@ could not be read is taken from the original help file and marked above as appro
 this repository was copied from the original program's code; the rules are a re-implementation.
 
 Ball bonus hold (0x42b820 steps 4 and 5, 0x4283f0): in Mutiny a ball in the ship's sink (`a_sink4`) lights Ship's Hold. When the ball is lost with the light on, the whole bonus is held and added to the next ball's bonus. The bonus pays without the score multiplier (0x423350).
+
+Fire lizard sinks (0x425c30): in the idle state the second hit of the two sinks together, in either of them, lights the first dragon letter (a counter in `v_lite63`); it is not one hit in each sink.

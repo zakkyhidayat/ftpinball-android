@@ -1744,8 +1744,9 @@ namespace
 				open_egg_menu();
 			// Dragon letters: both fire lizard sinks, the spell bank, the dragon loop, the gargoyle bank, the tower ramp and the
 			// tower bank (which also lights the tower lock)
+			// original 0x425c30: the second hit of the fire lizard sinks, in either of them, lights the letter (v_lite63 counts the hits)
 			if (!strcmp(name, "a_sink1") || !strcmp(name, "a_sink2"))
-				if ((FireMask |= name[6] == '1' ? 1 : 2) == 3)
+				if (!QuestActive && !SlayActive && !MultiMode && ++FireMask >= 2)
 				{
 					FireMask = 0;
 					dragon_letter(0);
