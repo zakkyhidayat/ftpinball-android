@@ -1298,6 +1298,7 @@ namespace
 			{
 				LootActive = true;
 				QuestIndex = 0;
+				pb::MainTable->AddScore(1000000); // Peg Leg's Loot mode start (0x42cfc0, 0x4f)
 				say(pinball::MissTextBox, "Hit X to find Peg Leg's Loot", -1.0f, 1);
 			}
 		}
