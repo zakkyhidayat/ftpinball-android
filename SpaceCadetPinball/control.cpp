@@ -890,8 +890,12 @@ namespace
 	{
 		if (Rules != &Dragon)
 			return;
-		diverter(0, 2);
-		diverter(3, 2);
+		// A and D are left alone during a multiball (info states 6 and 0xd of the original)
+		if (!MultiMode)
+		{
+			diverter(0, 2);
+			diverter(3, 2);
+		}
 		diverter(1, 1);
 		diverter(2, 1);
 	}
@@ -1646,7 +1650,7 @@ namespace
 					if (!strcmp(name, tower[i]) && (TowerMask |= 1 << i) == 7)
 					{
 						TowerMask = 0;
-						if (!QuestActive && !SlayActive)
+						if (!QuestActive && !SlayActive && !MultiMode)
 						{
 							diverter(0, 1);
 							diverter(3, 1);
@@ -1663,17 +1667,17 @@ namespace
 				egg_award(2);
 			// Diverter positions of the lane and sink handlers (original 0x426a50, 0x4274d0, 0x427680, 0x4267f0, 0x4265e0, 0x426c20, 0x426be0)
 			{
-				bool idle = !QuestActive && !SlayActive;
+				bool idle = !QuestActive && !SlayActive && !MultiMode;
 				if (!strcmp(name, "a_roll7"))
 					diverter(0, 1);
-				else if (!strcmp(name, "a_sink9") || !strcmp(name, "a_sink10"))
+				else if ((!strcmp(name, "a_sink9") || !strcmp(name, "a_sink10")) && !MultiMode)
 				{
 					diverter(0, 2);
 					diverter(3, 2);
 				}
 				else if (!strcmp(name, "s_oneway5") && idle)
 					diverter(3, 1);
-				else if (!strcmp(name, "a_ramp103"))
+				else if (!strcmp(name, "a_ramp103") && !MultiMode)
 					diverter(3, 2);
 				else if (!strcmp(name, "s_rexit18") && idle)
 					diverter(1, 2);
