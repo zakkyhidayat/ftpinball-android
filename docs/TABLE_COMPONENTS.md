@@ -115,7 +115,7 @@ Key components (names are the group names in the data):
 * `a_kout1`: **armor kickout**. Awards the next piece of armor.
 * `a_kout2`: **dragon egg kickout**. Each hit adds a dragon egg.
 * `a_kout3`: a kickout that only sets a flag in the original.
-* `a_bump1` to `a_bump4`: forest bumpers. Every tenth hit of a ball awards the next weapon (25,000 more each time; the count restarts on each ball).
+* `a_bump1` to `a_bump4`: forest bumpers. Every tenth hit of a ball awards the next weapon (25,000 more each time; the count restarts on each ball). A weapon pays 25,000, 35,000, 45,000 or 55,000 without the multiplier and then sets the table's score multiplier to 2, 3, 4 or 5 for every later score, until the ball is lost (decoded from 0x423330, 0x423130 and the table's score routine 0x419f10, which multiplies each score by `+0x15e`). The original's jackpot accumulation flags (`+0x16e`, `+0x176`, `+0x17e`) are never switched on in either game, so scoring never feeds the jackpots by itself.
 
 Rules that are implemented (`control.cpp`):
 

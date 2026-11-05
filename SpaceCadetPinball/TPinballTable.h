@@ -77,6 +77,7 @@ public:
 	float PlungerPositionY{};
 	int ScoreMultiplier{};
 	int ScoreAdded{};
+	int CustomMultiplier = 0; // Full Tilt tables set the multiplier directly (Dragon's Keep weapons: 2 to 5); 0 uses ScoreMultiplier
 	int ScoreSpecial1{};
 	int ScoreSpecial2{};
 	int ScoreSpecial2Flag{};

@@ -825,6 +825,7 @@ namespace
 		else if (value == MAX_WEAPONS)
 		{
 			Weapons = 4;
+			pb::MainTable->CustomMultiplier = 5;
 			say(pinball::InfoTextBox, "Max Weapons", 3.0f, 2);
 		}
 		else if (value == MAX_ARMOR)
@@ -985,6 +986,27 @@ namespace
 	// Casting a spell pays 120,000 and counts for the 75,000 per spell in the ball bonus (FUN_004236b0 of the original)
 	// There are four spells, each cast once: two offensive ones (fewer dragon hits needed) and two defensive ones (more time).
 	// A random one of those not cast yet is chosen; when all are cast nothing happens.
+	// A score without the table multiplier (original 0x423130 and 0x423350)
+	void add_flat(int score)
+	{
+		TPinballTable* table = pb::MainTable;
+		int saved = table->CustomMultiplier;
+		table->CustomMultiplier = 1;
+		table->AddScore(score);
+		table->CustomMultiplier = saved;
+	}
+
+	// The next weapon (original 0x423330): it pays 25,000, 35,000, 45,000 or 55,000 without the multiplier and then makes every
+	// score count double, triple, four or five times until the ball is lost
+	void weapon_award()
+	{
+		if (Weapons >= 4)
+			return;
+		add_flat(25000 + 10000 * Weapons);
+		++Weapons;
+		pb::MainTable->CustomMultiplier = Weapons + 1;
+	}
+
 	void cast_spell()
 	{
 		int open[4], count = 0;
@@ -1157,6 +1179,7 @@ namespace
 		Mystery = 1000000;
 		MysteryIdx = 4;
 		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = ForestHits = Weapons = SwordHits = SlayHits = SlayNeed = 0;
+		pb::MainTable->CustomMultiplier = 0;
 		SuperJackpot = 2500000;
 		BonusHold = 0;
 		BonusHoldLit = false;
@@ -1531,8 +1554,7 @@ namespace
 			break;
 		case 4: cast_spell(); break;
 		case 5:
-			++Weapons;
-			pb::MainTable->AddScore(25000 + 10000 * (Weapons - 1));
+			weapon_award();
 			say(pinball::InfoTextBox, "Weapon", 2.0f, 2);
 			break;
 		case 6:
@@ -1640,8 +1662,8 @@ namespace
 			{
 				// Every tenth forest bumper hit of a ball awards the next weapon (25,000 more each time, original 0x424bc0 and 0x423330)
 				static const char* const weapons[] = {"Frantz's Ax", "Firebow", "Sword of Virtue", "Dragon Lance"};
-				pb::MainTable->AddScore(25000 + 10000 * Weapons);
-				snprintf(Line, sizeof Line, "%s", weapons[Weapons++]);
+				snprintf(Line, sizeof Line, "%s", weapons[Weapons]);
+				weapon_award();
 				say(pinball::InfoTextBox, Line, 3.0f, 2);
 			}
 		}
@@ -1665,7 +1687,7 @@ namespace
 					if (!strcmp(name, skill[i]))
 					{
 						if (i == 1) egg_award(1);
-						else if (i == 2 && Weapons < 4) pb::MainTable->AddScore(25000 + 10000 * Weapons++);
+						else if (i == 2 && Weapons < 4) weapon_award();
 						else if (i == 3 && Armor < 3) ++Armor;
 						else if (i == 4 && !MultiMode) start_multiball(MULTI_GAGGLE, 1, "Gargoyle Gaggle-Ball");
 						else if (i == 0) cast_spell();
@@ -2161,6 +2183,7 @@ namespace
 		LastRoute = -1;
 		memset(BankPaid, 0, sizeof BankPaid);
 		table->ScoreMultiplier = 0;
+		table->CustomMultiplier = 0; // original 0x4245b0: the multiplier is 1 again for the next ball
 		end_multiball_state();
 		BallsInPlay = 1;
 		MultiMode = MULTI_NONE;

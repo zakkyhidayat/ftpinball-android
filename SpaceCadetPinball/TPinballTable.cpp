@@ -305,7 +305,7 @@ int TPinballTable::AddScore(int score)
 		if (ScoreSpecial2 > 5000000)
 			ScoreSpecial2 = 5000000;
 	}
-	int addedScore = ScoreAdded + score * score_multipliers[ScoreMultiplier];
+	int addedScore = ScoreAdded + score * (CustomMultiplier ? CustomMultiplier : score_multipliers[ScoreMultiplier]);
 	CurScore += addedScore;
 	if (CurScore > 1000000000)
 	{
