@@ -723,6 +723,9 @@ namespace
 	bool QuestActive, LastBallLost;
 	unsigned LaunchTicks;
 	int Hits[128];       // hits per score entry this ball
+	// Skulduggery routes (ramps, orbit sensors and wind lanes): lights lit for two seconds by each hit give the score step
+	Uint32 RouteComboEnd[128], RouteLightEnd[128];
+	int RouteCombo[128], RouteLights[128], LastRoute = -1;
 	bool BankPaid[128];  // bank bonus already awarded this ball
 	int ForestHits; // Dragon's Keep: forest bumper hits this ball; every tenth gives a weapon (a_bump1 field of the original)
 	int BumperHits, Weapons, SwordHits, SlayHits, SlayNeed, SuperJackpot, BonusHold;
@@ -1156,6 +1159,9 @@ namespace
 		LaunchTicks = 0;
 		QuestIndex = draw_quest(-1);
 		memset(Hits, 0, sizeof Hits);
+		memset(RouteCombo, 0, sizeof RouteCombo);
+		memset(RouteLights, 0, sizeof RouteLights);
+		LastRoute = -1;
 		memset(BankPaid, 0, sizeof BankPaid);
 	}
 
@@ -1164,6 +1170,30 @@ namespace
 	{
 		const ComponentScore& s = Rules->scores[index];
 		int hits = Hits[index]++;
+		if (Rules == &Pirates && (s.count == 12 || (s.count == 3 && !strncmp(s.name, "a_roll", 6))))
+		{
+			// original 0x428b70 and its siblings: a hit lights the next light of the group for two seconds (the lit count is
+			// the score step), and the ramps and orbit sensors also light a combo group; another route scoring first puts the
+			// combo of the previous one out (0x4232c0). The route lights only light in the idle state.
+			Uint32 now = SDL_GetTicks();
+			if (now >= RouteComboEnd[index]) RouteCombo[index] = 0;
+			if (now >= RouteLightEnd[index]) RouteLights[index] = 0;
+			if (LastRoute >= 0 && LastRoute != index) RouteCombo[LastRoute] = 0;
+			LastRoute = index;
+			int step = RouteLights[index] < 2 ? RouteLights[index] : 2;
+			if (s.count == 12)
+			{
+				step += (RouteCombo[index] < 3 ? RouteCombo[index] : 3) * 3;
+				++RouteCombo[index];
+				RouteComboEnd[index] = now + 2000;
+			}
+			if (!QuestActive && !LootActive)
+			{
+				++RouteLights[index];
+				RouteLightEnd[index] = now + 2000;
+			}
+			return s.values[step];
+		}
 		if (s.count == 1)
 			return s.values[0];
 		if (!strncmp(s.name, "a_bump", 6))
@@ -2088,6 +2118,9 @@ namespace
 		Eggs = 0;
 		RestartEnd = 0;
 		memset(Hits, 0, sizeof Hits);
+		memset(RouteCombo, 0, sizeof RouteCombo);
+		memset(RouteLights, 0, sizeof RouteLights);
+		LastRoute = -1;
 		memset(BankPaid, 0, sizeof BankPaid);
 		table->ScoreMultiplier = 0;
 		end_multiball_state();
