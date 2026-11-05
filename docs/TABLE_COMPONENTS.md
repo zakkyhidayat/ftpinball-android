@@ -182,7 +182,7 @@ Implemented:
 * Tavern mode: the window sinks (`a_sink5`, `a_sink6`, `a_sink7`) give the random award of the original: map piece, special treasure, coin award or extra ball.
 * Peg Leg's Loot after all modes or all six map pieces: hideaways give special treasures, the ship sink finds the loot.
 
-Skulduggery has no skill shot: its executable has no skill-shot message or state (the launcher handler `s_launcher1` only drives the cannon and the launch lights). Not implemented: wormhole style multiball and light sweeps.
+Skulduggery has no skill shot: its executable has no skill-shot message or state (the launcher handler `s_launcher1` only drives the cannon and the launch lights). Skulduggery has no wormhole: neither its component table nor its messages mention one, so the wormhole multiball item does not apply. Not implemented: light sweeps (visual only).
 
 Skulduggery start: the eleven drop targets `a_drop5` to `a_drop15` each light one letter of SKULDUGGERY (bits 0x1 to 0x400 of `v_lite1`, set by the handlers 0x4268b0 and the others). When all eleven are lit the mode is chosen (original 0x425de0). The old rule of ten hits on any start target is replaced by this.
 
