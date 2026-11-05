@@ -956,9 +956,25 @@ namespace
 		return !QuestActive && !LootActive && BallsInPlay <= 1;
 	}
 
+	// Skulduggery modes that use the hideaways (Treasure Hunt 0x42b090 and Peg Leg's Loot 0x42cfc0): while they run, the
+	// orbit tripwires s_trip3 and s_trip8 are off, and Peg Leg's Loot turns the sinks a_sink9 and a_sink12 on (0x42ce80).
+	// When either mode ends the sinks go off and the tripwires on again (0x424560, message 0x52)
+	void hideaway_gates(bool modeOn, bool sinks)
+	{
+		for (auto name : {"s_trip3", "s_trip8"})
+			if (auto c = pb::MainTable->find_component(name))
+				c->ActiveFlag = modeOn ? 0 : 1;
+		if (modeOn && !sinks)
+			return;
+		for (auto name : {"a_sink9", "a_sink12"})
+			if (auto c = pb::MainTable->find_component(name))
+				c->ActiveFlag = modeOn ? 1 : 0;
+	}
+
 	// Peg Leg's Loot starts from every path that sets it, and pays its start amount (0x42cfc0, 0x4f)
 	void start_loot()
 	{
+		hideaway_gates(true, true);
 		LootActive = true;
 		pb::MainTable->AddScore(1000000);
 	}
@@ -1242,6 +1258,8 @@ namespace
 		MultiMode = LetterMask = FireMask = TowerMask = GargoyleMask = SwordHits = 0;
 		LockLit = false;
 		FirstHit = false;
+		if (LootActive || (QuestActive && QuestIndex == 1 && Rules == &Pirates))
+			hideaway_gates(false, true);
 		LootActive = false;
 		ModeEnd = 0;
 		LaneMask = WindHits = Coins = MapPieces = LavaMask = HeldBalls = PirateLetters = Spot6Hits = 0;
@@ -1474,6 +1492,7 @@ namespace
 		}
 		if (Rules == &Pirates && QuestIndex == 1)
 		{
+			hideaway_gates(false, true);
 			// original 0x425ab0: pay what was buried
 			for (; BuriedCoins > 0; --BuriedCoins) coin_award();
 			for (; BuriedSpecial > 0; --BuriedSpecial) special_treasure();
@@ -1530,6 +1549,8 @@ namespace
 		}
 		StartHits = 0;
 		QuestActive = true;
+		if (Rules == &Pirates && QuestIndex == 1)
+			hideaway_gates(true, false);
 		QuestHits = 0;
 		HoardMask = 0;
 		BermudaCount = 0;
@@ -1948,6 +1969,7 @@ namespace
 				snprintf(Line, sizeof Line, "Peg Leg's Loot %d", loot);
 				say(pinball::InfoTextBox, Line, 5.0f, 2);
 				LootActive = false;
+				hideaway_gates(false, true);
 				MapPieces = 0;
 				memset(QuestDone, 0, sizeof QuestDone);
 				QuestIndex = draw_quest(-1);
