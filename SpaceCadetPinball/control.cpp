@@ -872,6 +872,30 @@ namespace
 		say(pinball::InfoTextBox, Line, 3.0f, 2);
 	}
 
+	// Dragon's Keep tower diverters: four pairs of one-way gates (original: messages 0x3e and 0x3f to a_dvtraa/b, ba/bb, ca/cb,
+	// da/db). Position 1 switches the first gate of a pair on and the second off, position 2 does the opposite
+	void diverter(int pair, int position)
+	{
+		static const char* const gates[4][2] = {{"a_dvtraa", "a_dvtrab"}, {"a_dvtrba", "a_dvtrbb"}, {"a_dvtrca", "a_dvtrcb"}, {"a_dvtrda", "a_dvtrdb"}};
+		auto first = pb::MainTable->find_component(gates[pair][0]);
+		auto second = pb::MainTable->find_component(gates[pair][1]);
+		if (first)
+			first->Message(position == 1 ? 62 : 63, 0.0f);
+		if (second)
+			second->Message(position == 1 ? 63 : 62, 0.0f);
+	}
+
+	// The diverters at the start of a ball (original 0x4245b0)
+	void reset_diverters()
+	{
+		if (Rules != &Dragon)
+			return;
+		diverter(0, 2);
+		diverter(3, 2);
+		diverter(1, 1);
+		diverter(2, 1);
+	}
+
 	// Peg Leg's Loot starts from every path that sets it, and pays its start amount (0x42cfc0, 0x4f)
 	void start_loot()
 	{
@@ -1087,6 +1111,7 @@ namespace
 	{
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
+		reset_diverters();
 		memset(QuestDone, 0, sizeof QuestDone);
 		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = SpellsCast = Offense = Defense = LoopCount = MenuTier = 0;
 		LoopTime = MenuEnd = 0;
@@ -1357,6 +1382,20 @@ namespace
 			StormEvery = level <= 5 ? 8 : level <= 10 ? 7 : level <= 15 ? 6 : 5;
 		}
 		ModeEnd = SDL_GetTicks() + (unsigned)(1000 * (Rules == &Dragon ? DragonSeconds : PirateSeconds)[QuestIndex]);
+		if (Rules == &Dragon && QuestIndex == 0)
+		{
+			// Dragon Hoard (original 0x428a80)
+			diverter(1, 2);
+			diverter(2, 2);
+		}
+		else if (Rules == &Dragon && QuestIndex == 2)
+		{
+			// Rescue Maiden (original 0x429510)
+			diverter(0, 1);
+			diverter(1, 2);
+			diverter(2, 1);
+			diverter(3, 1);
+		}
 		// the mode's start payout (the 0x4f handler of each mode; Dragon's Keep uses the profile's)
 		pb::MainTable->AddScore(Rules->quests[QuestIndex].startPoints ? Rules->quests[QuestIndex].startPoints : Rules->startPoints);
 		snprintf(Line, sizeof Line, "%s started", Rules->questWord);
@@ -1587,6 +1626,8 @@ namespace
 					if (!strcmp(name, gargoyle[i]) && (GargoyleMask |= 1 << i) == 15)
 					{
 						GargoyleMask = 0;
+						diverter(1, 1);
+						diverter(2, 1);
 						dragon_letter(3);
 					}
 				static const char* const tower[] = {"a_spot1", "a_spot2", "a_spot3"};
@@ -1594,6 +1635,11 @@ namespace
 					if (!strcmp(name, tower[i]) && (TowerMask |= 1 << i) == 7)
 					{
 						TowerMask = 0;
+						if (!QuestActive && !SlayActive)
+						{
+							diverter(0, 1);
+							diverter(3, 1);
+						}
 						dragon_letter(5);
 						if (!LockLit && !MultiMode)
 						{
@@ -1604,6 +1650,25 @@ namespace
 			}
 			if (!strcmp(name, "s_rexit18") || !strcmp(name, "s_rexit19"))
 				egg_award(2);
+			// Diverter positions of the lane and sink handlers (original 0x426a50, 0x4274d0, 0x427680, 0x4267f0, 0x4265e0, 0x426c20, 0x426be0)
+			{
+				bool idle = !QuestActive && !SlayActive;
+				if (!strcmp(name, "a_roll7"))
+					diverter(0, 1);
+				else if (!strcmp(name, "a_sink9") || !strcmp(name, "a_sink10"))
+				{
+					diverter(0, 2);
+					diverter(3, 2);
+				}
+				else if (!strcmp(name, "s_oneway5") && idle)
+					diverter(3, 1);
+				else if (!strcmp(name, "a_ramp103"))
+					diverter(3, 2);
+				else if (!strcmp(name, "s_rexit18") && idle)
+					diverter(1, 2);
+				else if (!strcmp(name, "s_rexit19") && idle)
+					diverter(2, 2);
+			}
 			if (!strcmp(name, "a_ramp103") && !(QuestActive && QuestIndex == 0))
 			{
 				LoopCount = SDL_GetTicks() - LoopTime > 10000 ? 0 : (LoopCount < 9 ? LoopCount + 1 : 9);
@@ -1956,6 +2021,7 @@ namespace
 			end_quest();
 		Fathom = 1; // the launcher of the original (0x425e70) clears the fathom lights for each ball
 		LavaMask = 0; // the volcano lights start again on each ball
+		reset_diverters();
 		if (!table->TiltLockFlag)
 		{
 			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : MapPieces * 250000 + Treasures * 100000);
