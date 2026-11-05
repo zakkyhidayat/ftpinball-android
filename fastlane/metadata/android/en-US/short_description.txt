@@ -1,1 +1,1 @@
-An Android port of the classic Windows game 3D Space Cadet Pinball
+Android app for the Space Cadet table of Full Tilt! Pinball, on the open source 3D Pinball engine

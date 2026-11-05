@@ -1,3 +1,12 @@
-This app is a simple Android port of the classic game bundled with various Windows versions: 3D Space Cadet Pinbal.
+Full Tilt! Pinball for Android runs the tables of the Full Tilt! Pinball game on the open source engine of 3D Pinball for Windows – Space Cadet.
 
-The game is constantly updated and soon an online scoreboard will be available.
+Tables:
+- Space Cadet: the full original rules.
+- Dragon's Keep and Skulduggery: rules re-implemented from the original game. They do not yet cover every part of the originals. These two tables need the Full Tilt! game data, which is not included in this app.
+
+Features:
+- Local top 10 high scores per table, shown after each game. Scores of games with cheats are not recorded.
+- Sound effects and music with on/off toggles and volume sliders.
+- Touch controls, haptic feedback, a restart confirmation and a back-to-menu confirmation.
+
+No online leaderboard.
