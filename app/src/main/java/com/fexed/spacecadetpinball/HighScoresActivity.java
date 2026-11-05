@@ -71,7 +71,7 @@ public class HighScoresActivity extends AppCompatActivity {
         chips.setVisibility(View.VISIBLE);
         chips.removeAllViews();
         for (Table t : Table.values()) {
-            if (!t.isInstalled(getAssets())) continue;
+            if (!TableFiles.isAvailable(this, t)) continue;
             Button chip = new Button(this, null, com.google.android.material.R.attr.materialButtonOutlinedStyle);
             chip.setText(t.title);
             chip.setAllCaps(false);

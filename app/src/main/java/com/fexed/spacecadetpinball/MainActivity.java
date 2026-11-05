@@ -337,12 +337,18 @@ public class MainActivity extends SDLActivity {
             }
             if (table == Table.DRAGON) {
                 // Dragon's Keep has no steel ball of its own: its ball sprites come from Space Cadet's data
-                copyAsset(assetManager, Table.CADET.assetDir() + "/" + Table.CADET.datFile, new File(dir, "BALL_SOURCE.DAT"));
+                File cadet = TableFiles.cadetSource(this);
+                if (cadet != null) copyFile(cadet, new File(dir, "BALL_SOURCE.DAT"));
+                else copyAsset(assetManager, Table.CADET.assetDir() + "/" + Table.CADET.datFile, new File(dir, "BALL_SOURCE.DAT"));
             }
-            if (table.assetDir() != null) {
+            if (table.isInstalled(assetManager)) {
                 for (String asset : assetManager.list(table.assetDir())) {
                     copyAsset(assetManager, table.assetDir() + "/" + asset, new File(dir, asset));
                 }
+            } else {
+                // the files the player imported from a copy of the game
+                File[] imported = TableFiles.importDir(this, table).listFiles();
+                if (imported != null) for (File file : imported) copyFile(file, new File(dir, file.getName()));
             }
             try (OutputStream os = new FileOutputStream(marker)) {
                 os.write(version.getBytes());
@@ -351,6 +357,18 @@ public class MainActivity extends SDLActivity {
             Log.e(TAG, "Unable to prepare " + table.id, e);
         }
         return dir;
+    }
+
+    private void copyFile(File source, File target) {
+        try (InputStream is = new java.io.FileInputStream(source); OutputStream os = new FileOutputStream(target)) {
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                os.write(buffer, 0, len);
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Unable to copy " + source, e);
+        }
     }
 
     private void copyAsset(AssetManager assetManager, String asset, File target) {

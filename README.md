@@ -25,13 +25,19 @@ This is a fork of [fexed/Pinball-on-Android](https://github.com/fexed/Pinball-on
 
 ## Full Tilt! data (optional)
 
+### Playing with a released APK
+
+The released APK has no game data. Copy the folder of your own copy of Full Tilt! Pinball (the one holding CADET, DRAGON and PIRATE) to your phone, open the app and tap **Add Full Tilt! files**, then choose that folder. The app copies the data it needs (the `.DAT` files, sounds, music and icons) into its own storage and unlocks the tables it finds; the original folder can then be removed. Dragon's Keep also needs the CADET folder for its ball.
+
+### Building your own APK with the data
+
 Full Tilt! Pinball is copyrighted and its data is **not** in this repository. To build an APK with the Full Tilt tables for your own use, stage your own copy of the game (the folder holding CADET, DRAGON and PIRATE) before building:
 
 ```bash
 tools/stage_fulltilt.sh /path/to/FULLTILT
 ```
 
-This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds but the menu has no tables. The original Windows 3D Pinball table is no longer bundled.
+This copies the data into the git-ignored `app/fulltilt-assets/`. Do not share an APK built this way. Without it the app builds, and the tables come from the files added in the app. The original Windows 3D Pinball table is no longer bundled.
 
 ## Documentation
 

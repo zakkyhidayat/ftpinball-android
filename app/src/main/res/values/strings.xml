@@ -72,7 +72,7 @@
     <string name="desc_hapticfeedback">Short vibration when pressing buttons</string>
     <string name="table_fulltilt">Full Tilt! Pinball</string>
     <string name="table_norules">Experimental: original scores, reconstructed quests</string>
-    <string name="no_tables">No tables found. Build the app with your own Full Tilt! Pinball data (see the README).</string>
+    <string name="no_tables">No tables found. Tap \"Add Full Tilt! files\" and choose your own copy of Full Tilt! Pinball.</string>
     <string name="last_played">Last played</string>
     <string name="about">About</string>
     <string name="menu_credits">Full Tilt! Pinball for Android\nFork by zakkyhidayat\n\nOriginal source code: k4zmu2a/SpaceCadetPinball\nAndroid port: fexed/Pinball-on-Android\n\nThis fork adds fixes, a new interface and Full Tilt! support. Full Tilt! Pinball belongs to its owners. Its game data is not included in this app or its source code.</string>
@@ -106,4 +106,12 @@
     <string name="hs_recent">RECENT GAMES</string>
     <string name="padsize">Flipper pad size</string>
     <string name="hs_stats">%1$s games \u00b7 best %2$s \u00b7 average %3$s</string>
+    <string name="import_title">Add Full Tilt! files</string>
+    <string name="import_help">The tables need the data of your own copy of Full Tilt! Pinball, which is not part of this app. Copy the game folder (with the CADET, DRAGON and PIRATE folders) to your phone, then choose it here. The files are copied into the app and the original folder can be removed.</string>
+    <string name="import_choose">Choose folder</string>
+    <string name="import_working">Copying the game files…</string>
+    <string name="import_done">Added: %1$s</string>
+    <string name="import_missing">Not found: %1$s</string>
+    <string name="import_none">No table found in that folder. Choose the folder that holds CADET, DRAGON and PIRATE, or the folder of one table.</string>
+    <string name="import_failed">The files could not be copied.</string>
 </resources>

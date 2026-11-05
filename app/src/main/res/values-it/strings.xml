@@ -73,7 +73,7 @@
     <string name="desc_hapticfeedback">Breve vibrazione alla pressione dei tasti</string>
     <string name="table_fulltilt">Full Tilt! Pinball</string>
     <string name="table_norules">Sperimentale: nessuna regola di punteggio</string>
-    <string name="no_tables">Nessun tavolo trovato. Compila l\'app con i tuoi dati di Full Tilt! Pinball (vedi il README).</string>
+    <string name="no_tables">Nessun tavolo trovato. Tocca \"Aggiungi i file di Full Tilt!\" e scegli la tua copia di Full Tilt! Pinball.</string>
     <string name="last_played">Ultimo giocato</string>
     <string name="about">Informazioni</string>
     <string name="menu_credits">Full Tilt! Pinball per Android\nFork di zakkyhidayat\n\nCodice sorgente originale: k4zmu2a/SpaceCadetPinball\nPorting Android: fexed/Pinball-on-Android\n\nQuesto fork aggiunge correzioni, una nuova interfaccia e il supporto a Full Tilt!. Full Tilt! Pinball appartiene ai suoi proprietari. I suoi dati di gioco non sono inclusi in questa app né nel codice sorgente.</string>
@@ -98,4 +98,12 @@
     <string name="hold_to_shoot">TIENI\nper lanciare</string>
     <string name="pause">PAUSA</string>
     <string name="pause_hint">Tocca per riprendere</string>
+    <string name="import_title">Aggiungi i file di Full Tilt!</string>
+    <string name="import_help">I tavoli usano i dati della tua copia di Full Tilt! Pinball, che non fa parte di questa app. Copia sul telefono la cartella del gioco (con le cartelle CADET, DRAGON e PIRATE) e sceglila qui. I file vengono copiati nell\'app e la cartella originale si può eliminare.</string>
+    <string name="import_choose">Scegli cartella</string>
+    <string name="import_working">Copia dei file del gioco…</string>
+    <string name="import_done">Aggiunti: %1$s</string>
+    <string name="import_missing">Non trovati: %1$s</string>
+    <string name="import_none">Nessun tavolo trovato in quella cartella. Scegli la cartella che contiene CADET, DRAGON e PIRATE, oppure quella di un solo tavolo.</string>
+    <string name="import_failed">Impossibile copiare i file.</string>
 </resources>
