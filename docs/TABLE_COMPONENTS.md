@@ -184,7 +184,7 @@ Implemented:
 
 Skulduggery has no skill shot: its executable has no skill-shot message or state (the launcher handler `s_launcher1` only drives the cannon and the launch lights). Not implemented: wormhole style multiball and light sweeps.
 
-Skulduggery idle state: with all four volcano lights `a_spot8` to `a_spot11` lit, Lava-Ball starts and two balls are queued for the plunger (original 0x427540; the `0x192` queue is the same feed as `feed_balls`). Not ported: Jail Break, which needs the count of balls held by `a_kick1` (`DAT_00435d3c` in the original). Nothing in the decompiles increments that count, so its capture site is still unknown.
+Skulduggery idle state: with all four volcano lights `a_spot8` to `a_spot11` lit, Lava-Ball starts and two balls are queued for the plunger (original 0x427540; the `0x192` queue is the same feed as `feed_balls`). Not ported: Jail Break. Its held-ball count (`DAT_00435d3c`) is incremented by `INC [0x435d3c]` at `0x42421b`, a block Ghidra does not analyse as a function, so its entry point is still unknown. From the bytes there: when the count reaches 2 the flag at `DAT_0043bc04+5` is set; when it reaches 3 the code calls `0x423630` (the Jail Break state, which pays 100,000 and queues the held balls). Jail Break also starts from the third hit of `a_spot6` in the idle state (0x4279b0).
 
 ## 5. Engine classes added for Full Tilt
 
