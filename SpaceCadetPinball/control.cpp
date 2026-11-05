@@ -948,7 +948,8 @@ namespace
 	void start_multiball(int mode, int extraBalls, const char* text)
 	{
 		MultiMode = mode;
-		pb::MainTable->AddScore(100000);
+		if (mode == MULTI_GAGGLE)
+			pb::MainTable->AddScore(100000); // only Gaggle (0x42b3c0) pays at the start; Barrage and Flurry do not
 		say(pinball::InfoTextBox, text, 3.0f, 2);
 		// original 0x42b3c0: the Gaggle ball comes out of the sink a_sink1
 		auto sink = mode == MULTI_GAGGLE ? dynamic_cast<TSink*>(pb::MainTable->find_component("a_sink1")) : nullptr;
