@@ -964,7 +964,10 @@ namespace
 		held[Locked++] = cmp;
 		if (Locked < 3)
 		{
-			say(pinball::InfoTextBox, "Ball Locked", 2.0f, 2);
+			// original 0xbc2 "Ball Trapped\n%ld" shows the sink's score
+			auto sink = dynamic_cast<TSink*>(cmp);
+			snprintf(Line, sizeof Line, "Ball Trapped\n%d", sink ? sink->get_scoring(0) : 0);
+			say(pinball::InfoTextBox, Line, 2.0f, 2);
 			feed_balls(1);
 			return true;
 		}
