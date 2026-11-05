@@ -732,6 +732,7 @@ namespace
 	int RouteCombo[128], RouteLights[128], LastRoute = -1;
 	bool BankPaid[128];  // bank bonus already awarded this ball
 	int ForestHits; // Dragon's Keep: forest bumper hits this ball; every tenth gives a weapon (a_bump1 field of the original)
+	int ArmorMask; // armor pieces won this ball: bit 0 kickback, 1 center post, 2 blocker (lights v_lite37 to v_lite39)
 	int BumperHits, Weapons, SwordHits, SlayHits, SlayNeed, SuperJackpot, BonusHold;
 	bool BonusHoldLit;
 	bool SlayActive;
@@ -802,6 +803,7 @@ namespace
 		say(pinball::MissTextBox, Line, -1.0f, 1);
 	}
 
+	void armor_award();
 	void award(int value)
 	{
 		if (value == JACKPOT)
@@ -833,7 +835,8 @@ namespace
 		}
 		else if (value == MAX_ARMOR)
 		{
-			Armor = 3;
+			while (Armor < 3)
+				armor_award();
 			say(pinball::InfoTextBox, "Max Armor", 3.0f, 2);
 		}
 		else if (value > 0)
@@ -1040,6 +1043,39 @@ namespace
 		pb::MainTable->CustomMultiplier = Weapons + 1;
 	}
 
+	// The next armor piece (original 0x4234b0): one of the three not yet won this ball, at random. The kickback pays 25,000, the
+	// center post and the blocker are raised for 55 seconds (the blocker time, 0x415398 and 0x414e43) and pay 50,000 and 100,000
+	void armor_gate(const char* name, bool up)
+	{
+		if (auto gate = pb::MainTable->find_component(name))
+			gate->Message(up ? 52 : 51, up ? 55.0f : 0.0f);
+	}
+
+	void armor_award()
+	{
+		int left[3], count = 0;
+		for (int i = 0; i < 3; ++i)
+			if (!(ArmorMask & 1 << i))
+				left[count++] = i;
+		if (!count)
+			return;
+		int piece = left[rand() % count];
+		ArmorMask |= 1 << piece;
+		++Armor;
+		if (piece == 0)
+			add_flat(25000);
+		else if (piece == 1)
+		{
+			armor_gate("a_center_post", true);
+			add_flat(50000);
+		}
+		else
+		{
+			armor_gate("a_bloce", true);
+			add_flat(100000);
+		}
+	}
+
 	void cast_spell()
 	{
 		int open[4], count = 0;
@@ -1197,6 +1233,7 @@ namespace
 		Jackpot = Rules->jackpotStart;
 		reset_diverters();
 		memset(QuestDone, 0, sizeof QuestDone);
+		ArmorMask = 0;
 		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = SpellsCast = Offense = Defense = LoopCount = MenuTier = 0;
 		LoopTime = MenuEnd = 0;
 		MenuOpen = ExtraBallLight = false;
@@ -1592,7 +1629,7 @@ namespace
 			say(pinball::InfoTextBox, "Weapon", 2.0f, 2);
 			break;
 		case 6:
-			++Armor;
+			armor_award();
 			say(pinball::InfoTextBox, "Armor", 2.0f, 2);
 			break;
 		case 7:
@@ -1733,7 +1770,7 @@ namespace
 					{
 						if (i == 1) egg_award(1);
 						else if (i == 2 && Weapons < 4) weapon_award();
-						else if (i == 3 && Armor < 3) ++Armor;
+						else if (i == 3 && Armor < 3) armor_award();
 						else if (i == 4 && !MultiMode) start_multiball(MULTI_GAGGLE, 1, "Gargoyle Gaggle-Ball");
 						else if (i == 0) cast_spell();
 						static const char* const said[] = {"Skill Shot: Spell", "Skill Shot: Dragon Egg", "Skill Shot: Weapon", "Skill Shot: Armor", "Skill Shot: Gaggle-Ball"};
@@ -2228,6 +2265,13 @@ namespace
 		}
 		TargetsHit = 0;
 		Eggs = 0;
+		if (Rules == &Dragon)
+		{
+			// original 0x4245b0: the armor lights and the gates start again with each ball
+			Armor = ArmorMask = 0;
+			armor_gate("a_center_post", false);
+			armor_gate("a_bloce", false);
+		}
 		RestartEnd = 0;
 		memset(Hits, 0, sizeof Hits);
 		memset(RouteCombo, 0, sizeof RouteCombo);
@@ -2260,6 +2304,11 @@ namespace
 	{
 		if (!pb::MainTable)
 			return;
+		if (code == 60 && dynamic_cast<TBlocker*>(cmp))
+		{
+			cmp->Message(51, 0.0f); // a raised blocker goes down when its time is over
+			return;
+		}
 		if (dynamic_cast<TDrain*>(cmp))
 		{
 			if (code == 2000)
