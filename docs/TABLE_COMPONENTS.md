@@ -163,7 +163,7 @@ Theme: a hunt for pirate treasure. Goal: complete the modes, collect the six map
 | `a_kout` | 2 | Kickouts |
 | `a_roll` | 10 | Wind lanes (four, 25,000 / 50,000 / 75,000) and island lanes |
 | `a_ramp` | 3 | Ramps |
-| `s_magnet` | 6 | Keg magnets under the tavern |
+| `s_magnet` | 6 | Keg magnets under the tavern; each hit pays 100,000 (0x42a470 to 0x42a740) |
 | `s_trip`, `s_oneway`, `s_rexit`, `s_hole` | 5, 2, 1, 1 | Lane sensors, gates, return exit, hole |
 
 Modes, in the order of the original: Attack Ship, Treasure Hunt, Tavern, Bermuda Triangle, Storm, Mutiny, Swordfight, then
