@@ -724,6 +724,7 @@ namespace
 	unsigned LaunchTicks;
 	int Hits[128];       // hits per score entry this ball
 	bool BankPaid[128];  // bank bonus already awarded this ball
+	int ForestHits; // Dragon's Keep: forest bumper hits this ball; every tenth gives a weapon (a_bump1 field of the original)
 	int BumperHits, Weapons, SwordHits, SlayHits, SlayNeed, SuperJackpot, BonusHold;
 	bool BonusHoldLit;
 	bool SlayActive;
@@ -1143,7 +1144,7 @@ namespace
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
-		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = Weapons = SwordHits = SlayHits = SlayNeed = 0;
+		QuestIndex = QuestHits = QuestsDone = StartHits = TargetsHit = BumperHits = ForestHits = Weapons = SwordHits = SlayHits = SlayNeed = 0;
 		SuperJackpot = 2500000;
 		BonusHold = 0;
 		BonusHoldLit = false;
@@ -1574,13 +1575,17 @@ namespace
 		}
 		if (Rules == &Pirates && ShipMystery && !strcmp(name, "a_roll3"))
 			shipwreck_mystery(); // original 0x4296d0
-		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && BumperHits % 8 == 0 && Weapons < 4)
+		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && ++ForestHits == 10)
 		{
-			// Every eighth forest bumper hit awards the next weapon (25,000 more each time, from the original code)
-			static const char* const weapons[] = {"Frantz's Ax", "Firebow", "Sword of Virtue", "Dragon Lance"};
-			pb::MainTable->AddScore(25000 + 10000 * Weapons);
-			snprintf(Line, sizeof Line, "%s", weapons[Weapons++]);
-			say(pinball::InfoTextBox, Line, 3.0f, 2);
+			ForestHits = 0;
+			if (Weapons < 4)
+			{
+				// Every tenth forest bumper hit of a ball awards the next weapon (25,000 more each time, original 0x424bc0 and 0x423330)
+				static const char* const weapons[] = {"Frantz's Ax", "Firebow", "Sword of Virtue", "Dragon Lance"};
+				pb::MainTable->AddScore(25000 + 10000 * Weapons);
+				snprintf(Line, sizeof Line, "%s", weapons[Weapons++]);
+				say(pinball::InfoTextBox, Line, 3.0f, 2);
+			}
 		}
 		if (match(Rules->targets, name))
 		{
@@ -2048,6 +2053,7 @@ namespace
 			end_quest();
 		Fathom = 1; // the launcher of the original (0x425e70) clears the fathom lights for each ball
 		LavaMask = 0; // the volcano lights start again on each ball
+		ForestHits = 0;
 		reset_diverters();
 		if (!table->TiltLockFlag)
 		{

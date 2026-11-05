@@ -115,7 +115,7 @@ Key components (names are the group names in the data):
 * `a_kout1`: **armor kickout**. Awards the next piece of armor.
 * `a_kout2`: **dragon egg kickout**. Each hit adds a dragon egg.
 * `a_kout3`: a kickout that only sets a flag in the original.
-* `a_bump1` to `a_bump4`: forest bumpers. Every eighth hit awards the next weapon.
+* `a_bump1` to `a_bump4`: forest bumpers. Every tenth hit of a ball awards the next weapon (25,000 more each time; the count restarts on each ball).
 
 Rules that are implemented (`control.cpp`):
 
