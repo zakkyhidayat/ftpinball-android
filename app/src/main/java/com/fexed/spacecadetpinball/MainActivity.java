@@ -520,8 +520,19 @@ public class MainActivity extends SDLActivity {
         int width = root.getWidth();
         int height = root.getHeight();
         if (width == 0 || height == 0) return;
-        int margin = (int) ((height - width * TABLE_ASPECT) / 2);
         float density = getResources().getDisplayMetrics().density;
+        if (getResources().getBoolean(R.bool.side_layout)) {
+            // Wide windows: the table fills the height and the controls sit in a column on each side of it
+            int side = Math.max((int) ((width - height / TABLE_ASPECT) / 2), (int) (160 * density));
+            ViewGroup.LayoutParams left = mBinding.toppanel.getLayoutParams();
+            left.width = side;
+            mBinding.toppanel.setLayoutParams(left);
+            ViewGroup.LayoutParams right = mBinding.bottompanel.getLayoutParams();
+            right.width = side;
+            mBinding.bottompanel.setLayoutParams(right);
+            return;
+        }
+        int margin = (int) ((height - width * TABLE_ASPECT) / 2);
         margin = Math.max(margin, (int) (120 * density));
         ViewGroup.LayoutParams top = mBinding.toppanel.getLayoutParams();
         top.height = margin;
@@ -685,7 +696,7 @@ public class MainActivity extends SDLActivity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
 
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE && !getResources().getBoolean(R.bool.side_layout)) {
             mBinding.infotxt.setVisibility(View.GONE);
             mBinding.missiontxt.setVisibility(View.GONE);
             mBinding.hudbar.setVisibility(View.GONE);

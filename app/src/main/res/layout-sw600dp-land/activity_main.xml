@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tablets and unfolded foldables in landscape: the table is centered and the controls sit in a column on each side.
+     The widths of the two columns are set in code from the table's width. The ids are those of the portrait layout. -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:background="@color/black">
+
+    <!-- The table's own sidebar painting behind the whole window, the table is drawn over it -->
+    <ImageView
+        android:id="@+id/backdrop"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0.45"
+        android:contentDescription="@null"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Left of the table: the four action buttons, score and balls, status, and the left flipper -->
+    <LinearLayout
+        android:id="@+id/toppanel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:paddingStart="12dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/exitbtn"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_button_size"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_icon_pill"
+                android:contentDescription="@string/menutitle"
+                android:src="@drawable/ic_exit" />
+
+            <ImageButton
+                android:id="@+id/replay"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_button_size"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_icon_pill"
+                android:contentDescription="@string/restarttitle"
+                android:src="@drawable/replay" />
+
+            <ImageButton
+                android:id="@+id/playpause"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_button_size"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_icon_pill"
+                android:contentDescription="@string/pause"
+                android:src="@drawable/pause" />
+
+            <ImageButton
+                android:id="@+id/settingsbtn"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/icon_button_size"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_icon_pill"
+                android:contentDescription="@string/settings_title"
+                android:src="@drawable/settings" />
+        </LinearLayout>
+        <!-- Score and ball count as the two halves of one bar -->
+        <LinearLayout
+            android:id="@+id/hudbar"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_hud_bar"
+            android:baselineAligned="false"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp">
+
+                <TextView
+                    android:id="@+id/scorelabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.15"
+                    android:text="@string/hud_score"
+                    android:textColor="@color/description_grey"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/txtscore"
+                    android:layout_width="match_parent"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    app:autoSizeMaxTextSize="28sp"
+                    app:autoSizeMinTextSize="14sp"
+                    app:autoSizeTextType="uniform"
+                    tools:text="10000000" />
+            </LinearLayout>
+
+            <View
+                android:id="@+id/hudsplit"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_marginVertical="10dp"
+                android:background="@color/card_stroke" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp">
+
+                <TextView
+                    android:id="@+id/ballslabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:letterSpacing="0.15"
+                    android:text="@string/hud_ball"
+                    android:textColor="@color/description_grey"
+                    android:textSize="10sp" />
+
+                <TextView
+                    android:id="@+id/ballstxt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:maxLines="1"
+                    android:textColor="@color/white"
+                    android:textSize="28sp"
+                    tools:text="1" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/infotxt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_horizontal"
+            android:maxLines="2"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            tools:text="Awaiting Deployment" />
+
+        <TextView
+            android:id="@+id/missiontxt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:maxLines="2"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            tools:text="mission text" />
+
+
+        <Button
+            android:id="@+id/left"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_pad"
+            android:text="@string/left"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+    <!-- Right of the table: the tilt buttons, the shoot button and the right flipper -->
+    <LinearLayout
+        android:id="@+id/bottompanel"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:paddingStart="8dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:id="@+id/tiltrow"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/tilt_height"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/tilt_left"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_nudge"
+                android:text="@string/tilt_left"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/tilt_bottom"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_nudge"
+                android:text="@string/tilt_center"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/tilt_right"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_nudge"
+                android:text="@string/tilt_right"
+                android:textColor="@color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Hold to shoot -->
+        <com.fexed.spacecadetpinball.PlungerButton
+            android:id="@+id/plunger"
+            android:layout_width="@dimen/plunger_button_size"
+            android:layout_height="@dimen/plunger_button_size"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_plunger_round"
+            android:padding="4dp"
+            android:text="@string/hold_to_shoot"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@+id/right"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_pad"
+            android:text="@string/right"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
+    </LinearLayout>
+
+    <!-- Paused: hides the table -->
+    <FrameLayout
+        android:id="@+id/pauseoverlay"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/black"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/pauseart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.35"
+            android:contentDescription="@null"
+            android:scaleType="centerCrop" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:letterSpacing="0.2"
+            android:text="@string/pause"
+            android:textColor="@color/white"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="72dp"
+            android:background="@drawable/bg_hud_bar"
+            android:paddingHorizontal="20dp"
+            android:paddingVertical="8dp"
+            android:text="@string/pause_hint"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
