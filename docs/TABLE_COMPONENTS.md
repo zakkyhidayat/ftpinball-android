@@ -83,6 +83,8 @@ Object type codes that Full Tilt adds to the original 3D Pinball set (from the o
 
 Theme: a battle with a dragon. Goal: complete the quests, or push the sword target in, to slay the dragon.
 
+Jackpot growth (0x42c020): each target hit adds 50,000 and counts for the 2,000 a target end-of-ball bonus; a ball in the well (`a_sink4`) or the first fire lizard sink (`a_sink1`) adds 75,000. Other sinks and the kickouts add nothing. The jackpot is capped at 10,000,000 (0x4238a0). The end-of-ball bonus steps (0x42b7c0) are 2,000 a target, 100,000 a quest, 50,000 an armor light, 75,000 a spell, 150,000 an egg and 75,000 times the weapon multiplier, which is what the port pays.
+
 Component inventory (counts from the game data):
 
 | Group | Count | Role |

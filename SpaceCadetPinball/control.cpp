@@ -664,7 +664,9 @@ namespace
 
 	const char* const DragonStart[] = {"a_sink1", "a_sink2", nullptr};
 	const char* const DragonTargets[] = {"a_spot*", nullptr};
-	const char* const DragonSinks[] = {"a_sink*", "a_kout*", nullptr};
+	// original 0x42c020: only sink hits (type 1017) from the well and the first fire lizard sink add 75,000 to the jackpot;
+	// target hits (types 1006 and 1019) add 50,000 and count for the target bonus
+	const char* const DragonSinks[] = {"a_sink4", "a_sink1", nullptr};
 	const char* const FireLizards[] = {"a_sink1", "a_sink2", nullptr};
 	const char* const PrisonTower[] = {"s_trip5", "s_trip6", nullptr};
 	const char* const Kickouts[] = {"a_kout*", "a_sink19", nullptr};

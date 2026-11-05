@@ -19,12 +19,12 @@ Helper routines of the original game code that write game state or scores and th
 | `0x423560` | cited | - | 8 |
 | `0x4235a0` | cited | - | 9 |
 | `0x4235c0` | cited | - | 10 |
-| `0x4235f0` | open | - | 0xb |
-| `0x423610` | open | - | 0xc |
+| `0x4235f0` | cited | - | 0xb |
+| `0x423610` | cited | - | 0xc |
 | `0x423630` | cited | - | 0xd |
-| `0x423650` | open | 10000000 | - |
-| `0x4236a0` | open | - | - |
-| `0x423720` | open | - | - |
+| `0x423650` | cited | 10000000 | - |
+| `0x4236a0` | cited | - | - |
+| `0x423720` | cited | - | - |
 | `0x423aa0` | cited | 1000000 | - |
 | `0x424580` | open | - | - |
 | `0x424700` | open | - | - |
@@ -62,7 +62,7 @@ Helper routines of the original game code that write game state or scores and th
 | `0x42d590` | cited | 100000 | 2, 2 |
 | `0x42d730` | cited | - | - |
 | `0x42d830` | open | - | 2 |
-| `0x42d850` | open | 20000, 40000 | 2 |
+| `0x42d850` | cited | 20000, 40000 | 2 |
 | `0x42d900` | open | 750000 | - |
 | `0x42db30` | cited | - | - |
 
@@ -70,7 +70,7 @@ Helper routines of the original game code that write game state or scores and th
 
 | Address | Status | Score-like values | State set |
 | --- | --- | --- | --- |
-| `0x423be0` | open | - | 0xd |
+| `0x423be0` | cited | - | 0xd |
 | `0x423e90` | open | 65526 | 9 |
 | `0x424210` | cited | - | - |
 | `0x424260` | open | 1000000, 2500000 | 1 |
@@ -91,8 +91,8 @@ Helper routines of the original game code that write game state or scores and th
 | `0x42ac80` | open | 25000 | 2, 2 |
 | `0x42b0e0` | open | - | 2 |
 | `0x42b3c0` | cited | 100000 | 2 |
-| `0x42b510` | open | - | 2 |
+| `0x42b510` | cited | - | 2 |
 | `0x42b7c0` | cited | 100000, 150000, 50000, 75000 | 0 |
 | `0x42c000` | open | - | 2 |
-| `0x42c020` | open | 100000, 50000, 75000 | - |
+| `0x42c020` | cited | 100000, 50000, 75000 | - |
 | `0x42c320` | open | - | - |
