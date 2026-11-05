@@ -184,7 +184,7 @@ Implemented:
 
 Skulduggery has no skill shot: its executable has no skill-shot message or state (the launcher handler `s_launcher1` only drives the cannon and the launch lights). Not implemented: wormhole style multiball and light sweeps.
 
-Skulduggery idle triggers not ported yet (decoded from 0x427540, 0x4279b0, 0x42d480, 0x42d590): when the volcano lights `a_spot11` are all lit (four bits) during the idle state, Lava-Ball starts: `a_kick1` kicks, two balls are queued for the plunger (the `0x192` counter of the original, the same feed as `feed_balls`). The third hit of `a_spot6` in the idle state starts Jail Break, which pays 100,000 and ends when the queue is one. Both overlap the volcano bank used by Swordfight, so they need a play-test before they are added.
+Skulduggery idle state: with all four volcano lights `a_spot8` to `a_spot11` lit, Lava-Ball starts and two balls are queued for the plunger (original 0x427540; the `0x192` queue is the same feed as `feed_balls`). Not ported: Jail Break, which needs the count of balls held by `a_kick1` (`DAT_00435d3c` in the original). Nothing in the decompiles increments that count, so its capture site is still unknown.
 
 ## 5. Engine classes added for Full Tilt
 

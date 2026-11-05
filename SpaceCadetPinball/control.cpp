@@ -743,6 +743,7 @@ namespace
 	int Spells, SpellMask, SpellsCast, Offense, Defense;
 	bool FirstHit; // the next component hit after a launch decides the skill shot
 	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
+	int LavaMask; // idle state: the volcano lights that start Lava-Ball when all four are lit
 	// Quest and mode lengths in seconds, from the timers the original code sets for each
 	const float DragonSeconds[] = {27.73f, 31.69f, 30.45f, 30.65f, 30.69f};
 	const float PirateSeconds[] = {30.0f, 30.68f, 27.4f, 31.14f, 24.14f, 30.0f, 30.0f};
@@ -1073,7 +1074,7 @@ namespace
 		FirstHit = false;
 		LootActive = false;
 		ModeEnd = 0;
-		WindHits = Coins = MapPieces = 0;
+		WindHits = Coins = MapPieces = LavaMask = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
@@ -1657,6 +1658,21 @@ namespace
 				show_quest();
 			}
 			return;
+		}
+
+		// Lava-Ball (original 0x427540, idle state): with all four volcano lights lit, two balls are queued for the plunger
+		if (Rules == &Pirates && !QuestActive)
+		{
+			static const char* const lava[] = {"a_spot8", "a_spot9", "a_spot10", "a_spot11"};
+			for (int i = 0; i < 4; ++i)
+				if (!strcmp(name, lava[i]))
+					LavaMask |= 1 << i;
+			if (LavaMask == 15)
+			{
+				LavaMask = 0;
+				say(pinball::InfoTextBox, "Lava-Ball", 3.0f, 2);
+				feed_balls(2);
+			}
 		}
 
 		if (!QuestActive)
