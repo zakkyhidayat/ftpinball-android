@@ -747,6 +747,8 @@ namespace
 	const float PirateSeconds[] = {30.0f, 30.68f, 27.4f, 31.14f, 24.14f, 30.0f, 30.0f};
 	unsigned ModeStart;
 	int BermudaCount;
+	int BuriedCoins, BuriedSpecial, BuriedBonus, BuriedJackpot; // Treasure Hunt: finds that are paid when the mode ends
+	bool BuriedExtra;
 	int HoardMask, TreasureX; // Treasure Hunt: the hideaway where the X is flashing
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
@@ -1222,6 +1224,17 @@ namespace
 	// grows, the quest light stays lit and the next quest is drawn.
 	void end_quest()
 	{
+		if (Rules == &Pirates && QuestIndex == 1)
+		{
+			// original 0x425ab0: pay what was buried
+			for (; BuriedCoins > 0; --BuriedCoins) coin_award();
+			for (; BuriedSpecial > 0; --BuriedSpecial) special_treasure();
+			if (BuriedBonus) pb::MainTable->AddScore(BuriedBonus);
+			if (BuriedJackpot) pb::MainTable->AddScore(BuriedJackpot);
+			if (BuriedExtra) award(EXTRA_BALL);
+			BuriedBonus = BuriedJackpot = 0;
+			BuriedExtra = false;
+		}
 		QuestActive = false;
 		QuestHits = 0;
 		++QuestsDone;
@@ -1274,6 +1287,8 @@ namespace
 		BermudaCount = 0;
 		ModeStart = SDL_GetTicks();
 		TreasureX = rand() % 5;
+		BuriedCoins = BuriedSpecial = BuriedBonus = BuriedJackpot = 0;
+		BuriedExtra = false;
 		ParrotMask = VolcanoMask = 0;
 		if (Rules == &Pirates && QuestIndex == 4)
 		{
@@ -1656,10 +1671,17 @@ namespace
 				return;
 			int next = rand() % 4;
 			TreasureX = next >= TreasureX ? next + 1 : next;
-			if (QuestHits < 4)
-				special_treasure();
-			else
-				award(JACKPOT);
+			// original 0x424b00: the finds are buried and paid when the mode ends: three coin awards, two special
+			// treasures, a bonus, the jackpot and an extra ball, then coin awards again
+			static const char* const buried[] = {"Coins\nBuried", "Coins\nBuried", "Coins\nBuried", "Special Treasure\nBuried",
+				"Special Treasure\nBuried", "Bonus\nBuried", "Jackpot\nBuried", "Extra Ball\nBuried"};
+			int find = QuestHits < 8 ? QuestHits : 0;
+			say(pinball::InfoTextBox, buried[find], 3.0f, 2);
+			if (find < 3) ++BuriedCoins;
+			else if (find < 5) ++BuriedSpecial;
+			else if (find == 5) BuriedBonus = (Treasures * 50 + QuestsDone * 20) * 10000;
+			else if (find == 6) BuriedJackpot = Jackpot;
+			else BuriedExtra = true;
 			++QuestHits;
 			Jackpot += q.jackpotAdd;
 			if (QuestHits < q.goal)
