@@ -128,7 +128,7 @@ Rules that are implemented (`control.cpp`):
   ruby 100,000 fire lizard sinks, opal 100,000 accelerator, emerald 200,000 and amethyst 250,000 ramps); all nine give the extra ball.
 * Fire Lizards: each sink hit is worth 100,000 more than the one before (up to 1,000,000) and every fourth hit awards the jackpot.
 * Slay Dragon: starts on the third sword hit or when all five quests are done. Starting it pays 500,000. Needs eight minus the weapons and offensive spells hits in the
-  dragon's mouth, in 30 seconds plus five per armor piece or defensive spell. The super jackpot grows with every component hit.
+  dragon's mouth, in 30 seconds plus five per armor piece or defensive spell. The super jackpot (cap 20,000,000) grows with bumpers (50,000), targets (100,000), the sinks `a_sink1`/`a_sink2` (500,000) and kickouts (750,000); slaying the dragon pays it plus 1,500,000 and the jackpot.
 * Skill shot: the first spell target the launched ball hits gives a spell (`a_spot4`), dragon egg (`a_spot5`), weapon (`a_spot6`), armor (`a_spot7`) or Gargoyle Gaggle-Ball (`a_spot22`).
 * Spell bank: hitting all five spell targets casts a spell (75,000 each in the ball bonus).
 * Ball drain: shoot again in the first 15 seconds, then the bonus (targets, quests, armor, spells, dragon eggs), extra balls, game over.
@@ -143,7 +143,7 @@ Rules that are implemented (`control.cpp`):
 
 Only Gaggle pays 100,000 at the start (decoded). Each multiball mode ends when one ball is left (the original has no extra scoring inside the Gaggle and Barrage states).
 
-Not implemented: the Dragon Maiden ball transfer from the tower sinks to
+Not implemented: the random ball transfer from the tower sinks to
 `a_sink1`/`a_sink2`, the tower diverters (`a_dvtraa`, `a_dvtrab`), the gem lights of Dragon Hoard, and light sweeps.
 
 ## 4. Skulduggery

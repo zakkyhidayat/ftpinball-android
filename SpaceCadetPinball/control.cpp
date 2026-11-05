@@ -1104,8 +1104,9 @@ namespace
 	{
 		if (!strncmp(name, "a_bump", 6)) SuperJackpot += 50000;
 		else if (!strncmp(name, "a_spot", 6)) SuperJackpot += 100000;
-		else if (!strncmp(name, "a_sink", 6)) SuperJackpot += 500000;
+		else if (!strcmp(name, "a_sink1") || !strcmp(name, "a_sink2")) SuperJackpot += 500000;
 		else if (!strncmp(name, "a_kout", 6)) SuperJackpot += 750000;
+		if (SuperJackpot > 20000000) SuperJackpot = 20000000;
 
 		if (!SlayActive)
 		{
@@ -1136,7 +1137,10 @@ namespace
 		}
 		SlayActive = false;
 		++QuestsDone;
+		// original 0x42a150: the super jackpot, then 1,500,000 and the jackpot (0x424490)
 		pb::MainTable->AddScore(SuperJackpot);
+		pb::MainTable->AddScore(1500000);
+		pb::MainTable->AddScore(Jackpot);
 		snprintf(Line, sizeof Line, "Super Jackpot %d", SuperJackpot);
 		say(pinball::InfoTextBox, Line, 5.0f, 2);
 		show_quest();
