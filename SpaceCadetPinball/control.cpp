@@ -744,6 +744,7 @@ namespace
 	bool FirstHit; // the next component hit after a launch decides the skill shot
 	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
 	int LavaMask; // idle state: the volcano lights that start Lava-Ball when all four are lit
+	int Spot6Hits; // Skulduggery idle state: the hits on a_spot6 (original 0x4279b0); the third starts Jail Break
 	int PirateLetters; // SKULDUGGERY: the letters lit so far in the idle state
 	int HeldBalls; // Jail: balls held in the brig (original DAT_00435d3c); the third trap starts Jail Break
 	// Quest and mode lengths in seconds, from the timers the original code sets for each
@@ -1083,7 +1084,7 @@ namespace
 		FirstHit = false;
 		LootActive = false;
 		ModeEnd = 0;
-		WindHits = Coins = MapPieces = LavaMask = HeldBalls = PirateLetters = 0;
+		WindHits = Coins = MapPieces = LavaMask = HeldBalls = PirateLetters = Spot6Hits = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
@@ -1701,6 +1702,19 @@ namespace
 		{
 			// SKULDUGGERY: one light per letter, lit by eleven drop targets (original 0x4268b0 and the others, which set
 			// bits 0x1 to 0x400 of v_lite1). When all eleven are lit the mode is chosen (original 0x425de0)
+			// Jail Break from the idle state (original 0x4279b0 and 0x42d590): the third hit of a_spot6 pays the held balls
+			// (100,000) and releases them; with none held it does nothing
+			if (!strcmp(name, "a_spot6") && ++Spot6Hits == 3)
+			{
+				Spot6Hits = 0;
+				if (HeldBalls)
+				{
+					pb::MainTable->AddScore(100000);
+					say(pinball::InfoTextBox, "Jail Break!", 3.0f, 2);
+					feed_balls(HeldBalls);
+					HeldBalls = 0;
+				}
+			}
 			static const char* const letters[] = {"a_drop5", "a_drop6", "a_drop7", "a_drop8", "a_drop9", "a_drop10", "a_drop11", "a_drop12", "a_drop13", "a_drop14", "a_drop15"};
 			for (int i = 0; i < 11; ++i)
 				if (!strcmp(name, letters[i]))
