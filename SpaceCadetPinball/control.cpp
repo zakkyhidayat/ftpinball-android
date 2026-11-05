@@ -1085,8 +1085,11 @@ namespace
 	// fed); the third lock starts Tower Barrage with the three locked balls. Returns true when the ball stays locked.
 	bool lock_ball(TPinballComponent* cmp)
 	{
-		static const char* const locks[] = {"a_sink18", "a_sink17", "a_sink16"};
-		if (Rules != &Dragon || !LockLit || MultiMode || Locked >= 3 || strcmp(cmp->GroupName, locks[Locked]))
+		// Each lock light has two sinks that trap a ball (original handlers 0x426f90 and 0x427100 for v_lite48, 0x4273d0 and
+		// 0x427290 for v_lite49, 0x4274d0 and 0x427680 for v_lite50); the diverters choose between them
+		static const char* const locks[3][2] = {{"a_sink18", "a_sink15"}, {"a_sink17", "a_sink13"}, {"a_sink9", "a_sink10"}};
+		if (Rules != &Dragon || !LockLit || MultiMode || Locked >= 3 || !cmp->GroupName
+			|| (strcmp(cmp->GroupName, locks[Locked][0]) && strcmp(cmp->GroupName, locks[Locked][1])))
 			return false;
 		LockedSinks[Locked++] = cmp;
 		if (Locked < 3)
