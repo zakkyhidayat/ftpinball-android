@@ -745,7 +745,7 @@ namespace
 	bool MenuOpen, ExtraBallLight;
 	int Spells, SpellMask, SpellsCast, Offense, Defense;
 	bool FirstHit; // the next component hit after a launch decides the skill shot
-	int WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
+	int LaneMask, WindHits, StormEvery, StormValue, Coins, MapPieces, ParrotMask, VolcanoMask;
 	int LavaMask; // idle state: the volcano lights that start Lava-Ball when all four are lit
 	int Spot6Hits; // Skulduggery idle state: the hits on a_spot6 (original 0x4279b0); the third starts Jail Break
 	int PirateLetters; // SKULDUGGERY: the letters lit so far in the idle state
@@ -1142,7 +1142,7 @@ namespace
 		FirstHit = false;
 		LootActive = false;
 		ModeEnd = 0;
-		WindHits = Coins = MapPieces = LavaMask = HeldBalls = PirateLetters = Spot6Hits = 0;
+		LaneMask = WindHits = Coins = MapPieces = LavaMask = HeldBalls = PirateLetters = Spot6Hits = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
 		MysteryIdx = 4;
@@ -1606,6 +1606,19 @@ namespace
 						IslandMask = 0;
 						fathom_up();
 					}
+				}
+		}
+		if (Rules == &Pirates && !QuestActive && !LootActive)
+		{
+			// Lane lights (original 0x429630, 0x429790, 0x429840, 0x4298f0, 0x4296d0 and the check at 0x424290): in the idle state
+			// each of five lanes lights its light; when all five are lit the lights start again and 0x423aa0 lights a map piece
+			// and pays One Million
+			static const char* const lanes[] = {"s_trip11", "a_roll5", "a_roll1", "a_roll2", "a_roll3"};
+			for (int i = 0; i < 5; ++i)
+				if (!strcmp(name, lanes[i]) && (LaneMask |= 1 << i) == 31)
+				{
+					LaneMask = 0;
+					map_piece();
 				}
 		}
 		if (Rules == &Pirates && ShipMystery && !strcmp(name, "a_roll3"))
@@ -2104,7 +2117,7 @@ namespace
 		if (QuestActive)
 			end_quest();
 		Fathom = 1; // the launcher of the original (0x425e70) clears the fathom lights for each ball
-		LavaMask = 0; // the volcano lights start again on each ball
+		LavaMask = LaneMask = 0; // the volcano and lane lights start again on each ball
 		ForestHits = SwordHits = 0;
 		reset_diverters();
 		if (!table->TiltLockFlag)
