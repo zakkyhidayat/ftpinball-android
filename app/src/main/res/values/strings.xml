@@ -75,7 +75,7 @@
     <string name="no_tables">No tables found. Build the app with your own Full Tilt! Pinball data (see the README).</string>
     <string name="last_played">Last played</string>
     <string name="about">About</string>
-    <string name="menu_credits">Original source code: k4zmu2a/SpaceCadetPinball\nAndroid port: fexed/Pinball-on-Android\n\nThis fork adds fixes, a new interface and Full Tilt! support. Full Tilt! Pinball belongs to its owners and its data is not distributed with the source code.</string>
+    <string name="menu_credits">Full Tilt! Pinball for Android\nFork by zakkyhidayat\n\nOriginal source code: k4zmu2a/SpaceCadetPinball\nAndroid port: fexed/Pinball-on-Android\n\nThis fork adds fixes, a new interface and Full Tilt! support. Full Tilt! Pinball belongs to its owners. Its game data is not included in this app or its source code.</string>
     <string name="menutitle">Back to main menu?</string>
     <string name="menumessage">The current game will be lost.</string>
     <string name="highscores_title">High scores</string>
