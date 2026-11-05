@@ -748,6 +748,7 @@ namespace
 	unsigned ModeStart;
 	int BermudaCount;
 	int BuriedCoins, BuriedSpecial, BuriedBonus, BuriedJackpot; // Treasure Hunt: finds that are paid when the mode ends
+	int Fathom, IslandMask; // Skulduggery: fathom level 1..7 (original player +0x15e), the island lane lights (two per lane)
 	bool BuriedExtra, ShipMystery; // ShipMystery: the shipwreck mystery waits on the rollover a_roll3
 	int HoardMask, TreasureX; // Treasure Hunt: the hideaway where the X is flashing
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
@@ -866,6 +867,13 @@ namespace
 		say(pinball::InfoTextBox, Line, 3.0f, 2);
 	}
 
+	// original 0x424350 / 0x4243d0: one more fathom light, up to six (fathom level seven)
+	void fathom_up()
+	{
+		if (Fathom < 7)
+			++Fathom;
+	}
+
 	// original 0x425c50: the shipwreck mystery is one of six awards
 	void shipwreck_mystery()
 	{
@@ -878,7 +886,10 @@ namespace
 			if (BumperHits < 60) BumperHits = 60; // the sixth bumper level
 			say(pinball::InfoTextBox, "Bumpers Level 6", 3.0f, 2);
 			break;
-		case 3: say(pinball::InfoTextBox, "Fathoms Up", 3.0f, 2); break;
+		case 3:
+			fathom_up();
+			say(pinball::InfoTextBox, "Fathoms Up", 3.0f, 2);
+			break;
 		case 4: map_piece(); break;
 		default: coin_award();
 		}
@@ -1069,6 +1080,8 @@ namespace
 		SuperJackpot = 2500000;
 		BonusHold = 0;
 		BonusHoldLit = false;
+		Fathom = 1;
+		IslandMask = 0;
 		ShipMystery = false;
 		SlayActive = false;
 		QuestActive = LastBallLost = false;
@@ -1450,6 +1463,22 @@ namespace
 			pb::MainTable->AddScore(component_score(index));
 		apply_lights(name);
 		play_sounds(name);
+		// Island lanes (original 0x429fa0, 0x42a060, 0x42a120): each lane lights its top light, then its bottom light; all six
+		// lit raise the fathom level and the lights start again
+		if (Rules == &Pirates)
+		{
+			static const char* const island[] = {"a_roll12", "a_roll11", "a_roll10"};
+			for (int i = 0; i < 3; ++i)
+				if (!strcmp(name, island[i]))
+				{
+					IslandMask |= IslandMask & 1 << i ? 8 << i : 1 << i;
+					if (IslandMask == 63)
+					{
+						IslandMask = 0;
+						fathom_up();
+					}
+				}
+		}
 		if (Rules == &Pirates && ShipMystery && !strcmp(name, "a_roll3"))
 			shipwreck_mystery(); // original 0x4296d0
 		if (Rules == &Dragon && !strncmp(name, "a_bump", 6) && BumperHits % 8 == 0 && Weapons < 4)
@@ -1614,6 +1643,7 @@ namespace
 			{
 				int loot = QuestsDone * 1000000 + Treasures * 500000 + Coins * 500000 + MapPieces * 1000000;
 				pb::MainTable->AddScore(loot);
+				fathom_up(); // original 0x42cfc0
 				snprintf(Line, sizeof Line, "Peg Leg's Loot %d", loot);
 				say(pinball::InfoTextBox, Line, 5.0f, 2);
 				LootActive = false;
@@ -1709,7 +1739,7 @@ namespace
 			say(pinball::InfoTextBox, buried[find], 3.0f, 2);
 			if (find < 3) ++BuriedCoins;
 			else if (find < 5) ++BuriedSpecial;
-			else if (find == 5) BuriedBonus = ((Treasures * 2 + MapPieces) * 25 + QuestsDone * 20 + TargetsHit) * 10000; // original 0x424aa0, times the fathom level (not modelled, taken as 1)
+			else if (find == 5) BuriedBonus = ((Treasures * 2 + MapPieces) * 25 + QuestsDone * 20 + TargetsHit) * Fathom * 10000; // original 0x424aa0
 			else if (find == 6) BuriedJackpot = Jackpot;
 			else BuriedExtra = true;
 			++QuestHits;
@@ -1811,6 +1841,7 @@ namespace
 		LaunchTicks = 0;
 		if (QuestActive)
 			end_quest();
+		Fathom = 1; // the launcher of the original (0x425e70) clears the fathom lights for each ball
 		if (!table->TiltLockFlag)
 		{
 			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : MapPieces * 250000 + Treasures * 100000);
