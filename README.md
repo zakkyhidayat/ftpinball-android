@@ -17,11 +17,11 @@ The app does not include the game's data, because it is copyrighted. You add it 
 ## Install
 
 1. Download the latest APK from the [Releases page](https://github.com/zakkyhidayat/ftpinball-android/releases) and install it. Android will ask you to allow installs from your browser or file manager.
-2. Put your copy of Full Tilt! Pinball on the phone. You need the folder that holds the `CADET`, `DRAGON` and `PIRATE` folders (on the original CD it is `WIN95/FULLTILT`). Copying the whole disc also works. It is about 19 MB.
-3. Open the app and tap **Add Full Tilt! files**. Choose that folder.
-4. The app copies what it needs and lists the tables it found. You can delete the copy you made in step 2 afterwards.
+2. Put your copy of Full Tilt! Pinball on the phone, in any folder you like. You need the folder that holds the `CADET`, `DRAGON` and `PIRATE` folders (on the original CD it is `WIN95/FULLTILT`). Copying the whole disc also works. It is about 19 MB.
+3. Open the app and tap **Choose your Full Tilt! folder**. The game reads the files from their folder, so Android first asks you to allow the app to read your storage (switch on "All files access" for the app and come back). Then choose your game folder.
+4. The app lists the tables it found, and they appear in the menu. The files are **not copied**: they stay where you put them, so keep that folder on your phone.
 
-If a table is missing from the menu, the app could not find its `.DAT` file in the folder you chose. Choose the folder one level up, or the folder of that table.
+If a table is missing from the menu, the app could not find its `.DAT` file in the folder you chose. Choose the folder one level up, or the folder of that table. If you move or delete the folder, choose it again.
 
 ## Playing
 

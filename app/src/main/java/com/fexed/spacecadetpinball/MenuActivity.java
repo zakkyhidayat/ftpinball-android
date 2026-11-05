@@ -27,48 +27,67 @@ public class MenuActivity extends AppCompatActivity {
     private static final String KEY_LAST_TABLE = "lasttable";
     private static final String KEY_PLAYED_AT = "playedat_";
 
-    /** The folder picker for the player's copy of the game; the system gives the app access to the chosen folder only. */
-    private final androidx.activity.result.ActivityResultLauncher<android.net.Uri> importLauncher =
+    /** The folder picker for the player's copy of the game; its files stay where they are. */
+    private final androidx.activity.result.ActivityResultLauncher<android.net.Uri> folderLauncher =
             registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.OpenDocumentTree(), uri -> {
-                if (uri != null) importFiles(uri);
+                if (uri != null) useFolder(uri);
             });
 
-    private void importFiles(android.net.Uri tree) {
-        androidx.appcompat.app.AlertDialog progress = new MaterialAlertDialogBuilder(this)
+    private void chooseFolder() {
+        new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.import_title)
-                .setMessage(R.string.import_working)
-                .setCancelable(false)
+                .setMessage(R.string.import_help)
+                .setPositiveButton(R.string.import_choose, (d, w) -> folderLauncher.launch(null))
+                .setNegativeButton(android.R.string.cancel, null)
                 .show();
-        new Thread(() -> {
-            TableFiles.Result result = null;
-            try {
-                result = TableFiles.importTree(getApplicationContext(), tree);
-            } catch (IOException | RuntimeException e) {
-                android.util.Log.e("Menu", "Import failed", e);
-            }
-            TableFiles.Result done = result;
-            runOnUiThread(() -> {
-                progress.dismiss();
-                String message;
-                if (done == null) {
-                    message = getString(R.string.import_failed);
-                } else if (done.imported.isEmpty()) {
-                    message = getString(R.string.import_none);
-                } else {
-                    StringBuilder found = new StringBuilder();
-                    for (Table t : done.imported) found.append(found.length() > 0 ? ", " : "").append(t.title);
-                    message = getString(R.string.import_done, found);
-                    if (!done.missing.isEmpty()) {
-                        StringBuilder missing = new StringBuilder();
-                        for (Table t : done.missing) missing.append(missing.length() > 0 ? ", " : "").append(t.title);
-                        message += "\n" + getString(R.string.import_missing, missing);
+    }
+
+    /** The engine reads the game files from their folder, so the app needs access to the phone's storage. */
+    private void askForAccess() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.import_title)
+                .setMessage(R.string.import_access)
+                .setPositiveButton(R.string.import_allow, (d, w) -> {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                        Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                                android.net.Uri.parse("package:" + getPackageName()));
+                        try {
+                            startActivity(intent);
+                        } catch (RuntimeException e) {
+                            startActivity(new Intent(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION));
+                        }
+                    } else {
+                        androidx.core.app.ActivityCompat.requestPermissions(this,
+                                new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
                     }
+                })
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void useFolder(android.net.Uri tree) {
+        java.io.File root = TableFiles.treeToPath(tree);
+        String message;
+        if (root == null) {
+            message = getString(R.string.import_failed);
+        } else {
+            TableFiles.Result result = TableFiles.useFolder(this, root);
+            if (result.found.isEmpty()) {
+                message = getString(R.string.import_none);
+            } else {
+                StringBuilder found = new StringBuilder();
+                for (Table t : result.found) found.append(found.length() > 0 ? ", " : "").append(t.title);
+                message = getString(R.string.import_done, found);
+                if (!result.missing.isEmpty()) {
+                    StringBuilder missing = new StringBuilder();
+                    for (Table t : result.missing) missing.append(missing.length() > 0 ? ", " : "").append(t.title);
+                    message += "\n" + getString(R.string.import_missing, missing);
                 }
-                new MaterialAlertDialogBuilder(this).setTitle(R.string.import_title).setMessage(message)
-                        .setPositiveButton(android.R.string.ok, null).show();
-                buildTableList();
-            });
-        }).start();
+            }
+        }
+        new MaterialAlertDialogBuilder(this).setTitle(R.string.import_title).setMessage(message)
+                .setPositiveButton(android.R.string.ok, null).show();
+        buildTableList();
     }
 
     @Override
@@ -84,12 +103,10 @@ public class MenuActivity extends AppCompatActivity {
                     getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY_LAST_TABLE, null));
             startActivity(intent);
         });
-        findViewById(R.id.menuimport).setOnClickListener(v -> new MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.import_title)
-                .setMessage(R.string.import_help)
-                .setPositiveButton(R.string.import_choose, (d, w) -> importLauncher.launch(null))
-                .setNegativeButton(android.R.string.cancel, null)
-                .show());
+        findViewById(R.id.menuimport).setOnClickListener(v -> {
+            if (!TableFiles.hasAccess(this)) askForAccess();
+            else chooseFolder();
+        });
         findViewById(R.id.menuabout).setOnClickListener(v -> new MaterialAlertDialogBuilder(this)
                 .setTitle(R.string.about)
                 .setMessage(R.string.menu_credits)
@@ -148,8 +165,8 @@ public class MenuActivity extends AppCompatActivity {
 
     /** Full Tilt tables ship a 120x120 icon next to their data. */
     private Bitmap loadIcon(Table table) {
-        java.io.File imported = new java.io.File(TableFiles.importDir(this, table), "icon.bmp");
-        if (!table.isInstalled(getAssets()) && imported.isFile()) return BitmapFactory.decodeFile(imported.getAbsolutePath());
+        java.io.File own = table.isInstalled(getAssets()) ? null : TableFiles.icon(this, table);
+        if (own != null) return BitmapFactory.decodeFile(own.getAbsolutePath());
         try (InputStream is = getAssets().open(table.assetDir() + "/icon.bmp")) {
             return BitmapFactory.decodeStream(is);
         } catch (IOException e) {

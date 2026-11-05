@@ -1,169 +1,212 @@
 package com.fexed.spacecadetpinball;
 
-import android.content.ContentResolver;
+import android.Manifest;
 import android.content.Context;
-import android.database.Cursor;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 import android.provider.DocumentsContract;
+import android.system.ErrnoException;
+import android.system.Os;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.EnumMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
- * Where the Full Tilt! data of each table comes from: the assets of an APK built with the data, or the files the player
- * imported from a copy of the original game (the data is copyrighted and is not part of the released app).
+ * Where the Full Tilt! data of each table comes from: the assets of an APK built with the data, or the folder of the
+ * player's own copy of the game, which stays where it is (the data is copyrighted and is not part of the released app).
+ * The game process finds the files of an external table through links in the app's own folder.
  */
 final class TableFiles {
+    private static final String PREFS = "com.fexed.spacecadetpinball.files";
+    private static final String KEY_SOURCE = "source_";
     private static final int SEARCH_DEPTH = 4; // the disc root holds WIN95/FULLTILT/CADET
 
     private TableFiles() {
     }
 
-    /** The folder the imported files of a table are kept in. */
-    static File importDir(Context context, Table table) {
-        return new File(new File(context.getFilesDir(), "import"), table.id);
+    /** Whether the app may read the folders of the player's game: "all files access", or the storage permission. */
+    static boolean hasAccess(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) return Environment.isExternalStorageManager();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
     }
 
-    static boolean hasImported(Context context, Table table) {
-        return new File(importDir(context, table), table.datFile).isFile();
+    private static SharedPreferences prefs(Context context) {
+        return context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+    }
+
+    /** The folder of the player's copy that holds this table, or null. */
+    static File source(Context context, Table table) {
+        String path = prefs(context).getString(KEY_SOURCE + table.id, null);
+        if (path == null) return null;
+        File dir = new File(path);
+        return child(dir, table.datFile) != null ? dir : null;
+    }
+
+    /** The icon file of the player's copy of a table, or null. */
+    static File icon(Context context, Table table) {
+        File source = source(context, table);
+        File[] children = source == null ? null : source.listFiles();
+        if (children == null) return null;
+        Arrays.sort(children);
+        for (File file : children) {
+            if (file.isFile() && file.getName().toLowerCase(Locale.ROOT).endsWith(".bmp")) return file;
+        }
+        return null;
     }
 
     static boolean isAvailable(Context context, Table table) {
         if (table.isInstalled(context.getAssets())) return true;
-        return hasImported(context, table);
+        return hasAccess(context) && source(context, table) != null;
     }
 
-    /** The outcome of an import: the tables that were found and copied. */
+    /** The folder a tree picked with the system folder picker stands for, or null when it is not on shared storage. */
+    static File treeToPath(Uri tree) {
+        String id = DocumentsContract.getTreeDocumentId(tree);
+        int colon = id.indexOf(':');
+        if (colon < 0) return null;
+        String volume = id.substring(0, colon);
+        String relative = id.substring(colon + 1);
+        File base = "primary".equals(volume) ? Environment.getExternalStorageDirectory() : new File("/storage/" + volume);
+        return relative.isEmpty() ? base : new File(base, relative);
+    }
+
+    /** The outcome of choosing a folder: the tables that were found there. */
     static final class Result {
-        final List<Table> imported = new ArrayList<>();
+        final List<Table> found = new ArrayList<>();
         final List<Table> missing = new ArrayList<>();
     }
 
-    /**
-     * Looks for the tables below the folder the player picked (the folder of the game, or the folder of a single table)
-     * and copies the files each one needs into the app. Call from a background thread.
-     */
-    static Result importTree(Context context, Uri tree) throws IOException {
-        ContentResolver resolver = context.getContentResolver();
-        Map<Table, String> folders = new EnumMap<>(Table.class);
-        scan(resolver, tree, DocumentsContract.getTreeDocumentId(tree), 0, folders);
-
+    /** Looks for the tables below the folder the player chose (the game folder, the disc, or one table's folder). */
+    static Result useFolder(Context context, File root) {
+        java.util.Map<Table, File> folders = new java.util.EnumMap<>(Table.class);
+        scan(root, 0, folders);
         Result result = new Result();
+        SharedPreferences.Editor editor = prefs(context).edit();
         for (Table table : Table.values()) {
-            String folder = folders.get(table);
+            File folder = folders.get(table);
             if (folder == null) {
                 result.missing.add(table);
                 continue;
             }
-            File dir = importDir(context, table);
-            deleteRecursive(dir);
-            if (!dir.mkdirs() && !dir.isDirectory()) throw new IOException("Unable to create " + dir);
-            copyTable(resolver, tree, folder, table, dir);
-            // the work folder is rebuilt from the imported files the next time the table starts
+            editor.putString(KEY_SOURCE + table.id, folder.getAbsolutePath());
+            // the table's own folder is rebuilt from the new location the next time it starts
             deleteRecursive(new File(context.getFilesDir(), table.id));
-            result.imported.add(table);
+            result.found.add(table);
         }
+        editor.apply();
         return result;
     }
 
     /** Finds the folder of each table by the data file it holds, whatever the folder is called. */
-    private static void scan(ContentResolver resolver, Uri tree, String folder, int depth, Map<Table, String> found) {
-        List<Doc> children = children(resolver, tree, folder);
+    private static void scan(File folder, int depth, java.util.Map<Table, File> found) {
+        File[] children = folder.listFiles();
+        if (children == null) return;
         boolean isTableFolder = false;
         for (Table table : Table.values()) {
-            for (Doc child : children) {
-                if (!child.directory && child.name.equalsIgnoreCase(table.datFile)) {
-                    if (!found.containsKey(table)) found.put(table, folder);
-                    isTableFolder = true;
-                }
+            if (child(folder, table.datFile) != null) {
+                if (!found.containsKey(table)) found.put(table, folder);
+                isTableFolder = true;
             }
         }
         if (isTableFolder || depth >= SEARCH_DEPTH) return;
-        for (Doc child : children) {
-            if (child.directory) scan(resolver, tree, child.id, depth + 1, found);
+        Arrays.sort(children);
+        for (File child : children) {
+            if (child.isDirectory()) scan(child, depth + 1, found);
         }
     }
 
-    /** The data file, the icon and the sound files of a table; the original uses upper case names. */
-    private static void copyTable(ContentResolver resolver, Uri tree, String folder, Table table, File dir) throws IOException {
+    /** The file of a folder with this name, ignoring case. */
+    private static File child(File folder, String name) {
+        File[] children = folder.listFiles();
+        if (children == null) return null;
+        for (File child : children) {
+            if (child.isFile() && child.getName().equalsIgnoreCase(name)) return child;
+        }
+        return null;
+    }
+
+    /**
+     * Links the data file, the icon and the sound and music files of an external table into the table's own folder, with
+     * the upper case names of the original. The files themselves are not copied.
+     */
+    static void link(Context context, Table table, File dir) throws IOException {
+        File source = source(context, table);
+        if (source == null) throw new IOException("No folder for " + table.id);
+        linkFile(child(source, table.datFile), new File(dir, table.datFile));
+        File[] children = source.listFiles();
+        if (children == null) return;
         boolean icon = false;
         boolean sounds = false;
-        List<Doc> children = children(resolver, tree, folder);
-        for (Doc child : children) {
-            String lower = child.name.toLowerCase(Locale.ROOT);
-            if (child.directory) {
-                if (lower.equals("sound")) {
-                    sounds = true;
-                    for (Doc sound : children(resolver, tree, child.id)) {
-                        if (!sound.directory) copy(resolver, tree, sound.id, new File(dir, sound.name.toUpperCase(Locale.ROOT)));
+        for (File file : children) {
+            String lower = file.getName().toLowerCase(Locale.ROOT);
+            if (file.isDirectory() && lower.equals("sound")) {
+                sounds = true;
+                File[] files = file.listFiles();
+                if (files != null) {
+                    for (File sound : files) {
+                        if (sound.isFile()) linkFile(sound, new File(dir, sound.getName().toUpperCase(Locale.ROOT)));
                     }
                 }
-            } else if (lower.equals(table.datFile.toLowerCase(Locale.ROOT))) {
-                copy(resolver, tree, child.id, new File(dir, table.datFile));
-            } else if (lower.endsWith(".bmp") && !icon) {
+            } else if (file.isFile() && lower.endsWith(".bmp") && !icon) {
                 icon = true;
-                copy(resolver, tree, child.id, new File(dir, "icon.bmp"));
+                linkFile(file, new File(dir, "icon.bmp"));
             }
         }
         if (!sounds) {
             // some copies keep the sound files next to the data file
-            for (Doc child : children) {
-                String lower = child.name.toLowerCase(Locale.ROOT);
-                if (!child.directory && (lower.endsWith(".wav") || lower.endsWith(".mds") || lower.endsWith(".mid"))) {
-                    copy(resolver, tree, child.id, new File(dir, child.name.toUpperCase(Locale.ROOT)));
+            for (File file : children) {
+                String lower = file.getName().toLowerCase(Locale.ROOT);
+                if (file.isFile() && (lower.endsWith(".wav") || lower.endsWith(".mds") || lower.endsWith(".mid"))) {
+                    linkFile(file, new File(dir, file.getName().toUpperCase(Locale.ROOT)));
                 }
             }
         }
     }
 
-    private static final class Doc {
-        final String id;
-        final String name;
-        final boolean directory;
-
-        Doc(String id, String name, boolean directory) {
-            this.id = id;
-            this.name = name;
-            this.directory = directory;
-        }
-    }
-
-    private static List<Doc> children(ContentResolver resolver, Uri tree, String folder) {
-        List<Doc> list = new ArrayList<>();
-        Uri uri = DocumentsContract.buildChildDocumentsUriUsingTree(tree, folder);
-        String[] columns = {DocumentsContract.Document.COLUMN_DOCUMENT_ID, DocumentsContract.Document.COLUMN_DISPLAY_NAME,
-                DocumentsContract.Document.COLUMN_MIME_TYPE};
-        try (Cursor cursor = resolver.query(uri, columns, null, null, null)) {
-            while (cursor != null && cursor.moveToNext()) {
-                boolean directory = DocumentsContract.Document.MIME_TYPE_DIR.equals(cursor.getString(2));
-                list.add(new Doc(cursor.getString(0), cursor.getString(1), directory));
+    private static void linkFile(File target, File link) throws IOException {
+        if (target == null) throw new IOException("Missing file for " + link.getName());
+        if (link.exists() || isLink(link)) link.delete();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            try {
+                Os.symlink(target.getAbsolutePath(), link.getAbsolutePath());
+                return;
+            } catch (ErrnoException e) {
+                // fall through to a copy
             }
-        } catch (RuntimeException e) {
-            // an unreadable folder counts as empty
         }
-        return list;
-    }
-
-    private static void copy(ContentResolver resolver, Uri tree, String document, File target) throws IOException {
-        Uri uri = DocumentsContract.buildDocumentUriUsingTree(tree, document);
-        try (InputStream in = resolver.openInputStream(uri); OutputStream out = new FileOutputStream(target)) {
-            if (in == null) throw new IOException("Unable to read " + target.getName());
+        try (InputStream in = new FileInputStream(target); OutputStream out = new FileOutputStream(link)) {
             byte[] buffer = new byte[16384];
             int len;
             while ((len = in.read(buffer)) != -1) out.write(buffer, 0, len);
         }
     }
 
+    private static boolean isLink(File file) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return false;
+        try {
+            Os.readlink(file.getAbsolutePath());
+            return true;
+        } catch (ErrnoException e) {
+            return false;
+        }
+    }
+
     static void deleteRecursive(File file) {
-        File[] children = file.listFiles();
+        File[] children = isLink(file) ? null : file.listFiles();
         if (children != null) for (File child : children) deleteRecursive(child);
         file.delete();
     }

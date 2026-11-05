@@ -315,7 +315,7 @@ public class MainActivity extends SDLActivity {
         }
     }
 
-    /** Copies the files of the chosen table to its own folder, once per app version. */
+    /** Gets the files of the chosen table into its own folder (copies the bundled ones, links the player's), once per app version. */
     private File prepareTableFiles(Table table) {
         File dir = new File(getFilesDir(), table.id);
         File marker = new File(dir, ".version");
@@ -339,9 +339,8 @@ public class MainActivity extends SDLActivity {
                     copyAsset(assetManager, table.assetDir() + "/" + asset, new File(dir, asset));
                 }
             } else {
-                // the files the player imported from a copy of the game
-                File[] imported = TableFiles.importDir(this, table).listFiles();
-                if (imported != null) for (File file : imported) copyFile(file, new File(dir, file.getName()));
+                // the player's own copy of the game stays where it is: the table's folder links to its files
+                TableFiles.link(this, table, dir);
             }
             try (OutputStream os = new FileOutputStream(marker)) {
                 os.write(version.getBytes());
@@ -350,18 +349,6 @@ public class MainActivity extends SDLActivity {
             Log.e(TAG, "Unable to prepare " + table.id, e);
         }
         return dir;
-    }
-
-    private void copyFile(File source, File target) {
-        try (InputStream is = new java.io.FileInputStream(source); OutputStream os = new FileOutputStream(target)) {
-            byte[] buffer = new byte[8192];
-            int len;
-            while ((len = is.read(buffer)) != -1) {
-                os.write(buffer, 0, len);
-            }
-        } catch (IOException e) {
-            Log.e(TAG, "Unable to copy " + source, e);
-        }
     }
 
     private void copyAsset(AssetManager assetManager, String asset, File target) {
