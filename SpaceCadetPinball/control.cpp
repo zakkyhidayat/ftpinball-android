@@ -870,6 +870,13 @@ namespace
 		say(pinball::InfoTextBox, Line, 3.0f, 2);
 	}
 
+	// Peg Leg's Loot starts from every path that sets it, and pays its start amount (0x42cfc0, 0x4f)
+	void start_loot()
+	{
+		LootActive = true;
+		pb::MainTable->AddScore(1000000);
+	}
+
 	// original 0x424350 / 0x4243d0: one more fathom light, up to six (fathom level seven)
 	void fathom_up()
 	{
@@ -909,7 +916,7 @@ namespace
 		default: award(EXTRA_BALL); break;
 		}
 		if (MapPieces >= 6 && !LootActive)
-			LootActive = true;
+			start_loot();
 	}
 
 	// Casting a spell pays 120,000 and counts for the 75,000 per spell in the ball bonus (FUN_004236b0 of the original)
@@ -1298,9 +1305,8 @@ namespace
 			QuestIndex = draw_quest(-1);
 			if (QuestIndex < 0)
 			{
-				LootActive = true;
+				start_loot();
 				QuestIndex = 0;
-				pb::MainTable->AddScore(1000000); // Peg Leg's Loot mode start (0x42cfc0, 0x4f)
 				say(pinball::MissTextBox, "Hit X to find Peg Leg's Loot", -1.0f, 1);
 			}
 		}
@@ -1665,14 +1671,13 @@ namespace
 		// the third trap is held instead, which starts Jail Break (0x42d590): it pays 100,000 and releases the held balls
 		if (Rules == &Pirates && !strcmp(name, "s_hole19"))
 		{
-			if (++HeldBalls < 3)
-				feed_balls(1);
-			else
+			// The hole gives the ball back itself, so the first two traps change nothing; the held ball is one of the three
+			if (++HeldBalls == 3)
 			{
 				HeldBalls = 0;
 				pb::MainTable->AddScore(100000);
 				say(pinball::InfoTextBox, "Jail Break!", 3.0f, 2);
-				feed_balls(3);
+				feed_balls(2);
 			}
 		}
 
@@ -1723,7 +1728,7 @@ namespace
 				random_award();
 				if (MapPieces >= 6 && !LootActive)
 				{
-					LootActive = true;
+					start_loot();
 					show_quest();
 				}
 			}
@@ -1905,6 +1910,7 @@ namespace
 		if (QuestActive)
 			end_quest();
 		Fathom = 1; // the launcher of the original (0x425e70) clears the fathom lights for each ball
+		LavaMask = 0; // the volcano lights start again on each ball
 		if (!table->TiltLockFlag)
 		{
 			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : MapPieces * 250000 + Treasures * 100000);

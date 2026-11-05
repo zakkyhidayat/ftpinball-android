@@ -97,12 +97,10 @@ void TSink::Collision(TBall* ball, vector2* nextPosition, vector2* direction, fl
 {
 	if (Timer && loader::Lenient)
 	{
-		// a release is still pending: cancel it, but let a waiting new ball out first
+		// a release is still pending: cancel it, and let the ball already in the sink (or a waiting new ball) out first
 		timer::kill(Timer);
-		if (SpawnBall)
+		if (SpawnBall || HeldBall)
 			TimerExpired(Timer, this);
-		else if (HeldBall)
-			--Holding;
 	}
 	Timer = 0;
 	if (PinballTable->TiltLockFlag)
