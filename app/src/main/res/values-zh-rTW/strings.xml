@@ -18,7 +18,7 @@
     <string name="plungerpopup">發球方式提示</string>
     <string name="plungerhint">按住螢幕來發球</string>
     <string name="goto_googleplay"><u><a hred="https://play.google.com/store/apps/dev?id=6687966458279653723">看看我其他的APP</a></u></string>
-    <string name="goto_github"><u><a hred="https://github.com/fexed/Pinball-on-Android/releases">檢查有沒有最新版本</a></u></string>
+    <string name="goto_github"><u><a hred="https://github.com/zakkyhidayat/ftpinball-android/releases">檢查有沒有最新版本</a></u></string>
     <string name="cheat_title">作弊</string>
     <string name="cheat_disclaimer">在發射第一顆球前可以使用 (注意：有一些作弊選項還沒有功能)</string>
     <string name="cheat_gmax">gmax - 啟用重力井</string>

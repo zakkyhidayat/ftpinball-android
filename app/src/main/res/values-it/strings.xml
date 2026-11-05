@@ -19,7 +19,7 @@
     <string name="plungerpopup">Popup del lanciatore</string>
     <string name="plungerhint">Tieni premuto sullo schermo per lanciare la pallina</string>
     <string name="goto_googleplay"><u><a hred="https://play.google.com/store/apps/dev?id=6687966458279653723">Dai un\'occhiata alle mie altre app!</a></u></string>
-    <string name="goto_github"><u><a hred="https://github.com/fexed/Pinball-on-Android/releases">Guarda l\'ultima versione</a></u></string>
+    <string name="goto_github"><u><a hred="https://github.com/zakkyhidayat/ftpinball-android/releases">Guarda l\'ultima versione</a></u></string>
     <string name="cheat_title">Trucchi</string>
     <string name="cheat_disclaimer">Da attivare prima di lanciare la prima pallina (nota: alcuni trucchi non funzionano ancora)</string>
     <string name="cheat_gmax">gmax - Attiva il Pozzo Gravitazionale</string>
@@ -76,7 +76,7 @@
     <string name="no_tables">Nessun tavolo trovato. Tocca \"Aggiungi i file di Full Tilt!\" e scegli la tua copia di Full Tilt! Pinball.</string>
     <string name="last_played">Ultimo giocato</string>
     <string name="about">Informazioni</string>
-    <string name="menu_credits">Full Tilt! Pinball per Android\nFork di zakkyhidayat\n\nCodice sorgente originale: k4zmu2a/SpaceCadetPinball\nPorting Android: fexed/Pinball-on-Android\n\nQuesto fork aggiunge correzioni, una nuova interfaccia e il supporto a Full Tilt!. Full Tilt! Pinball appartiene ai suoi proprietari. I suoi dati di gioco non sono inclusi in questa app né nel codice sorgente.</string>
+    <string name="menu_credits">Full Tilt! Pinball per Android\n\nMotore: SpaceCadetPinball di k4zmu2a (licenza MIT).\n\nQuesta app aggiunge il supporto a Full Tilt!, una nuova interfaccia e correzioni. Full Tilt! Pinball appartiene ai suoi proprietari. I suoi dati di gioco non sono inclusi in questa app né nel codice sorgente.</string>
     <string name="menutitle">Tornare al menu principale?</string>
     <string name="menumessage">La partita in corso andrà persa.</string>
     <string name="highscores_title">Migliori punteggi</string>
