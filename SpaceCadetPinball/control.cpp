@@ -1946,6 +1946,14 @@ namespace
 			say(pinball::InfoTextBox, "Shipwreck Mystery\nAvailable", 3.0f, 2);
 			return;
 		}
+		if (Rules == &Pirates && QuestIndex == 0 && !strcmp(name, "s_trip2"))
+		{
+			// original 0x4290c0 and 0x424440: during Attack Ship the sensor s_trip2 raises the ship targets again
+			for (int i = 0; ShipTargets[i]; ++i)
+				if (auto drop = pb::MainTable->find_component(ShipTargets[i]))
+					drop->Message(50, 0.0f);
+			return;
+		}
 		if (Rules == &Pirates && QuestIndex == 0 && !strcmp(name, "s_rexit8"))
 		{
 			// original 0x429140: during Attack Ship the wire ramp captures the ship: the ship targets come back up and the
