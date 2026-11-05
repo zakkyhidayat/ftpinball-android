@@ -44,9 +44,9 @@ Helper routines of the original game code that write game state or scores and th
 | `0x427540` | cited | - | - |
 | `0x4278c0` | cited | - | - |
 | `0x428900` | cited | - | - |
-| `0x429ef0` | open | - | - |
-| `0x42a830` | open | - | - |
-| `0x42aad0` | open | - | - |
+| `0x429ef0` | cited | - | - |
+| `0x42a830` | cited | - | - |
+| `0x42aad0` | cited | - | - |
 | `0x42ab90` | open | - | - |
 | `0x42abf0` | open | - | - |
 | `0x42ad70` | open | 200000 | - |
