@@ -99,3 +99,4 @@ Helper routines of the original game code that write game state or scores and th
 
 - `0x4245b0` (Dragon ball start): checked. Diverters, multiplier reset to 1 and the kicker enabled are ported; the other calls are light resets (visual only).
 - `0x423680` (Skulduggery `a_sink8` message 0x41): sets the sink eject mode with -1, 1 or 2. Used in the brig and boss code, which are approximations here; not ported.
+- `0x424560` / `0x42ce80` (Skulduggery): ball start turns a_sink9 and a_sink12 on and s_trip3 and s_trip8 off; `0x424560` turns the two sinks off. What turns the tripwires back on is not decoded, so not ported.
