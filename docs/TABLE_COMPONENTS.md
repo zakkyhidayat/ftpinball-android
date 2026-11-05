@@ -192,6 +192,8 @@ Skulduggery start: the eleven drop targets `a_drop5` to `a_drop15` each light on
 
 Skulduggery idle state: with all four volcano lights `a_spot8` to `a_spot11` lit, Lava-Ball starts and two balls are queued for the plunger (original 0x427540; the `0x192` queue is the same feed as `feed_balls`). Jail (the brig, `s_hole19`, decoded from 0x429040 and the routine at 0x424210, whose only caller is the brig handler at 0x4290a6): the hole gives a trapped ball back itself, so the first two traps change nothing. The third trap is held and starts Jail Break: 100,000, and two more balls are fed (the held ball is the third). Approximation: the original's queue counter (`0x192`) is not tracked, so the release feeds new balls rather than queued ones. The brig's flag on the second trap (a light) is not ported. Jail Break from the idle state: the third hit of `a_spot6` (original 0x4279b0) pays the held balls, 100,000, and releases them; with none held it does nothing. The idle lights of that cycle are not ported.
 
+Not ported (Skulduggery island ramps): `a_ramp8` and `a_ramp5` (0x428b70, 0x428d80) and the sensor `s_trip8` (0x429400) score from a 12-step ladder (25,000 to 475,000). The step is 3 times the level of the island combo light group (0, 1, 2, 3 or more) plus the number of lit island lights (0 to 2) (`left_island_combo_light_group`, `left_island_light_group`). The port has no score entry for them, because how the combo lights are raised and expire (timer message 0x4d) is not yet decoded.
+
 ## 5. Engine classes added for Full Tilt
 
 | File | Purpose |
