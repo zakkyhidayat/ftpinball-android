@@ -895,8 +895,22 @@ namespace
 		case 0: special_treasure(); break;
 		case 1: award(EXTRA_BALL); break;
 		case 2:
-			if (BumperHits < 60) BumperHits = 60; // the sixth bumper level
-			say(pinball::InfoTextBox, "Bumpers Level 6", 3.0f, 2);
+			{
+				// Max Crew (original 0x425000): the bumpers go to the top level, twelve hits per level (see component_score)
+				if (BumperHits < 72) BumperHits = 72;
+				int value = 0;
+				for (int i = 0; i < Rules->scoreCount; ++i)
+				{
+					const ComponentScore& s = Rules->scores[i];
+					if (!strncmp(s.name, "a_bump", 6))
+					{
+						value = s.values[6 < s.count ? 6 : s.count - 1];
+						break;
+					}
+				}
+				snprintf(Line, sizeof Line, "Max Crew\nBumpers Now %d", value);
+				say(pinball::InfoTextBox, Line, 3.0f, 2);
+			}
 			break;
 		case 3:
 			fathom_up();
