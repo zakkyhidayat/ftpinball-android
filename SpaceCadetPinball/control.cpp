@@ -1706,7 +1706,7 @@ namespace
 			say(pinball::InfoTextBox, buried[find], 3.0f, 2);
 			if (find < 3) ++BuriedCoins;
 			else if (find < 5) ++BuriedSpecial;
-			else if (find == 5) BuriedBonus = (Treasures * 50 + QuestsDone * 20) * 10000;
+			else if (find == 5) BuriedBonus = ((Treasures * 2 + MapPieces) * 25 + QuestsDone * 20 + TargetsHit) * 10000; // original 0x424aa0, times the fathom level (not modelled, taken as 1)
 			else if (find == 6) BuriedJackpot = Jackpot;
 			else BuriedExtra = true;
 			++QuestHits;
