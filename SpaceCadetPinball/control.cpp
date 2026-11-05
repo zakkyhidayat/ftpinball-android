@@ -1656,6 +1656,9 @@ namespace
 					map_piece();
 				}
 		}
+		// Mutiny (original 0x4283f0, state 9): a ball in the ship's sink lights Ship's Hold, which carries the ball bonus over
+		if (Rules == &Pirates && QuestActive && QuestIndex == 5 && !strcmp(name, "a_sink4"))
+			BonusHoldLit = true;
 		// Treasure Hunt (original 0x42b090, message 0x4a from a component of type 1020, the lit rollover lights): each such hit adds
 		// 20,000 to the jackpot
 		if (Rules == &Pirates && QuestActive && QuestIndex == 1 && !strncmp(name, "v_mlite", 7))
@@ -2175,17 +2178,15 @@ namespace
 		if (!table->TiltLockFlag)
 		{
 			int bonus = TargetsHit * Rules->bonusPerTarget + QuestsDone * Rules->bonusPerQuest + (Rules == &Dragon ? Armor * 50000 + Spells * 75000 + Eggs * 150000 + (Weapons ? (Weapons + 1) * 75000 : 0) : MapPieces * 250000 + Treasures * 100000);
-			if (Rules == &Dragon)
-			{
-				// original 0x42b7c0: the held bonus is added, and the total is held for the next ball when the hold light is on
-				bonus += BonusHold;
-				BonusHold = BonusHoldLit ? bonus : 0;
-				BonusHoldLit = false;
-			}
+			// original 0x42b7c0 and 0x42b820: the held bonus is added, and the total is held for the next ball when the hold light
+			// is on (the dragon slain; Ship's Hold in Skulduggery's Mutiny). The bonus pays without the multiplier (0x423350)
+			bonus += BonusHold;
+			BonusHold = BonusHoldLit ? bonus : 0;
+			BonusHoldLit = false;
 			if (bonus > 0)
 			{
 				snprintf(Line, sizeof Line, "Total Bonus %d", bonus);
-				table->AddScore(bonus);
+				add_flat(bonus);
 				say(pinball::InfoTextBox, Line, 3.0f, 2);
 			}
 		}

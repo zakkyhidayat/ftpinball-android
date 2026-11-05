@@ -51,12 +51,12 @@ Helper routines of the original game code that write game state or scores and th
 | `0x42abf0` | cited | - | - |
 | `0x42ad70` | cited | 200000 | - |
 | `0x42b090` | cited | 20000, 300000 | - |
-| `0x42b420` | open | 200000 | - |
-| `0x42b820` | open | 10000, 100000, 200000, 250000 | 1, 3 |
+| `0x42b420` | cited | 200000 | - |
+| `0x42b820` | cited | 10000, 100000, 200000, 250000 | 1, 3 |
 | `0x42c070` | cited | 200000 | - |
 | `0x42c430` | cited | 10000, 100000, 25000, 300000 | - |
-| `0x42ca00` | open | 100000 | - |
-| `0x42cc10` | open | 250000 | - |
+| `0x42ca00` | cited | 100000 | - |
+| `0x42cc10` | cited | 250000 | - |
 | `0x42cfc0` | cited | 1000000, 50000, 500000 | - |
 | `0x42d480` | cited | - | 2 |
 | `0x42d590` | cited | 100000 | 2, 2 |

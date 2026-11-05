@@ -217,3 +217,5 @@ The score tables, light and sound operations and the state flow were read from t
 (handler tables, quest selection, mystery award mapping, special treasure and coin tables, storm levels). Behavior that
 could not be read is taken from the original help file and marked above as approximated or not implemented. Nothing in
 this repository was copied from the original program's code; the rules are a re-implementation.
+
+Ball bonus hold (0x42b820 steps 4 and 5, 0x4283f0): in Mutiny a ball in the ship's sink (`a_sink4`) lights Ship's Hold. When the ball is lost with the light on, the whole bonus is held and added to the next ball's bonus. The bonus pays without the score multiplier (0x423350).
