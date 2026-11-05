@@ -36,17 +36,9 @@ final class TableFiles {
         return new File(importDir(context, table), table.datFile).isFile();
     }
 
-    /** Dragon's Keep has no steel ball of its own: its ball sprites come from Space Cadet's data. */
-    static File cadetSource(Context context) {
-        if (Table.CADET.isInstalled(context.getAssets())) return null;
-        File imported = new File(importDir(context, Table.CADET), Table.CADET.datFile);
-        return imported.isFile() ? imported : null;
-    }
-
     static boolean isAvailable(Context context, Table table) {
         if (table.isInstalled(context.getAssets())) return true;
-        if (!hasImported(context, table)) return false;
-        return table != Table.DRAGON || Table.CADET.isInstalled(context.getAssets()) || cadetSource(context) != null;
+        return hasImported(context, table);
     }
 
     /** The outcome of an import: the tables that were found and copied. */
@@ -77,7 +69,6 @@ final class TableFiles {
             copyTable(resolver, tree, folder, table, dir);
             // the work folder is rebuilt from the imported files the next time the table starts
             deleteRecursive(new File(context.getFilesDir(), table.id));
-            if (table == Table.CADET) deleteRecursive(new File(context.getFilesDir(), Table.DRAGON.id));
             result.imported.add(table);
         }
         return result;

@@ -91,10 +91,13 @@ public:
 	void ReserveEntries(size_t count) { Entries.reserve(count); }
 	gdrv_bitmap8* GetBitmap(int resolution) const;
 	zmap_header_type* GetZMap(int resolution) const;
+	// Some Full Tilt groups hold two bitmaps for the same resolution; GetBitmap gives the last, this one the first
+	gdrv_bitmap8* GetFirstBitmap(int resolution) const { return FirstBitmaps[resolution]; }
 
 private:
 	std::vector<EntryData*> Entries;
 	gdrv_bitmap8* Bitmaps[3]{};
+	gdrv_bitmap8* FirstBitmaps[3]{};
 	zmap_header_type* ZMaps[3]{};
 	bool NeedsSort = false;
 

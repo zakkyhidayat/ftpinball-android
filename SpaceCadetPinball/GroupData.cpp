@@ -144,6 +144,8 @@ void GroupData::SplitSplicedBitmap(const gdrv_bitmap8& srcBmp, gdrv_bitmap8& bmp
 void GroupData::SetBitmap(gdrv_bitmap8* bmp)
 {
 	// Some Full Tilt tables define a group's bitmap more than once: the last one wins
+	if (!FirstBitmaps[bmp->Resolution])
+		FirstBitmaps[bmp->Resolution] = bmp;
 	Bitmaps[bmp->Resolution] = bmp;
 
 	auto zMap = ZMaps[bmp->Resolution];

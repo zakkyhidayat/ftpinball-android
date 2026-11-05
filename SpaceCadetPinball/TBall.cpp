@@ -55,61 +55,19 @@ TBall::TBall(TPinballTable* table) : TPinballComponent(table, -1, false)
 		auto zDepth = proj::z_distance(visVec);
 		VisualZArray[index] = zDepth;
 	}
-	// Dragon's Keep only has a smiley face for a ball in its own data. The steel ball of the other Full Tilt
-	// tables (Space Cadet's data is stored next to it by the app) is scaled to the sizes Dragon's Keep uses.
+	// Dragon's Keep stores two bitmaps for every ball frame: the steel ball first, then a smiley face. The last bitmap of a
+	// group is the one the engine keeps, so the steel ball of the data is taken from the first one.
 	if (pb::FullTiltMode && winmain::DatFileName == "DRAGON.DAT")
 	{
-		auto steelDat = partman::load_records(pinball::make_path_name("BALL_SOURCE.DAT").c_str(), true);
-		if (steelDat)
+		for (size_t i = 0; i < ListBitmap->size(); ++i)
 		{
-			std::vector<gdrv_bitmap8*> steel;
-			auto steelPalette = reinterpret_cast<ColorRgba*>(steelDat->field_labeled("background", FieldTypes::Palette));
-			ColorRgba palette[256]{};
-			if (steelPalette)
+			auto group = loader::loader_table->Groups[groupIndex + static_cast<int>(i)];
+			auto target = ListBitmap->at(i);
+			auto first = target ? group->GetFirstBitmap(target->Resolution) : nullptr;
+			if (first && first != target && first->Width == target->Width && first->Height == target->Height)
 			{
-				// same rules as gdrv::display_palette: colors 10..245 come from the data, 255 is white
-				for (int i = 10; i < 246; ++i)
-				{
-					palette[i] = steelPalette[i];
-					palette[i].rgba.Alpha = 0xFF;
-				}
-				palette[255].Color = 0xffFFFFFF;
-			}
-			int steelGroup = steelDat->record_labeled("ball2");
-			for (int i = steelGroup + 1; steelGroup >= 0 && i < static_cast<int>(steelDat->Groups.size()); ++i)
-			{
-				auto src = steelDat->Groups[i]->GetBitmap(2);
-				if (!src || (!steel.empty() && src->Width < steel.back()->Width))
-					break;
-				// the second data file was not given its palette on load: colors come from its own palette
-				if (steelPalette)
-				{
-					auto dst = src->BmpBufPtr1;
-					for (int y = src->Height - 1; y >= 0; y--)
-					{
-						auto idx = reinterpret_cast<uint8_t*>(src->IndexedBmpPtr) + src->IndexedStride * y;
-						for (int x = 0; x < src->Width; x++)
-							*dst++ = palette[*idx++];
-					}
-				}
-				steel.push_back(src);
-			}
-			if (steel.size() >= 2 && ListBitmap->size() >= 2)
-			{
-				for (size_t i = 0; i < ListBitmap->size(); ++i)
-				{
-					auto target = ListBitmap->at(i);
-					auto src = steel[i * (steel.size() - 1) / (ListBitmap->size() - 1)];
-					auto scaled = new gdrv_bitmap8(target->Width, target->Height, false);
-					scaled->XPosition = target->XPosition;
-					scaled->YPosition = target->YPosition;
-					scaled->Resolution = target->Resolution;
-					for (int y = 0; y < scaled->Height; ++y)
-						for (int x = 0; x < scaled->Width; ++x)
-							scaled->BmpBufPtr1[y * scaled->Stride + x] =
-								src->BmpBufPtr1[(y * src->Height / scaled->Height) * src->Stride + x * src->Width / scaled->Width];
-					(*ListBitmap)[i] = scaled;
-				}
+				gdrv::ApplyPalette(*first);
+				(*ListBitmap)[i] = first;
 			}
 		}
 	}

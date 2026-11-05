@@ -322,8 +322,7 @@ public class MainActivity extends SDLActivity {
         String version = String.valueOf(BuildConfig.VERSION_CODE);
         try {
             if (marker.exists() && version.equals(new String(java.nio.file.Files.readAllBytes(marker.toPath())))
-                    && new File(dir, table.datFile).exists()
-                    && (table != Table.DRAGON || new File(dir, "BALL_SOURCE.DAT").exists())) return dir;
+                    && new File(dir, table.datFile).exists()) return dir;
         } catch (IOException | RuntimeException ignored) {
         }
         dir.mkdirs();
@@ -334,12 +333,6 @@ public class MainActivity extends SDLActivity {
                 if (children != null && children.length > 0) continue;
                 if (table.fullTilt && asset.startsWith("PINBALL.") && !asset.endsWith(".mp3")) continue;
                 copyAsset(assetManager, asset, new File(dir, asset));
-            }
-            if (table == Table.DRAGON) {
-                // Dragon's Keep has no steel ball of its own: its ball sprites come from Space Cadet's data
-                File cadet = TableFiles.cadetSource(this);
-                if (cadet != null) copyFile(cadet, new File(dir, "BALL_SOURCE.DAT"));
-                else copyAsset(assetManager, Table.CADET.assetDir() + "/" + Table.CADET.datFile, new File(dir, "BALL_SOURCE.DAT"));
             }
             if (table.isInstalled(assetManager)) {
                 for (String asset : assetManager.list(table.assetDir())) {
