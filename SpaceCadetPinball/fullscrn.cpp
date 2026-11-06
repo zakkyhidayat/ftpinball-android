@@ -125,15 +125,17 @@ void fullscrn::window_size_changed()
 		OffsetY = static_cast<int>(floor((height - res->TableHeight * ScaleY) / 2));
 	}
 
+	// Space Cadet's board is 583 pixels wide. Narrower tables (Dragon's Keep is 503) are stretched horizontally so their
+	// board is as wide as that one; the part beyond the window (the plunger and bow) is cropped
+	const float referenceBoardWidth = 583.0f;
+	float boardStretch = 1.0f;
+	if (pb::MainTable && pb::MainTable->Width > 0 && pb::MainTable->Width < referenceBoardWidth)
+		boardStretch = referenceBoardWidth / pb::MainTable->Width;
+	ScaleX *= boardStretch;
+
 	render::DestinationRect = SDL_Rect
 	{
 		OffsetX, OffsetY + menuHeight,
-		width - OffsetX * 2, height - OffsetY * 2
+		static_cast<int>((width - OffsetX * 2) * boardStretch), height - OffsetY * 2
 	};
-
-	// Only the board (left part of the virtual screen) is shown and the view is sized for Space Cadet's 583 pixel
-	// wide board: center narrower tables (Dragon's Keep is 503 wide) in that space
-	const float referenceBoardWidth = 583.0f;
-	if (pb::MainTable && pb::MainTable->Width > 0 && pb::MainTable->Width < referenceBoardWidth && render::vscreen)
-		render::DestinationRect.x += static_cast<int>(render::DestinationRect.w * (referenceBoardWidth - pb::MainTable->Width) / render::vscreen->Width / 2);
 }

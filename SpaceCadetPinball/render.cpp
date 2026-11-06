@@ -466,11 +466,11 @@ void render::BlitVScreen()
 
 void render::PresentVScreen()
 {
-	static bool fitted = false;
-	if (!fitted && pb::MainTable)
+	static int fittedWidth = 0;
+	if (pb::MainTable && pb::MainTable->Width != fittedWidth)
 	{
-		fitted = true;
-		fullscrn::window_size_changed(); // centers tables narrower than Space Cadet
+		fittedWidth = pb::MainTable->Width;
+		fullscrn::window_size_changed(); // stretches tables narrower than Space Cadet to its board width
 	}
 	PresentVScreenTable();
 }
