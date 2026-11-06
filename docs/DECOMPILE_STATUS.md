@@ -109,3 +109,5 @@ Helper routines of the original game code that write game state or scores and th
 - Peg Leg's Loot end (`0x42cfc0` case 0x50 default, then state 0xc): the original pays the loot in a text sequence, ends the mode (0x52), ejects `a_sink8` and queues two balls. Ported: the two queued balls, the brig reset and the `a_sink8` eject at the `a_sink4` loot hit. Not ported: the text timing.
 
 - Skulduggery mode timeout (`0x42b090` and `0x42cc10`, message 0x40e): when no mode has started on this ball (`DAT_00435d30`, set by the mode start `0x425de0` and cleared at ball start `0x42ab90`), the sink `a_sink8` ejects now. Ported: `QuestStartedBall` set in `begin_quest`, cleared at new game and per ball, and the eject on timeout. Not verified in play.
+
+- Skulduggery hideaway dispatch (`0x4236a0`, called from `0x428800` and others): in the normal play state (info state 2) it ejects `a_sink8` with the default delay; otherwise a random pick (`0x42dd0b`) ejects one of `a_sink14`, `a_sink15` or `a_sink16`. Not ported: the random pick and the state mapping need the hideaway logic in `control.cpp` mapped first.
