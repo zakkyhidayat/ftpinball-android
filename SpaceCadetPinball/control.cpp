@@ -1979,11 +1979,14 @@ namespace
 			return;
 		}
 
-		// The brig (original 0x429040 and the jail routine 0x424210): a trapped ball is sent back out through the launcher;
-		// the third trap is held instead, which starts Jail Break (0x42d590): it pays 100,000 and releases the held balls
-		if (Rules == &Pirates && !strcmp(name, "s_hole19"))
+		// The brig (original 0x429040 and the trap routine 0x424210). A trapped ball leaves play, the queue of balls to serve
+		// drops by one (not below zero), the held count rises by one and the launcher serves a replacement ball (message
+		// 0x3fb, without checking the queue). The third trapped ball starts Jail Break (state 0xd, 0x42d590): 100,000, and
+		// every held ball is served again. The routine is skipped while a multiball state (0xc, 0xd or 0x11) is running.
+		// The hole gives the ball back itself here, and that ball stands in for the replacement, so only the held count
+		// and the release are kept
+		if (Rules == &Pirates && !strcmp(name, "s_hole19") && BallsInPlay <= 1)
 		{
-			// The hole gives the ball back itself, so the first two traps change nothing; the held ball is one of the three
 			if (++HeldBalls == 3)
 			{
 				HeldBalls = 0;
@@ -2019,9 +2022,10 @@ namespace
 				Spot6Hits = 0;
 				if (HeldBalls)
 				{
-					// the brig hole gave those balls back itself (see s_hole19), so no ball is fed here
+					// 0x42d590: the held balls are served again, so the ball in play is joined by one per held ball
 					pb::MainTable->AddScore(100000);
 					say(pinball::InfoTextBox, "Jail Break!", 3.0f, 2);
+					feed_balls(HeldBalls);
 					HeldBalls = 0;
 				}
 			}
