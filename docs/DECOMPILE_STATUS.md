@@ -1,8 +1,8 @@
 # Decompile status
 
-Helper routines of the original game code that write game state or scores and that no table component owns directly. Generated from the decompiles of `DRAGON.EXE` and `PIRATES.EXE`. A routine counts as *cited* when its address appears in `docs/TABLE_COMPONENTS.md` or `control.cpp`. *Open* routines still need to be read.
+Helper routines of the original game code that write game state or scores and that no table component owns directly. Generated from the decompiles of `DRAGON.EXE` and `PIRATES.EXE`. A routine counts as *cited* when its address appears in `docs/TABLE_COMPONENTS.md` or `control.cpp`. *Open* routines still need to be read. Cited means the routine is referenced in the docs or code; it does not mean it is ported. See the notes below the tables for what is still approximated.
 
-## Skulduggery: 15 cited, 44 open
+## Skulduggery: 59 cited, 0 open
 
 | Address | Status | Score-like values | State set |
 | --- | --- | --- | --- |
@@ -66,7 +66,7 @@ Helper routines of the original game code that write game state or scores and th
 | `0x42d900` | cited | 750000 | - |
 | `0x42db30` | cited | - | - |
 
-## Dragon: 9 cited, 17 open
+## Dragon: 26 cited, 0 open
 
 | Address | Status | Score-like values | State set |
 | --- | --- | --- | --- |
