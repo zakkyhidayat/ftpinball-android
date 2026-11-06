@@ -1984,6 +1984,9 @@ namespace
 				HeldBalls = 0;
 				brig_gate(false);
 				feed_balls(2);
+				// original 0x423680(0): the sink a_sink8 ejects its ball at once (message 0x41 with 0, the engine's message 56)
+				if (auto sink = dynamic_cast<TSink*>(pb::MainTable->find_component("a_sink8")))
+					sink->Message(56, 0.0f);
 				MapPieces = 0;
 				memset(QuestDone, 0, sizeof QuestDone);
 				QuestIndex = draw_quest(-1);

@@ -106,4 +106,4 @@ Helper routines of the original game code that write game state or scores and th
 
 - Lava-Ball (`0x427540`, state 0xc start `0x42d480`): ported the queue of two balls and now also clears the held brig balls and the `s_oneway12` gate. The original also ejects from `a_sink8` (`0x423680`, see above) when zero or one ball is held; not ported.
 
-- Peg Leg's Loot end (`0x42cfc0` case 0x50 default, then state 0xc): the original pays the loot in a text sequence, ends the mode (0x52), ejects `a_sink8` and queues two balls. Ported: the two queued balls and the brig reset at the `a_sink4` loot hit. Not ported: the text timing and the `a_sink8` eject.
+- Peg Leg's Loot end (`0x42cfc0` case 0x50 default, then state 0xc): the original pays the loot in a text sequence, ends the mode (0x52), ejects `a_sink8` and queues two balls. Ported: the two queued balls, the brig reset and the `a_sink8` eject at the `a_sink4` loot hit. Not ported: the text timing.
