@@ -906,6 +906,15 @@ namespace
 		return (Rules == &Dragon && QuestActive && QuestIndex == 2) || MultiMode == MULTI_BARRAGE;
 	}
 
+	// Pirates brig gate s_oneway12 (original 0x42d480, 0x4230c0): off at the start of a ball, on once two balls are held
+	void brig_gate(bool on)
+	{
+		if (Rules != &Pirates)
+			return;
+		if (auto gate = pb::MainTable->find_component("s_oneway12"))
+			gate->ActiveFlag = on ? 1 : 0;
+	}
+
 	// The diverters at the start of a ball (original 0x4245b0)
 	void reset_diverters()
 	{
@@ -1248,6 +1257,7 @@ namespace
 		Rules = winmain::DatFileName == "PIRATES.DAT" ? &Pirates : &Dragon;
 		Jackpot = Rules->jackpotStart;
 		reset_diverters();
+		brig_gate(false);
 		memset(QuestDone, 0, sizeof QuestDone);
 		ArmorMask = 0;
 		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = SpellsCast = Offense = Defense = LoopCount = MenuTier = 0;
@@ -1987,9 +1997,12 @@ namespace
 		// and the release are kept
 		if (Rules == &Pirates && !strcmp(name, "s_hole19") && BallsInPlay <= 1)
 		{
-			if (++HeldBalls == 3)
+			if (++HeldBalls == 2)
+				brig_gate(true);
+			if (HeldBalls == 3)
 			{
 				HeldBalls = 0;
+				brig_gate(false);
 				pb::MainTable->AddScore(100000);
 				say(pinball::InfoTextBox, "Jail Break!", 3.0f, 2);
 				feed_balls(2);
@@ -2027,6 +2040,7 @@ namespace
 					say(pinball::InfoTextBox, "Jail Break!", 3.0f, 2);
 					feed_balls(HeldBalls);
 					HeldBalls = 0;
+					brig_gate(false);
 				}
 			}
 			static const char* const letters[] = {"a_drop5", "a_drop6", "a_drop7", "a_drop8", "a_drop9", "a_drop10", "a_drop11", "a_drop12", "a_drop13", "a_drop14", "a_drop15"};
@@ -2309,6 +2323,7 @@ namespace
 		end_multiball_state();
 		BallsInPlay = 1;
 		MultiMode = MULTI_NONE;
+		brig_gate(false);
 		reset_diverters(); // after the multiball state, so that the tower gates are not skipped
 		if (table->ExtraBalls)
 		{
