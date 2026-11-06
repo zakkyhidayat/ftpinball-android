@@ -2020,6 +2020,9 @@ namespace
 			{
 				LavaMask = 0;
 				say(pinball::InfoTextBox, "Lava-Ball", 3.0f, 2);
+				// original 0x427540 and state 0xc (0x42d480): two balls are queued, and the held balls and the brig gate are cleared
+				HeldBalls = 0;
+				brig_gate(false);
 				feed_balls(2);
 			}
 		}
