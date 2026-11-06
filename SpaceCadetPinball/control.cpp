@@ -1980,6 +1980,10 @@ namespace
 				say(pinball::InfoTextBox, Line, 5.0f, 2);
 				LootActive = false;
 				hideaway_gates(false, true);
+				// original 0x42cfc0 (end of the sequence, then state 0xc): two balls are queued and the brig is cleared
+				HeldBalls = 0;
+				brig_gate(false);
+				feed_balls(2);
 				MapPieces = 0;
 				memset(QuestDone, 0, sizeof QuestDone);
 				QuestIndex = draw_quest(-1);
