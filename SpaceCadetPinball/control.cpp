@@ -766,6 +766,7 @@ namespace
 	int Fathom, IslandMask; // Skulduggery: fathom level 1..7 (original player +0x15e), the island lane lights (two per lane)
 	bool BuriedExtra, ShipMystery; // ShipMystery: the shipwreck mystery waits on the rollover a_roll3
 	int HoardMask, TreasureX; // Treasure Hunt: the hideaway where the X is flashing
+	bool QuestStartedBall{}; // Skulduggery: a mode has started on this ball (original DAT_00435d30); a timeout before that ejects a_sink8
 	unsigned ModeEnd; // Skulduggery modes are timed (about 30 seconds in the original); the captive ball adds ten
 	bool LootActive; // Skulduggery: every mode done, the ship sink finds Peg Leg's loot
 	unsigned RestartEnd;
@@ -1258,6 +1259,7 @@ namespace
 		Jackpot = Rules->jackpotStart;
 		reset_diverters();
 		brig_gate(false);
+		QuestStartedBall = false;
 		memset(QuestDone, 0, sizeof QuestDone);
 		ArmorMask = 0;
 		Armor = RestartQuest = Treasures = Eggs = Spells = SpellMask = SpellsCast = Offense = Defense = LoopCount = MenuTier = 0;
@@ -1272,6 +1274,7 @@ namespace
 			hideaway_gates(false, true);
 		LootActive = false;
 		ModeEnd = 0;
+		QuestStartedBall = false;
 		LaneMask = WindHits = Coins = MapPieces = LavaMask = HeldBalls = PirateLetters = Spot6Hits = 0;
 		RestartEnd = 0;
 		Mystery = 1000000;
@@ -1552,6 +1555,7 @@ namespace
 
 	void begin_quest(bool restart)
 	{
+		QuestStartedBall = true;
 		if (restart)
 		{
 			QuestIndex = RestartQuest;
@@ -1962,7 +1966,13 @@ namespace
 			++WindHits;
 
 		if (QuestActive && SDL_GetTicks() > ModeEnd)
+		{
+			// original 0x42b090 and 0x42cc10: the mode timer ends a mode that never started on this ball, and the sink a_sink8 ejects
+			if (Rules == &Pirates && !QuestStartedBall)
+				if (auto sink = dynamic_cast<TSink*>(pb::MainTable->find_component("a_sink8")))
+					sink->Message(56, 0.0f);
 			end_quest();
+		}
 
 		if (LootActive)
 		{
